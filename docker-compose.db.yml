@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  db:
+    image: mariadb:10 # or mysql:5.7
+    container_name: aivec_wp_mysql
+    restart: always
+    volumes:
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+  phpmyadmin:
+    container_name: aivec_wp_pma
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 22222:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+
+volumes: 
+  data:
