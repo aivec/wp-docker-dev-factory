@@ -17,6 +17,9 @@ logger() {
     '
 }
 
+# setting the XDEBUG_CONFIG environment variable doesn't seem to work so we hardcode here
+sudo sh -c "echo 'xdebug.remote_host=${DOCKER_BRIDGE_IP}' >> /usr/local/etc/php/conf.d/xdebug.ini"
+
 h2 "Installing and activating Japanese language pack."
 wp language core install ja |& logger
 wp site switch-language ja |& logger

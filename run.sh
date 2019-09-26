@@ -12,7 +12,11 @@ WARN="${YELLOW}[warning]${NC}"
 FATAL="${RED}[fatal]${NC}"
 
 NETWORK_NAME=wp-dev-instances
-export DOCKER_BRIDGE_IP=$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')
+
+if [ ! -f wp-instances.json ]; then
+    echo -e >&2 "${INFO} ${WHITE}${YELLOW}wp-instances.json${WHITE} must be in the root of this project. Refer to the file in the ${WHITE}${YELLOW}examples${WHITE} folder."
+    exit 1
+fi
 
 command -v docker >/dev/null 2>&1 || {
     echo -e >&2 "${FATAL} ${WHITE}${YELLOW}docker${WHITE} is either not installed or not in your PATH. ${YELLOW}docker${WHITE} is required for the Wordpress container. https://docs.docker.com/install/"
@@ -141,9 +145,11 @@ runContainer() {
     
     PLUGINS="${downloadplugins[*]}"
     volumes+=(-v `pwd`/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh)
+    volumes+=(-v `pwd`/redump.php:/app/redump.php)
 
     v=${volumes[@]}
     NEW_URL=http://localhost:${WP_PORT}
+    DOCKER_BRIDGE_IP=$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')
 
     docker run -d --name=${WP_CONTAINER_NAME} -p ${WP_PORT}:80 -p 443:443 \
         --cap-add=SYS_ADMIN \
@@ -210,6 +216,15 @@ logContainer() {
     docker logs -f ${WP_CONTAINER_NAME}
 }
 
+redumpDB() {
+    i=$1 # config index
+
+    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    project_name=$(echo $config | jq -r '.["project-name"]')
+    WP_CONTAINER_NAME=${project_name}_dev_wp
+    docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "php redump.php root root ${project_name} /data/db.sql"
+}
+
 projectcount=$(cat wp-instances.json | jq -r '. | length')
 projectcount=$(($projectcount - 1))
 projects=()
@@ -232,15 +247,15 @@ done
 while true; do
     read -p "1) Run Containers
 2) Stop Containers
-3) Launch NGROK
+3) Launch NGROK (local SSL)
 4) Log Container
-5) Wipe Mysql db and re-dump
+5) Overwrite DB dumpfile with new dump
 q) quit
 Select an operation to perform for '$selectedproject': " answer
     case $answer in
     [1]*)
-        docker build -t wordpress_devenv_visiblevc:latest \
-                --build-arg DOCKER_BRIDGE_IP=${DOCKER_BRIDGE_IP} .
+        docker build -t wordpress_devenv_visiblevc:latest . \
+            --build-arg DOCKER_BRIDGE_IP=${DOCKER_BRIDGE_IP}
 
         echo -e "\n${INFO} ${WHITE}Running Container(s)...${NC}"
         docker-compose -p ${NETWORK_NAME} -f docker-compose.db.yml up -d
@@ -262,7 +277,7 @@ Select an operation to perform for '$selectedproject': " answer
         exit
         ;;
     [5]*)
-        echo -e "\n${INFO} ${WHITE}Not yet implemented. Aborting.${NC}"
+        redumpDB "${indexmap[$selectedproject]}"
         # echo -e "Wiping Mysql database and re-dumping with dump file...\n"
         exit
         ;;
@@ -270,6 +285,6 @@ Select an operation to perform for '$selectedproject': " answer
         echo -e "\nBye."
         exit
         ;;
-    *) echo "Please select one of 1, 2, 3, or q" ;;
+    *) echo "Please select one of 1, 2, 3, 4, 5, or q" ;;
     esac
 done
