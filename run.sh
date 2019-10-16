@@ -254,9 +254,7 @@ q) quit
 Select an operation to perform for '$selectedproject': " answer
     case $answer in
     [1]*)
-        docker build -t wordpress_devenv_visiblevc:latest . \
-            --build-arg DOCKER_BRIDGE_IP=${DOCKER_BRIDGE_IP}
-
+        docker build -t wordpress_devenv_visiblevc:latest .
         echo -e "\n${INFO} ${WHITE}Running Container(s)...${NC}"
         docker-compose -p ${NETWORK_NAME} -f docker-compose.db.yml up -d
         runContainer "${indexmap[$selectedproject]}"
