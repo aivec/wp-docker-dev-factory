@@ -89,10 +89,9 @@ runContainer() {
         downloadplugins+=($(echo $DOWNLOAD_PLUGINS | jq -r --arg index "$plugini" '.[$index | tonumber]'))
         plugini=$(($plugini + 1))
     done
-    if [ "$SSL_ENABLED" = "true" ]; then
-        # used for ngrok
-        downloadplugins+=(relative-url)
-    fi
+    # used for ngrok
+    downloadplugins+=(relative-url)
+
     printf -v DOWNLOAD_PLUGINS ',%s' "${downloadplugins[@]}"
     DOWNLOAD_PLUGINS=${DOWNLOAD_PLUGINS:1}
 
@@ -159,6 +158,7 @@ runContainer() {
         --env PLUGINS="$PLUGINS" \
         --env XDEBUG_CONFIG=remote_host=${DOCKER_BRIDGE_IP} \
         --env ENVIRONMENT=development \
+        --env AVC_NODE_ENV=development \
         --env DOCKER_BRIDGE_IP=${DOCKER_BRIDGE_IP} \
         --env DOCKER_CONTAINER_PORT=${WP_PORT} \
         --env URL_REPLACE=${NEW_URL} \
@@ -225,6 +225,26 @@ redumpDB() {
     docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "php redump.php root root ${project_name} /data/db.sql"
 }
 
+toggleSSL() {
+    i=$1 # config index
+
+    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    project_name=$(echo $config | jq -r '.["project-name"]')
+    WP_CONTAINER_NAME=${project_name}_dev_wp
+
+    if docker exec -it ${WP_CONTAINER_NAME} /bin/bash -c 'grep "define(\"WP_SITEURL\"" wp-config.php'; then
+        docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "sed -i '/^define(\"WP_HOME\"/d' wp-config.php"
+        docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "sed -i '/^define(\"WP_SITEURL\"/d' wp-config.php"
+        docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "wp plugin deactivate relative-url"
+        echo -e "\n${INFO} ${WHITE}Toggled SSL ${YELLOW}OFF${NC}"
+    else
+        docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "sed -i '/all, stop editing!/ a define(\"WP_SITEURL\", \"http://\" . \$_SERVER[\"HTTP_HOST\"]);' /app/wp-config.php"
+        docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "sed -i '/all, stop editing!/ a define(\"WP_HOME\", \"http://\" . \$_SERVER[\"HTTP_HOST\"]);' /app/wp-config.php"
+        docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "wp plugin activate relative-url"
+        echo -e "\n${INFO} ${WHITE}Toggled SSL ${GREEN}ON${NC}"
+    fi
+}
+
 projectcount=$(cat wp-instances.json | jq -r '. | length')
 projectcount=$(($projectcount - 1))
 projects=()
@@ -248,8 +268,9 @@ while true; do
     read -p "1) Run Containers
 2) Stop Containers
 3) Launch NGROK (local SSL)
-4) Log Container
-5) Overwrite DB dumpfile with new dump
+4) Toggle SSL
+5) Log Container
+6) Overwrite DB dumpfile with new dump
 q) quit
 Select an operation to perform for '$selectedproject': " answer
     case $answer in
@@ -271,10 +292,14 @@ Select an operation to perform for '$selectedproject': " answer
         exit
         ;;
     [4]*)
-        logContainer "${indexmap[$selectedproject]}"
+        toggleSSL "${indexmap[$selectedproject]}"
         exit
         ;;
     [5]*)
+        logContainer "${indexmap[$selectedproject]}"
+        exit
+        ;;
+    [6]*)
         redumpDB "${indexmap[$selectedproject]}"
         # echo -e "Wiping Mysql database and re-dumping with dump file...\n"
         exit

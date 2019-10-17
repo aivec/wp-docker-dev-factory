@@ -70,4 +70,7 @@ if [ "$SSL_ENABLED" = "true" ]; then
     # append these lines to wp-config.php for ngrok to work
     sed -i '/all, stop editing!/ a define("WP_SITEURL", "http://" . $_SERVER["HTTP_HOST"]);' /app/wp-config.php
     sed -i '/all, stop editing!/ a define("WP_HOME", "http://" . $_SERVER["HTTP_HOST"]);' /app/wp-config.php
+    wp plugin activate relative-url
+else
+    wp plugin deactivate relative-url
 fi
