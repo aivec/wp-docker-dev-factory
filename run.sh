@@ -14,20 +14,20 @@ FATAL="${RED}[fatal]${NC}"
 NETWORK_NAME=wp-dev-instances
 
 if [ ! -f wp-instances.json ]; then
-    echo -e >&2 "${INFO} ${WHITE}${YELLOW}wp-instances.json${WHITE} must be in the root of this project. Refer to the file in the ${WHITE}${YELLOW}examples${WHITE} folder."
+    echo -e "${INFO} ${WHITE}${YELLOW}wp-instances.json${WHITE} must be in the root of this project. Refer to the file in the ${WHITE}${YELLOW}examples${WHITE} folder." >&2
     exit 1
 fi
 
 command -v docker >/dev/null 2>&1 || {
-    echo -e >&2 "${FATAL} ${WHITE}${YELLOW}docker${WHITE} is either not installed or not in your PATH. ${YELLOW}docker${WHITE} is required for the Wordpress container. https://docs.docker.com/install/"
+    echo -e "${FATAL} ${WHITE}${YELLOW}docker${WHITE} is either not installed or not in your PATH. ${YELLOW}docker${WHITE} is required for the Wordpress container. https://docs.docker.com/install/" >&2
     exit 1
 }
 command -v docker-compose >/dev/null 2>&1 || {
-    echo -e >&2 "${FATAL} ${WHITE}${YELLOW}docker-compose${WHITE} is either not installed or not in your PATH. ${YELLOW}docker-compose${WHITE} is required for the MySQL and phpmyadmin containers. https://docs.docker.com/compose/install/"
+    echo -e "${FATAL} ${WHITE}${YELLOW}docker-compose${WHITE} is either not installed or not in your PATH. ${YELLOW}docker-compose${WHITE} is required for the MySQL and phpmyadmin containers. https://docs.docker.com/compose/install/" >&2
     exit 1
 }
 command -v jq >/dev/null 2>&1 || {
-    echo -e >&2 "${FATAL} ${WHITE}${YELLOW}jq${WHITE} is either not installed or not in your PATH. ${YELLOW}jq${WHITE} is required to parse the JSON config file. https://stedolan.github.io/jq/download"
+    echo -e "${FATAL} ${WHITE}${YELLOW}jq${WHITE} is either not installed or not in your PATH. ${YELLOW}jq${WHITE} is required to parse the JSON config file. https://stedolan.github.io/jq/download" >&2
     exit 1
 }
 
@@ -141,10 +141,11 @@ runContainer() {
             printf "${WARN} ${WHITE}Local MySQL dump file at ${CYAN}${mysqldump}${WHITE} doesn't exist. Skipping volume mount.${NC}\n"
         fi
     fi
-    
+
     PLUGINS="${downloadplugins[*]}"
-    volumes+=(-v `pwd`/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh)
-    volumes+=(-v `pwd`/redump.php:/app/redump.php)
+    volumes+=(-v $(pwd)/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh)
+    volumes+=(-v $(pwd)/redump.php:/app/redump.php)
+    volumes+=(-v $(pwd)/dumpfiles:/app/dumpfiles)
 
     v=${volumes[@]}
     NEW_URL=http://localhost:${WP_PORT}
@@ -177,8 +178,8 @@ runContainer() {
         --env WORDPRESS_DEBUG=1 \
         --env WORDPRESS_DB_NAME=${PROJECT_NAME} \
         --env WORDPRESS_DB_HOST=aivec_wp_mysql \
-        --env WORDPRESS_DB_USER=root \
-        --env WORDPRESS_DB_PASSWORD=root \
+        --env WORDPRESS_DB_USER=admin \
+        --env WORDPRESS_DB_PASSWORD=admin \
         --network=${NETWORK_NAME}_default \
         wordpress_devenv_visiblevc
 
@@ -201,7 +202,7 @@ runNGROK() {
     config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
     WP_PORT=$(echo $config | jq -r '.["container-port"]')
     command -v ngrok >/dev/null 2>&1 || {
-        echo -e >&2 "${FATAL} ${WHITE}${YELLOW}ngrok${WHITE} is either not installed or not in your PATH. ${YELLOW}ngrok${WHITE} is required to pipe HTTP through an SSL tunnel. Please install it. https://ngrok.com/download"
+        echo -e "${FATAL} ${WHITE}${YELLOW}ngrok${WHITE} is either not installed or not in your PATH. ${YELLOW}ngrok${WHITE} is required to pipe HTTP through an SSL tunnel. Please install it. https://ngrok.com/download" >&2
         exit 1
     }
     ngrok http localhost:${WP_PORT}
@@ -225,6 +226,18 @@ redumpDB() {
     docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "php redump.php root root ${project_name} /data/db.sql"
 }
 
+createNewDumpfile() {
+    i=$1 # config index
+
+    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    project_name=$(echo $config | jq -r '.["project-name"]')
+    WP_CONTAINER_NAME=${project_name}_dev_wp
+    printf "\n${INFO} ${WHITE}New dump-files are placed in a folder named ${YELLOW}dumpfiles${WHITE} in this directory${NC}\n"
+    printf "Please enter a file name for your new dump-file (.sql is not required): "
+    read filename
+    docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "php redump.php root root ${project_name} /app/dumpfiles/$filename.sql"
+}
+
 toggleSSL() {
     i=$1 # config index
 
@@ -242,6 +255,61 @@ toggleSSL() {
         docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "sed -i '/all, stop editing!/ a define(\"WP_HOME\", \"http://\" . \$_SERVER[\"HTTP_HOST\"]);' /app/wp-config.php"
         docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "wp plugin activate relative-url"
         echo -e "\n${INFO} ${WHITE}Toggled SSL ${GREEN}ON${NC}"
+    fi
+}
+
+toggleDeploymentBundleAsPluginVolume() {
+    i=$1 # config index
+
+    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+
+    plugincount=$(echo $config | jq -r '.["local-plugins"] | length')
+    plugincount=$(($plugincount - 1))
+    plugins=()
+
+    pi=0
+    while [ $pi -le $plugincount ]; do
+        pname=$(echo $config | jq -r --arg index "$pi" '.["local-plugins"][$index | tonumber]')
+        plugins+=($pname)
+        pi=$(($pi + 1))
+    done
+
+    printf "\n"
+    PS3='Select a plugin to build: '
+    select selectedplugin in "${plugins[@]}"; do
+        printf "\n"
+        break
+    done
+
+    cd $selectedplugin
+    plugin_name="${PWD##*/}"
+    cd ../
+    if [ -e "$plugin_name.devrepo.tar" ]; then
+        printf "\n${INFO} ${WHITE}Found repo backup archive, setting volume back to ${YELLOW}development${WHITE} repo${NC}\n"
+        rm -rf $plugin_name/*
+        mv $plugin_name.devrepo.tar $plugin_name/git_bundle.tar
+        cd $plugin_name
+        tar -xf git_bundle.tar
+        rm git_bundle.tar
+    else
+        printf "\n${INFO} ${WHITE}Replacing volume with ${GREEN}deployment${WHITE} bundle${NC}\n"
+        cd $plugin_name
+        if [ ! -e "zip_plugin.sh" ]; then
+            printf "\n${FATAL} ${WHITE}${YELLOW}zip_plugin.sh${WHITE} does not exist in project folder. Aborting.\n"
+            exit 1
+        fi
+        ./zip_plugin.sh
+        mv $plugin_name*.zip ../$plugin_name.zip
+        tar --create --file=../$plugin_name.devrepo.tar .
+        cd ../
+        rm -rf $plugin_name/*
+        rm -rf $plugin_name/.* 2> /dev/null
+        mv $plugin_name.zip $plugin_name/bundle.zip
+        cd $plugin_name
+        unzip bundle.zip
+        cp -a $plugin_name*/. .
+        rm bundle.zip
+        find . ! -type f -name "$plugin_name*" | xargs rm -R
     fi
 }
 
@@ -270,7 +338,9 @@ while true; do
 3) Launch NGROK (local SSL)
 4) Toggle SSL
 5) Log Container
-6) Overwrite DB dumpfile with new dump
+6) Overwrite host dumpfile with DB of currently mounted volume
+7) Create new host dumpfile with DB of currently mounted volume
+8) Replace plugin volume with deployment ready bundle (Toggle)
 q) quit
 Select an operation to perform for '$selectedproject': " answer
     case $answer in
@@ -304,10 +374,20 @@ Select an operation to perform for '$selectedproject': " answer
         # echo -e "Wiping Mysql database and re-dumping with dump file...\n"
         exit
         ;;
+    [7]*)
+        createNewDumpfile "${indexmap[$selectedproject]}"
+        # echo -e "Wiping Mysql database and re-dumping with dump file...\n"
+        exit
+        ;;
+    [8]*)
+        toggleDeploymentBundleAsPluginVolume "${indexmap[$selectedproject]}"
+        # echo -e "Wiping Mysql database and re-dumping with dump file...\n"
+        exit
+        ;;
     [Qq]*)
         echo -e "\nBye."
         exit
         ;;
-    *) echo "Please select one of 1, 2, 3, 4, 5, or q" ;;
+    *) echo "Please select a number" ;;
     esac
 done
