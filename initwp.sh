@@ -20,6 +20,10 @@ logger() {
 # setting the XDEBUG_CONFIG environment variable doesn't seem to work so we hardcode here
 sudo sh -c "echo 'xdebug.remote_host=${DOCKER_BRIDGE_IP}' >> /usr/local/etc/php/conf.d/xdebug.ini"
 
+# PHP doesnt seem to pick up on environment variables when started via apache so we
+# have to explicitly list them for apache
+echo "export AVC_NODE_ENV=${AVC_NODE_ENV}" | sudo tee -a /etc/apache2/envvars > /dev/null
+
 h2 "Installing and activating Japanese language pack."
 wp language core install ja |& logger
 wp site switch-language ja |& logger

@@ -158,7 +158,6 @@ runContainer() {
         ${v} \
         --env PLUGINS="$PLUGINS" \
         --env XDEBUG_CONFIG=remote_host=${DOCKER_BRIDGE_IP} \
-        --env ENVIRONMENT=development \
         --env AVC_NODE_ENV=development \
         --env DOCKER_BRIDGE_IP=${DOCKER_BRIDGE_IP} \
         --env DOCKER_CONTAINER_PORT=${WP_PORT} \
