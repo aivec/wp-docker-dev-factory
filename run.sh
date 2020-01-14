@@ -204,7 +204,7 @@ runNGROK() {
         echo -e "${FATAL} ${WHITE}${YELLOW}ngrok${WHITE} is either not installed or not in your PATH. ${YELLOW}ngrok${WHITE} is required to pipe HTTP through an SSL tunnel. Please install it. https://ngrok.com/download" >&2
         exit 1
     }
-    ngrok http localhost:${WP_PORT}
+    ngrok http -region jp localhost:${WP_PORT}
 }
 
 logContainer() {
