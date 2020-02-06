@@ -1,8 +1,18 @@
 FROM visiblevc/wordpress:latest
 
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp
+RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp \
+        libfreetype6-dev \
+        libmcrypt-dev \
+        libjpeg-dev \
+        libpng-dev \
+        jq
+RUN sudo docker-php-ext-configure gd --with-freetype-dir=/usr/freetype2 --with-png-dir=/usr --with-jpeg-dir=/usr
+RUN sudo docker-php-ext-install gd
 
 SHELL ["/bin/sh", "-c"]
+
+# Strict error/notice reporting
+RUN sudo sh -c 'echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini'
 
 # Install xdebug for PHP live debugging in vscode
 RUN yes | sudo pecl install xdebug \

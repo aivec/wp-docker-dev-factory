@@ -13,9 +13,24 @@ FATAL="${RED}[fatal]${NC}"
 
 NETWORK_NAME=wp-dev-instances
 
-if [ ! -f wp-instances.json ]; then
-    echo -e "${INFO} ${WHITE}${YELLOW}wp-instances.json${WHITE} must be in the root of this project. Refer to the file in the ${WHITE}${YELLOW}examples${WHITE} folder." >&2
-    exit 1
+parentdir=`pwd`
+
+configfolder="$1"
+configfile=wp-instances.json
+if [ ! -z $configfolder ]; then
+    if [ ! -e "$configfolder/$configfile" ]; then
+        echo -e "${INFO} ${WHITE}${YELLOW}$configfolder/$configfile${WHITE} does not exist. Aborting" >&2
+        exit 1
+    else
+        cd $configfolder
+    fi
+else
+    if [ ! -f wp-instances.json ]; then
+        echo -e "${INFO} ${WHITE}${YELLOW}wp-instances.json${WHITE} must be in the root of this project. Refer to the file in the ${WHITE}${YELLOW}examples${WHITE} folder." >&2
+        exit 1
+    else
+        configfile=wp-instances.json
+    fi
 fi
 
 command -v docker >/dev/null 2>&1 || {
@@ -34,7 +49,7 @@ command -v jq >/dev/null 2>&1 || {
 runContainer() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     project_name=$(echo $config | jq -r '.["project-name"]')
     WP_PORT=$(echo $config | jq -r '.["container-port"]')
     DOWNLOAD_PLUGINS=$(echo $config | jq -r '.["download-plugins"]')
@@ -95,8 +110,6 @@ runContainer() {
     printf -v DOWNLOAD_PLUGINS ',%s' "${downloadplugins[@]}"
     DOWNLOAD_PLUGINS=${DOWNLOAD_PLUGINS:1}
 
-    DB_CONTAINER_NAME=${project_name}_dev_db
-    PMA_CONTAINER_NAME=${project_name}_dev_pma
     WP_CONTAINER_NAME=${project_name}_dev_wp
     PROJECT_NAME=$project_name
 
@@ -111,8 +124,12 @@ runContainer() {
     while [ $plugini -le $plugincount ]; do
         ppath=$(echo $config | jq -r --arg index "$plugini" '.["local-plugins"][$index | tonumber]')
         if [ -d $ppath ]; then
-            pbasename=${ppath##*/}
-            volumes+=(-v $ppath:/app/wp-content/plugins/$pbasename)
+            absolute_path=$(
+                cd "$ppath"
+                pwd
+            )
+            pbasename=${absolute_path##*/}
+            volumes+=(-v $absolute_path:/app/wp-content/plugins/$pbasename)
         else
             printf "${WARN} ${WHITE}Local plugin folder at ${CYAN}${ppath}${WHITE} doesn't exist. Skipping volume mount.${NC}\n"
         fi
@@ -125,8 +142,12 @@ runContainer() {
     while [ $themei -le $themecount ]; do
         tpath=$(echo $config | jq -r --arg index "$themei" '.["local-themes"][$index | tonumber]')
         if [ -d $tpath ]; then
-            tbasename=${tpath##*/}
-            volumes+=(-v $tpath:/app/wp-content/themes/$tbasename)
+            absolute_path=$(
+                cd "$tpath"
+                pwd
+            )
+            tbasename=${absolute_path##*/}
+            volumes+=(-v $absolute_path:/app/wp-content/themes/$tbasename)
         else
             printf "${WARN} ${WHITE}Local theme folder at ${CYAN}${tpath}${WHITE} doesn't exist. Skipping volume mount.${NC}\n"
         fi
@@ -136,6 +157,13 @@ runContainer() {
     mysqldump=$(echo $config | jq -r '.["mysql-dumpfile"]')
     if [ ! -z $mysqldump ]; then
         if [ -e $mysqldump ]; then
+            frelpath=$(dirname "$mysqldump")
+            fname=$(basename "$mysqldump")
+            absolute_path=$(
+                cd "$frelpath"
+                pwd
+            )
+            mysqldump="$absolute_path/$fname"
             volumes+=(-v $mysqldump:/data/db.sql)
         else
             printf "${WARN} ${WHITE}Local MySQL dump file at ${CYAN}${mysqldump}${WHITE} doesn't exist. Skipping volume mount.${NC}\n"
@@ -143,9 +171,9 @@ runContainer() {
     fi
 
     PLUGINS="${downloadplugins[*]}"
-    volumes+=(-v $(pwd)/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh)
-    volumes+=(-v $(pwd)/redump.php:/app/redump.php)
-    volumes+=(-v $(pwd)/dumpfiles:/app/dumpfiles)
+    volumes+=(-v $parentdir/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh)
+    volumes+=(-v $parentdir/redump.php:/app/redump.php)
+    volumes+=(-v $parentdir/dumpfiles:/app/dumpfiles)
 
     v=${volumes[@]}
     NEW_URL=http://localhost:${WP_PORT}
@@ -188,7 +216,7 @@ runContainer() {
 stopContainer() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     project_name=$(echo $config | jq -r '.["project-name"]')
     WP_CONTAINER_NAME=${project_name}_dev_wp
     docker stop $WP_CONTAINER_NAME
@@ -198,7 +226,7 @@ stopContainer() {
 runNGROK() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     WP_PORT=$(echo $config | jq -r '.["container-port"]')
     command -v ngrok >/dev/null 2>&1 || {
         echo -e "${FATAL} ${WHITE}${YELLOW}ngrok${WHITE} is either not installed or not in your PATH. ${YELLOW}ngrok${WHITE} is required to pipe HTTP through an SSL tunnel. Please install it. https://ngrok.com/download" >&2
@@ -210,7 +238,7 @@ runNGROK() {
 logContainer() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     project_name=$(echo $config | jq -r '.["project-name"]')
     WP_CONTAINER_NAME=${project_name}_dev_wp
     docker logs -f ${WP_CONTAINER_NAME}
@@ -219,7 +247,7 @@ logContainer() {
 redumpDB() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     project_name=$(echo $config | jq -r '.["project-name"]')
     WP_CONTAINER_NAME=${project_name}_dev_wp
     docker exec -it ${WP_CONTAINER_NAME} /bin/sh -c "php redump.php root root ${project_name} /data/db.sql"
@@ -228,7 +256,7 @@ redumpDB() {
 createNewDumpfile() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     project_name=$(echo $config | jq -r '.["project-name"]')
     WP_CONTAINER_NAME=${project_name}_dev_wp
     printf "\n${INFO} ${WHITE}New dump-files are placed in a folder named ${YELLOW}dumpfiles${WHITE} in this directory${NC}\n"
@@ -240,7 +268,7 @@ createNewDumpfile() {
 toggleSSL() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
     project_name=$(echo $config | jq -r '.["project-name"]')
     WP_CONTAINER_NAME=${project_name}_dev_wp
 
@@ -260,7 +288,7 @@ toggleSSL() {
 toggleDeploymentBundleAsPluginVolume() {
     i=$1 # config index
 
-    config=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]')
+    config=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]')
 
     plugincount=$(echo $config | jq -r '.["local-plugins"] | length')
     plugincount=$(($plugincount - 1))
@@ -293,16 +321,16 @@ toggleDeploymentBundleAsPluginVolume() {
     else
         printf "\n${INFO} ${WHITE}Replacing volume with ${GREEN}deployment${WHITE} bundle${NC}\n"
         cd $plugin_name
-        if [ ! -e "zip_plugin.sh" ]; then
-            printf "\n${FATAL} ${WHITE}${YELLOW}zip_plugin.sh${WHITE} does not exist in project folder. Aborting.\n"
+        if [ ! -e "bundle.sh" ]; then
+            printf "\n${FATAL} ${WHITE}${YELLOW}bundle.sh${WHITE} does not exist in project folder. Aborting.\n"
             exit 1
         fi
-        ./zip_plugin.sh
+        ./bundle.sh
         mv $plugin_name*.zip ../$plugin_name.zip
         tar --create --file=../$plugin_name.devrepo.tar .
         cd ../
         rm -rf $plugin_name/*
-        rm -rf $plugin_name/.* 2> /dev/null
+        rm -rf $plugin_name/.* 2>/dev/null
         mv $plugin_name.zip $plugin_name/bundle.zip
         cd $plugin_name
         unzip bundle.zip
@@ -312,14 +340,14 @@ toggleDeploymentBundleAsPluginVolume() {
     fi
 }
 
-projectcount=$(cat wp-instances.json | jq -r '. | length')
+projectcount=$(cat $configfile | jq -r '. | length')
 projectcount=$(($projectcount - 1))
 projects=()
 declare -A indexmap
 
 i=0
 while [ $i -le $projectcount ]; do
-    pname=$(cat wp-instances.json | jq -r --arg index "$i" '.[$index | tonumber]["project-name"]')
+    pname=$(cat $configfile | jq -r --arg index "$i" '.[$index | tonumber]["project-name"]')
     indexmap[$pname]=$i
     projects+=($pname)
     i=$(($i + 1))
@@ -344,16 +372,16 @@ q) quit
 Select an operation to perform for '$selectedproject': " answer
     case $answer in
     [1]*)
-        docker build -t wordpress_devenv_visiblevc:latest .
+        docker build -t wordpress_devenv_visiblevc:latest $parentdir
         echo -e "\n${INFO} ${WHITE}Running Container(s)...${NC}"
-        docker-compose -p ${NETWORK_NAME} -f docker-compose.db.yml up -d
+        docker-compose -p ${NETWORK_NAME} -f $parentdir/docker-compose.db.yml up -d
         runContainer "${indexmap[$selectedproject]}"
         exit
         ;;
     [2]*)
         echo -e "\n${INFO} ${WHITE}Stopping Container(s)...${NC}"
         stopContainer "${indexmap[$selectedproject]}"
-        docker-compose -p ${NETWORK_NAME} -f docker-compose.db.yml down
+        docker-compose -p ${NETWORK_NAME} -f $parentdir/docker-compose.db.yml down
         exit
         ;;
     [3]*)

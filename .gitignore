@@ -1,2 +1,6 @@
 /wp-instances.json
 dumpfiles
+/configs
+/assets
+/projects
+node_modules

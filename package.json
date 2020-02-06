@@ -1,0 +1,31 @@
+{
+  "name": "dev-factory",
+  "version": "1.0.0",
+  "description": "- Make sure to create an account on [ngrok.com](ngrok.com) so that you get more connections per minute.",
+  "main": "run.js",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "ngrok": "^3.2.7",
+    "prompts": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aivec/visiblevc-devenv-factory.git"
+  },
+  "keywords": [
+    "WordPress",
+    "docker"
+  ],
+  "author": "Evan D Shaw",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/aivec/visiblevc-devenv-factory/issues"
+  },
+  "homepage": "https://github.com/aivec/visiblevc-devenv-factory#readme"
+}
