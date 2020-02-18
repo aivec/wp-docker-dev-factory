@@ -1,4 +1,4 @@
-FROM visiblevc/wordpress:latest
+FROM visiblevc/wordpress:latest-php7.3
 
 RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp \
         libfreetype6-dev \
@@ -6,8 +6,8 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp 
         libjpeg-dev \
         libpng-dev \
         jq
-RUN sudo docker-php-ext-configure gd --with-freetype-dir=/usr/freetype2 --with-png-dir=/usr --with-jpeg-dir=/usr
-RUN sudo docker-php-ext-install gd
+RUN sudo -E docker-php-ext-configure gd --with-freetype-dir=/usr/freetype2 --with-png-dir=/usr --with-jpeg-dir=/usr
+RUN sudo -E docker-php-ext-install pdo_mysql gd
 
 SHELL ["/bin/sh", "-c"]
 

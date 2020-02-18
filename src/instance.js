@@ -27,7 +27,7 @@ const runContainer = function(config) {
   const v = volumes.join(" ");
 
   execSync(
-    `docker run -d --name=${containerName} -p ${containerPort}:80 -p 443:443 \
+    `docker run -d --name=${containerName} -p ${containerPort}:80 \
         --cap-add=SYS_ADMIN \
         --device=/dev/fuse \
         --security-opt apparmor=unconfined \
@@ -41,6 +41,8 @@ const runContainer = function(config) {
         --env DB_HOST=aivec_wp_mysql \
         --env DB_NAME=${instanceName} \
         --env FTP_CONFIGS='${JSON.stringify(ftp)}' \
+        --env WORDPRESS_DEBUG=1 \
+        --env WP_DEBUG_DISPLAY=1 \
         --env WORDPRESS_DEBUG=1 \
         --env WORDPRESS_DB_NAME=${instanceName} \
         --env WORDPRESS_DB_HOST=aivec_wp_mysql \
