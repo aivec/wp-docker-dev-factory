@@ -8,4 +8,6 @@ exec(
     'mysqldump --user='.$user.' --password='.$pass.' --host='.$host.' '.$database.' --result-file='.$dir.' 2>&1',
     $output
 );
-var_dump($output);
+if (!empty($output)) {
+    echo $output[0];
+}

@@ -9,6 +9,7 @@ const validateConfig = (config, workingdir) => {
   config.localThemes = config.localThemes ? config.localThemes : [];
   config.downloadPlugins = config.downloadPlugins ? config.downloadPlugins : [];
   config.mysqlDumpfile = config.mysqlDumpfile ? config.mysqlDumpfile : "";
+  config.database = config.database ? config.database : [];
 
   if (!config.instanceName) {
     logger.error(
@@ -87,18 +88,30 @@ const validateConfig = (config, workingdir) => {
     volumes = [...volumes, `-v ${abspath}:/app/wp-content/themes/${folder}`];
   });
 
-  if (config.mysqlDumpfile) {
-    const abspath = path.resolve(workingdir, config.mysqlDumpfile);
-    if (!existsSync(abspath)) {
-      logger.error(
-        `${logger.WHITE}Local MySQL dump file at ${logger.CYAN}${abspath}${logger.WHITE} doesn't exist.`
-      );
-      process.exit(1);
+  let envvars = {};
+  envvars['DB_NAME'] = config.instanceName
+  if (config.database) {
+    const db = config.database
+    if (db.mysqlDumpfile) {
+      const abspath = path.resolve(workingdir, db.mysqlDumpfile);
+      if (!existsSync(abspath)) {
+        logger.error(
+          `${logger.WHITE}Local MySQL dump file at ${logger.CYAN}${abspath}${logger.WHITE} doesn't exist.`
+        );
+        process.exit(1);
+      }
+      volumes = [...volumes, `-v ${abspath}:/data/db.sql`];
     }
-    volumes = [...volumes, `-v ${abspath}:/data/db.sql`];
+    if (db.dbName) {
+      envvars['DB_NAME'] = db.dbName
+    }
+    if (db.dbPrefix) {
+      envvars['DB_PREFIX'] = db.dbPrefix
+    }
   }
 
   config.volumes = volumes
+  config.envvars = envvars
 
   return config
 }

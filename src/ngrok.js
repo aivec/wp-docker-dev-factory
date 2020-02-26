@@ -8,15 +8,20 @@ const runNgrok = async config => {
 
   try {
     execSync(
+      `docker exec -i ${config.containerName} wp plugin activate relative-url`,
+      { stdio: "inherit" }
+    );
+  } catch (e) {
+    console.log(e)
+  }
+
+  try {
+    execSync(
       `docker exec -i ${config.containerName} sed -i '/all, stop editing!/ a define("WP_SITEURL", "http://" . $_SERVER["HTTP_HOST"]);' /app/wp-config.php`,
       { stdio: "inherit" }
     );
     execSync(
       `docker exec -i ${config.containerName} sed -i '/all, stop editing!/ a define("WP_HOME", "http://" . $_SERVER["HTTP_HOST"]);' /app/wp-config.php`,
-      { stdio: "inherit" }
-    );
-    execSync(
-      `docker exec -i ${config.containerName} wp plugin activate relative-url`,
       { stdio: "inherit" }
     );
   } catch (e) {
@@ -39,6 +44,15 @@ process.on("SIGINT", () => {
     return;
   }
 
+  try {
+    execSync(
+      `docker exec -i ${process.env.containerName} wp plugin deactivate relative-url`,
+      { stdio: "inherit" }
+    );
+  } catch (e) {
+    console.log(e)
+  }
+
   logger.warn("closing ngrok connection");
   try {
     execSync(
@@ -51,10 +65,6 @@ process.on("SIGINT", () => {
     );
     execSync(
       `docker exec -i ${process.env.containerName} sed -i '/^define("WP_SITEURL"/d' wp-config.php`,
-      { stdio: "inherit" }
-    );
-    execSync(
-      `docker exec -i ${process.env.containerName} wp plugin deactivate relative-url`,
       { stdio: "inherit" }
     );
   } catch (e) {
