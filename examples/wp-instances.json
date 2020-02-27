@@ -1,36 +1,29 @@
-[
+{
+  "instanceName": "my-local-wordpress",
+  "containerPort": 8060,
+  "database": {
+    "mysqlDumpfile": "dumpfiles/testdatabase.sql",
+    "dbName": "dbname",
+    "dbPrefix": "dbprefix_"
+  },
+  "downloadPlugins": ["wordpress-plugin-1", "wordpress-plugin-2"],
+  "localPlugins": [
+    "/absolute/path/to/plugin/directory",
+    "relative/path/to/plugin/directory",
+    "../relative/path/to/plugin/directory"
+  ],
+  "localThemes": [
+    "/absolute/path/to/theme/directory",
+    "relative/path/to/theme/directory",
+    "../relative/path/to/theme/directory"
+  ],
+  "ftp": [
     {
-        "project-name": "my-example-project",
-        "ssl": true,
-        "container-port": "8000",
-        "local-plugins": [
-            "/absolute/path/to/local/plugin1",
-            "/absolute/path/to/local/plugin2"
-        ],
-        "local-themes": [
-            "/absolute/path/to/local/theme1",
-            "/absolute/path/to/local/theme2"
-        ],
-        "download-plugins": [
-            "wordpress-downloadable-plugin1",
-            "wordpress-downloadable-plugin2"
-        ],
-        "mysql-dumpfile": "/absolute/path/to/my/optional/dump/file.sql",
-        "download-proprietary-plugins-themes": true,
-        "proprietary-pluginspath": "ftp/relative/path/to/plugins/folder",
-        "proprietary-plugin-zipfiles": [
-            "zip-file1-without-file-extension",
-            "zip-file2-without-file-extension",
-            "zip-file3-without-file-extension"
-        ],
-        "proprietary-themespath": "ftp/relative/path/to/themes/folder",
-        "proprietary-theme-zipfiles": [
-            "zip-file1-without-file-extension",
-            "zip-file2-without-file-extension",
-            "zip-file3-without-file-extension"
-        ],
-        "proprietary-ftphost": "ftp.examplehost.jp",
-        "proprietary-ftpuser": "exampleuser@my-site.com",
-        "proprietary-ftppassword": "ftpexamplepassword"
+      "host": "myserver.com",
+      "user": "user@domain",
+      "password": "mypassword",
+      "plugins": ["relative/path/to/plugin/zipfile/noextension"],
+      "themes": ["relative/path/to/theme/zipfile/noextension"]
     }
-]
+  ]
+}

@@ -47,6 +47,34 @@ const toggleDeploymentBundle = async config => {
   } catch (e) {
     console.log("\nAborted.");
   }
+
+  const bashcommand = `if [ -e "$plugin_name.devrepo.tar" ]; then
+    printf "\n${logger.INFO} ${logger.WHITE}Found repo backup archive, setting volume back to ${logger.YELLOW}development${logger.WHITE} repo\n"
+    rm -rf $plugin_name/*
+    mv $plugin_name.devrepo.tar $plugin_name/git_bundle.tar
+    cd $plugin_name
+    tar -xf git_bundle.tar
+    rm git_bundle.tar
+  else
+    printf "\n${logger.WHITE}Replacing volume with ${logger.GREEN}deployment${logger.WHITE} bundle\n"
+    cd $plugin_name
+    if [ ! -e "bundle.sh" ]; then
+        printf "\n${logger.WHITE}${logger.YELLOW}bundle.sh${logger.WHITE} does not exist in project folder. Aborting.\n"
+        exit 1
+    fi
+    ./bundle.sh
+    mv $plugin_name*.zip ../$plugin_name.zip
+    tar --create --file=../$plugin_name.devrepo.tar .
+    cd ../
+    rm -rf $plugin_name/*
+    rm -rf $plugin_name/.* 2>/dev/null
+    mv $plugin_name.zip $plugin_name/bundle.zip
+    cd $plugin_name
+    unzip bundle.zip
+    cp -a $plugin_name*/. .
+    rm bundle.zip
+    find . ! -type f -name "$plugin_name*" | xargs rm -R
+  fi`
 };
 
 module.exports = toggleDeploymentBundle;

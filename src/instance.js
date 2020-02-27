@@ -10,6 +10,7 @@ const runContainer = function(config) {
     containerName,
     containerPort,
     dockerBridgeIP,
+    alreadyInstalled,
     ftp
   } = config;
 
@@ -28,6 +29,10 @@ const runContainer = function(config) {
     `-v ${config.topdir}/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh`
   ];
   volumes = [...volumes, `-v ${config.topdir}/redump.php:/app/redump.php`];
+  volumes = [
+    ...volumes,
+    `-v ${config.topdir}/get_active_plugins.php:/app/get_active_plugins.php`
+  ];
   volumes = [...volumes, `-v ${config.topdir}/dumpfiles:/app/dumpfiles`];
   const v = volumes.join(" ");
 
@@ -45,6 +50,7 @@ const runContainer = function(config) {
         --env DOCKER_BRIDGE_IP="${dockerBridgeIP}" \
         --env DOCKER_CONTAINER_PORT=${containerPort} \
         --env FTP_CONFIGS='${JSON.stringify(ftp)}' \
+        --env ALREADY_INSTALLED_PLUGINS='${JSON.stringify(alreadyInstalled)}' \
         --env WP_DEBUG=1 \
         --env WP_DEBUG_DISPLAY=1 \
         --env DB_HOST=aivec_wp_mysql \
@@ -58,10 +64,16 @@ const runContainer = function(config) {
   } catch (e) {
     console.log(e);
     logger.error("Something went wrong :(");
-    process.exit(1)
+    process.exit(1);
   }
 
-  execSync(`docker logs -f ${containerName}`, { stdio: "inherit" });
+  try {
+    execSync(`docker logs -f ${containerName}`, { stdio: "inherit" });
+  } catch (e) {
+    logger.info(
+      `${logger.YELLOW}${containerName}${logger.WHITE} is still running in the background. You can view the log stream anytime with ${logger.GREEN}Log WordPress Container`
+    );
+  }
 };
 
 module.exports = runContainer;

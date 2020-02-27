@@ -11,6 +11,8 @@ const validateConfig = (config, workingdir) => {
   config.mysqlDumpfile = config.mysqlDumpfile ? config.mysqlDumpfile : "";
   config.database = config.database ? config.database : [];
 
+  let alreadyInstalled = [...config.downloadPlugins];
+
   if (!config.instanceName) {
     logger.error(
       `${logger.WHITE}${logger.YELLOW}instanceName${logger.WHITE} is not defined in your config.`
@@ -61,6 +63,69 @@ const validateConfig = (config, workingdir) => {
       );
       process.exit(1);
     }
+    ftp.forEach((fconfig, index) => {
+      if (!fconfig.host) {
+        logger.error(
+          `${logger.WHITE}The ${logger.YELLOW}host${
+            logger.WHITE
+          } key for ftp config ${logger.GREEN}${index + 1}${
+            logger.WHITE
+          } is not defined.`
+        );
+        process.exit(1);
+      }
+      if (!fconfig.user) {
+        logger.error(
+          `${logger.WHITE}The ${logger.YELLOW}user${
+            logger.WHITE
+          } key for ftp config ${logger.GREEN}${index + 1}${
+            logger.WHITE
+          } is not defined.`
+        );
+        process.exit(1);
+      }
+      if (!fconfig.password) {
+        logger.error(
+          `${logger.WHITE}The ${logger.YELLOW}password${
+            logger.WHITE
+          } key for ftp config ${logger.GREEN}${index + 1}${
+            logger.WHITE
+          } is not defined.`
+        );
+        process.exit(1);
+      }
+      if (fconfig.plugins) {
+        if (!Array.isArray(fconfig.plugins)) {
+          logger.error(
+            `${logger.WHITE}The ${logger.YELLOW}plugins${
+              logger.WHITE
+            } key for ftp config ${logger.GREEN}${index + 1}${
+              logger.WHITE
+            } is defined but not an array.`
+          );
+          process.exit(1);
+        }
+        fconfig.plugins.forEach(
+          remotepath =>
+            (alreadyInstalled = [
+              ...alreadyInstalled,
+              path.basename(remotepath)
+            ])
+        );
+      }
+      if (fconfig.themes) {
+        if (!Array.isArray(fconfig.themes)) {
+          logger.error(
+            `${logger.WHITE}The ${logger.YELLOW}themes${
+              logger.WHITE
+            } key for ftp config ${logger.GREEN}${index + 1}${
+              logger.WHITE
+            } is defined but not an array.`
+          );
+          process.exit(1);
+        }
+      }
+    });
   }
 
   let volumes = [];
@@ -74,6 +139,7 @@ const validateConfig = (config, workingdir) => {
       process.exit(1);
     }
     volumes = [...volumes, `-v ${abspath}:/app/wp-content/plugins/${folder}`];
+    alreadyInstalled = [...alreadyInstalled, folder];
   });
 
   config.localThemes.forEach(t => {
@@ -89,9 +155,9 @@ const validateConfig = (config, workingdir) => {
   });
 
   let envvars = {};
-  envvars['DB_NAME'] = config.instanceName
+  envvars["DB_NAME"] = config.instanceName;
   if (config.database) {
-    const db = config.database
+    const db = config.database;
     if (db.mysqlDumpfile) {
       const abspath = path.resolve(workingdir, db.mysqlDumpfile);
       if (!existsSync(abspath)) {
@@ -103,17 +169,18 @@ const validateConfig = (config, workingdir) => {
       volumes = [...volumes, `-v ${abspath}:/data/db.sql`];
     }
     if (db.dbName) {
-      envvars['DB_NAME'] = db.dbName
+      envvars["DB_NAME"] = db.dbName;
     }
     if (db.dbPrefix) {
-      envvars['DB_PREFIX'] = db.dbPrefix
+      envvars["DB_PREFIX"] = db.dbPrefix;
     }
   }
 
-  config.volumes = volumes
-  config.envvars = envvars
+  config.volumes = volumes;
+  config.envvars = envvars;
+  config.alreadyInstalled = alreadyInstalled;
 
-  return config
-}
+  return config;
+};
 
-module.exports = validateConfig
+module.exports = validateConfig;

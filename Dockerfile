@@ -1,11 +1,13 @@
 FROM visiblevc/wordpress:latest-php7.3
 
+RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp \
         libfreetype6-dev \
         libmcrypt-dev \
         libjpeg-dev \
         libpng-dev \
-        jq
+        jq \
+        nodejs
 RUN sudo -E docker-php-ext-configure gd --with-freetype-dir=/usr/freetype2 --with-png-dir=/usr --with-jpeg-dir=/usr
 RUN sudo -E docker-php-ext-install pdo_mysql gd
 
