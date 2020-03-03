@@ -156,6 +156,7 @@ const validateConfig = (config, workingdir) => {
 
   let envvars = {};
   envvars["DB_NAME"] = config.instanceName;
+  envvars["DB_PREFIX"] = "wp_";
   if (config.database) {
     const db = config.database;
     if (db.mysqlDumpfile) {

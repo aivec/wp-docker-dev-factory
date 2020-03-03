@@ -5,7 +5,7 @@ const logger = require("./logger");
 const overwriteDumpfile = ({ containerName, envvars: { DB_NAME } }) => {
   try {
     exec(
-      `docker exec -it ${containerName} /bin/sh -c "php redump.php root root ${DB_NAME} /app/db.sql"`,
+      `docker exec -i ${containerName} /bin/sh -c "php redump.php root root ${DB_NAME} /app/db.sql"`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(error);
