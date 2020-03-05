@@ -4,6 +4,7 @@ const { existsSync } = require("fs");
 
 const validateConfig = (config, workingdir) => {
   config.instanceName = config.instanceName ? config.instanceName : "";
+  config.locale = config.locale ? config.locale : "en_US";
   config.containerPort = config.containerPort ? config.containerPort : "";
   config.localPlugins = config.localPlugins ? config.localPlugins : [];
   config.localThemes = config.localThemes ? config.localThemes : [];

@@ -24,9 +24,12 @@ sudo sh -c "echo 'xdebug.remote_host=${DOCKER_BRIDGE_IP}' >> /usr/local/etc/php/
 # have to explicitly list them for apache
 echo "export AVC_NODE_ENV=${AVC_NODE_ENV}" | sudo tee -a /etc/apache2/envvars >/dev/null
 
-h2 "Installing and activating Japanese language pack."
-wp language core install ja |& logger
-wp site switch-language ja |& logger
+h2 "Updating blogname..."
+wp option update blogname "${INSTANCE_NAME}" |& logger
+
+h2 "Setting site language to ${WP_LOCALE}"
+wp language core install ${WP_LOCALE} |& logger
+wp site switch-language ${WP_LOCALE} |& logger
 
 if [[ ! -z ${FTP_CONFIGS} ]]; then
     h2 "Pulling non-free plugins/themes from FTP server via lftp. This may take some time..."

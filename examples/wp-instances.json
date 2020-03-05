@@ -1,6 +1,7 @@
 {
   "instanceName": "my-local-wordpress",
   "containerPort": 8060,
+  "locale": "en_US",
   "database": {
     "mysqlDumpfile": "dumpfiles/testdatabase.sql",
     "dbName": "dbname",

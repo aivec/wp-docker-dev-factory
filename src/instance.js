@@ -6,6 +6,8 @@ const runContainer = function(config) {
   makeContainers(config);
 
   const {
+    locale,
+    instanceName,
     networkname,
     containerName,
     containerPort,
@@ -49,8 +51,10 @@ const runContainer = function(config) {
         --env AVC_NODE_ENV=development \
         --env DOCKER_BRIDGE_IP="${dockerBridgeIP}" \
         --env DOCKER_CONTAINER_PORT=${containerPort} \
+        --env INSTANCE_NAME=${instanceName} \
         --env FTP_CONFIGS='${JSON.stringify(ftp)}' \
         --env ALREADY_INSTALLED_PLUGINS='${JSON.stringify(alreadyInstalled)}' \
+        --env WP_LOCALE=${locale} \
         --env WP_DEBUG=1 \
         --env WP_DEBUG_DISPLAY=1 \
         --env DB_HOST=aivec_wp_mysql \
