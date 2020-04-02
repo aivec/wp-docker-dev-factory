@@ -1,8 +1,12 @@
-const { execSync, exec } = require("child_process");
-const prompts = require("prompts");
-const logger = require("./logger");
+import { FinalInstanceConfig } from "./config";
+import { exec } from "child_process";
+import prompts from "prompts";
+import logger from "./logger";
 
-const overwriteDumpfile = ({ containerName, envvars: { DB_NAME } }) => {
+export const overwriteDumpfile = ({
+  containerName,
+  envvars: { DB_NAME }
+}: FinalInstanceConfig) => {
   try {
     exec(
       `docker exec -i ${containerName} /bin/sh -c "php redump.php root root ${DB_NAME} /app/db.sql"`,
@@ -32,7 +36,10 @@ const overwriteDumpfile = ({ containerName, envvars: { DB_NAME } }) => {
   }
 };
 
-const createNewDump = async ({ containerName, envvars: { DB_NAME } }) => {
+export const createNewDump = async ({
+  containerName,
+  envvars: { DB_NAME }
+}: FinalInstanceConfig) => {
   try {
     logger.info(
       "New dump-files are placed in a folder named dumpfiles in your project directory."
@@ -69,5 +76,3 @@ const createNewDump = async ({ containerName, envvars: { DB_NAME } }) => {
     console.log("\nAborted.");
   }
 };
-
-module.exports = { createNewDump, overwriteDumpfile };

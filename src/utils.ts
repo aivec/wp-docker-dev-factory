@@ -1,7 +1,16 @@
-const { exec } = require("child_process");
-const logger = require("./logger");
+import { exec } from "child_process";
+import logger from "./logger";
 
-const isContainerRunning = (containerName, callback) => {
+export const isObject = (vartocheck: any) =>
+  vartocheck === Object(vartocheck) &&
+  Object.prototype.toString.call(vartocheck) !== "[object Array]";
+
+export const isString = (vartocheck: any) => typeof vartocheck === "string";
+
+export const isContainerRunning = (
+  containerName: string,
+  callback: (found: boolean) => void
+) => {
   exec(
     `docker ps --filter "name=${containerName}" -q`,
     (error, stdout, stderr) => {
@@ -20,5 +29,3 @@ const isContainerRunning = (containerName, callback) => {
     }
   );
 };
-
-module.exports = { isContainerRunning };

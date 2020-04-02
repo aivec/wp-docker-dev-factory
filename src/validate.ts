@@ -1,17 +1,16 @@
-const path = require("path");
-const logger = require("./logger");
-const { existsSync } = require("fs");
+import path from "path";
+import logger from "./logger";
+import validateFtpConfig from "./validate/ftpssh";
+import { existsSync } from "fs";
+import { InstanceConfig } from "./config"
 
-const validateConfig = (config, workingdir) => {
+const validateConfig = (config: InstanceConfig, workingdir: string) => {
   config.instanceName = config.instanceName ? config.instanceName : "";
   config.locale = config.locale ? config.locale : "en_US";
-  config.containerPort = config.containerPort ? config.containerPort : "";
   config.localPlugins = config.localPlugins ? config.localPlugins : [];
   config.localThemes = config.localThemes ? config.localThemes : [];
   config.downloadPlugins = config.downloadPlugins ? config.downloadPlugins : [];
-  config.mysqlDumpfile = config.mysqlDumpfile ? config.mysqlDumpfile : "";
-  config.database = config.database ? config.database : [];
-
+  
   let alreadyInstalled = [...config.downloadPlugins];
 
   if (!config.instanceName) {
@@ -55,78 +54,9 @@ const validateConfig = (config, workingdir) => {
     }
   }
 
-  // proprietary plugins and themes data
   let { ftp } = config;
   if (ftp) {
-    if (!Array.isArray(ftp)) {
-      logger.error(
-        `${logger.WHITE}${logger.YELLOW}ftp${logger.WHITE} is defined in your config but it is not an array.`
-      );
-      process.exit(1);
-    }
-    ftp.forEach((fconfig, index) => {
-      if (!fconfig.host) {
-        logger.error(
-          `${logger.WHITE}The ${logger.YELLOW}host${
-            logger.WHITE
-          } key for ftp config ${logger.GREEN}${index + 1}${
-            logger.WHITE
-          } is not defined.`
-        );
-        process.exit(1);
-      }
-      if (!fconfig.user) {
-        logger.error(
-          `${logger.WHITE}The ${logger.YELLOW}user${
-            logger.WHITE
-          } key for ftp config ${logger.GREEN}${index + 1}${
-            logger.WHITE
-          } is not defined.`
-        );
-        process.exit(1);
-      }
-      if (!fconfig.password) {
-        logger.error(
-          `${logger.WHITE}The ${logger.YELLOW}password${
-            logger.WHITE
-          } key for ftp config ${logger.GREEN}${index + 1}${
-            logger.WHITE
-          } is not defined.`
-        );
-        process.exit(1);
-      }
-      if (fconfig.plugins) {
-        if (!Array.isArray(fconfig.plugins)) {
-          logger.error(
-            `${logger.WHITE}The ${logger.YELLOW}plugins${
-              logger.WHITE
-            } key for ftp config ${logger.GREEN}${index + 1}${
-              logger.WHITE
-            } is defined but not an array.`
-          );
-          process.exit(1);
-        }
-        fconfig.plugins.forEach(
-          remotepath =>
-            (alreadyInstalled = [
-              ...alreadyInstalled,
-              path.basename(remotepath)
-            ])
-        );
-      }
-      if (fconfig.themes) {
-        if (!Array.isArray(fconfig.themes)) {
-          logger.error(
-            `${logger.WHITE}The ${logger.YELLOW}themes${
-              logger.WHITE
-            } key for ftp config ${logger.GREEN}${index + 1}${
-              logger.WHITE
-            } is defined but not an array.`
-          );
-          process.exit(1);
-        }
-      }
-    });
+    validateFtpConfig(ftp);
   }
 
   let volumes = [];
@@ -185,4 +115,4 @@ const validateConfig = (config, workingdir) => {
   return config;
 };
 
-module.exports = validateConfig;
+export default validateConfig;

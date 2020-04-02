@@ -1,8 +1,9 @@
-const { execSync } = require("child_process");
-const makeContainers = require("./dbcontainers");
-const logger = require("./logger");
+import { FinalInstanceConfig } from "./config";
+import { execSync } from "child_process";
+import makeContainers from "./dbcontainers";
+import logger from "./logger";
 
-const runContainer = function(config) {
+const runContainer = function(config: FinalInstanceConfig) {
   makeContainers(config);
 
   const {
@@ -80,4 +81,4 @@ const runContainer = function(config) {
   }
 };
 
-module.exports = runContainer;
+export default runContainer;

@@ -1,7 +1,8 @@
-const logger = require("./logger");
-const { execSync } = require("child_process");
+import logger from "./logger";
+import { execSync } from "child_process";
+import { FinalInstanceConfig } from "./config";
 
-const makeContainers = ({ topdir, networkname }) => {
+const makeContainers = ({ topdir, networkname }: FinalInstanceConfig) => {
   logger.info(`${logger.WHITE}Running Container(s)...${logger.NC}`);
   execSync(`docker build -t wordpress_devenv_visiblevc:latest ${topdir}`, {
     stdio: "inherit"
@@ -12,4 +13,4 @@ const makeContainers = ({ topdir, networkname }) => {
   );
 };
 
-module.exports = makeContainers;
+export default makeContainers

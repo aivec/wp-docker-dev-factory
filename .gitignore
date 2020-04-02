@@ -3,4 +3,5 @@ dumpfiles
 /configs
 /assets
 /projects
+/dist
 node_modules

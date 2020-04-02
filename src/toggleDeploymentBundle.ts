@@ -1,49 +1,56 @@
-const { execSync } = require("child_process");
-const fs = require("fs")
-const archiver = require('archiver');
-const path = require("path");
-const prompts = require("prompts");
-const logger = require("./logger");
+import { FinalInstanceConfig } from "./config";
+import { execSync } from "child_process";
+import fs from "fs";
+import archiver from "archiver";
+import path from "path";
+import prompts from "prompts";
+import logger from "./logger";
 
-const toggleDeploymentBundle = async config => {
+const toggleDeploymentBundle = async (config: FinalInstanceConfig) => {
   try {
-    const { index } = await prompts({
+    /* const { index } = await prompts({
       type: "select",
       name: "index",
       message: "Select a plugin to bundle",
       choices: config.localPlugins
-    });
-    const selected = config.localPlugins[index];
+    }); */
+    const selected = config.localPlugins[0];
     const pluginName = path.basename(selected);
     const pluginParentDirPath = path.dirname(selected);
     // console.log(`plugin abspath: ${selected}`);
     // console.log(`plugin parent dir path: ${pluginParentDirPath}`);
     // console.log(`plugin name: ${pluginName}`);
 
-    fs.open(`${pluginParentDirPath}/${pluginName}.devrepo.zip`, 'r', (err, fd) => {
-      if (err) {
-        if (err.code === 'ENOENT') {
-          logger.info(
-            `${logger.WHITE}Replacing ${logger.YELLOW}${pluginName} ${logger.WHITE}volume with ${logger.GREEN}deployment${logger.WHITE} bundle`
-          );
+    fs.open(
+      `${pluginParentDirPath}/${pluginName}.devrepo.zip`,
+      "r",
+      (err, fd) => {
+        if (err) {
+          if (err.code === "ENOENT") {
+            logger.info(
+              `${logger.WHITE}Replacing ${logger.YELLOW}${pluginName} ${logger.WHITE}volume with ${logger.GREEN}deployment${logger.WHITE} bundle`
+            );
 
-          try {
-            execSync(`cd ${selected} && ./bundle.sh`, { stdio: "inherit" });
-          } catch (e) {
-            logger.error(`${e}`);
-            process.exit(1)
+            try {
+              execSync(`cd ${selected} && ./bundle.sh`, { stdio: "inherit" });
+            } catch (e) {
+              logger.error(`${e}`);
+              process.exit(1);
+            }
+
+            var output = fs.createWriteStream(
+              `${pluginParentDirPath}/${pluginName}.devrepo.zip`
+            );
+            var archive = archiver("zip", {
+              zlib: { level: 9 } // Sets the compression level.
+            });
           }
-
-          var output = fs.createWriteStream(`${pluginParentDirPath}/${pluginName}.devrepo.zip`);
-          var archive = archiver('zip', {
-            zlib: { level: 9 } // Sets the compression level.
-          });
+        } else {
+          logger.error(err);
+          process.exit(1);
         }
-      } else {
-        logger.error(err);
-        process.exit(1)
       }
-    });
+    );
   } catch (e) {
     console.log("\nAborted.");
   }
@@ -74,7 +81,7 @@ const toggleDeploymentBundle = async config => {
     cp -a $plugin_name*/. .
     rm bundle.zip
     find . ! -type f -name "$plugin_name*" | xargs rm -R
-  fi`
+  fi`;
 };
 
-module.exports = toggleDeploymentBundle;
+export default toggleDeploymentBundle;

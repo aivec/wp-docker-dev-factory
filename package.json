@@ -1,8 +1,11 @@
 {
-  "name": "dev-factory",
+  "name": "@aivec/wp-docker-dev-factory",
   "version": "1.0.0",
-  "description": "- Make sure to create an account on [ngrok.com](ngrok.com) so that you get more connections per minute.",
-  "main": "run.js",
+  "description": "Make sure to create an account on [ngrok.com](ngrok.com) so that you get more connections per minute.",
+  "main": "./dist/index.js",
+  "bin": {
+    "aivec-wpdocker": "./dist/index.js"
+  },
   "directories": {
     "example": "examples"
   },
@@ -11,9 +14,17 @@
     "ngrok": "^3.2.7",
     "prompts": "^2.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^13.9.8",
+    "@types/prompts": "^2.0.5",
+    "nodemon": "^2.0.2",
+    "ts-node": "^8.8.1",
+    "typescript": "^3.8.3"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p .",
+    "start": "ts-node src/index.ts"
   },
   "repository": {
     "type": "git",

@@ -1,9 +1,10 @@
-const { execSync } = require("child_process");
-const ngrok = require("ngrok");
-const logger = require("./logger");
+import { FinalInstanceConfig } from "./config";
+import { execSync } from "child_process";
+import ngrok from "ngrok";
+import logger from "./logger";
 
-const runNgrok = async config => {
-  process.env.ngrokRunning = true;
+const runNgrok = async (config: FinalInstanceConfig) => {
+  process.env.ngrokRunning = "true";
   process.env.containerName = config.containerName;
 
   try {
@@ -12,7 +13,7 @@ const runNgrok = async config => {
       { stdio: "inherit" }
     );
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
   try {
@@ -25,13 +26,13 @@ const runNgrok = async config => {
       { stdio: "inherit" }
     );
   } catch (e) {
-    console.log(e)
+    console.log(e);
     logger.warn("SSL is already toggled ON");
   }
 
   const url = await ngrok.connect({
     addr: config.containerPort,
-    region: "jp",
+    region: "ap",
     onStatusChange: status => logger.info(status),
     onLogEvent: data => console.log(data)
   });
@@ -50,7 +51,7 @@ process.on("SIGINT", () => {
       { stdio: "inherit" }
     );
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
   logger.warn("closing ngrok connection");
@@ -58,7 +59,7 @@ process.on("SIGINT", () => {
     execSync(
       `docker exec -i ${process.env.containerName} grep 'define("WP_SITEURL"' wp-config.php`,
       { stdio: "inherit" }
-    )
+    );
     execSync(
       `docker exec -i ${process.env.containerName} sed -i '/^define("WP_HOME"/d' wp-config.php`,
       { stdio: "inherit" }
@@ -68,9 +69,9 @@ process.on("SIGINT", () => {
       { stdio: "inherit" }
     );
   } catch (e) {
-    console.log(e)
+    console.log(e);
     logger.warn("SSL is already toggled OFF");
   }
 });
 
-module.exports = runNgrok;
+export default runNgrok;
