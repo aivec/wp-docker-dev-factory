@@ -27,6 +27,10 @@ export interface FtpMeta {
   password?: string;
 }
 
+export interface FinalFtpConfig extends FtpConfig {
+  meta?: FtpMeta;
+} 
+
 export interface TransformedInstanceConfig {
   containerName: string;
   topdir: string;
@@ -43,4 +47,6 @@ export interface EnvVars {
   DB_PREFIX?: string;
 }
 
-export interface FinalInstanceConfig extends InstanceConfig, TransformedInstanceConfig {}
+export interface FinalInstanceConfig extends InstanceConfig, TransformedInstanceConfig {
+  ftp?: FinalFtpConfig[];
+}

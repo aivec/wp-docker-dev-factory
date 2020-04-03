@@ -56,7 +56,7 @@ const validateConfig = (config: InstanceConfig, workingdir: string) => {
 
   let { ftp } = config;
   if (ftp) {
-    validateFtpConfig(ftp);
+    config.ftp = validateFtpConfig(ftp);
   }
 
   let volumes = [];

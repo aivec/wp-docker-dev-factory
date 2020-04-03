@@ -40,9 +40,9 @@ if [[ ! -z ${FTP_CONFIGS} ]]; then
     configi=0
     while [ $configi -le $configcount ]; do
         config=$(echo $FTP_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
-        host=$(echo $config | jq -r '.["host"]')
-        user=$(echo $config | jq -r '.["user"]')
-        password=$(echo $config | jq -r '.["password"]')
+        host=$(echo $config | jq -r '.["meta"]["host"]')
+        user=$(echo $config | jq -r '.["meta"]["user"]')
+        password=$(echo $config | jq -r '.["meta"]["password"]')
         plugins=$(echo $config | jq -r '.["plugins"]')
         themes=$(echo $config | jq -r '.["themes"]')
 

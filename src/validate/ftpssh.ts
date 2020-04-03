@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "fs";
-import { FtpConfig, FtpMeta } from "src/config";
+import { FtpConfig, FtpMeta, FinalFtpConfig } from "src/config";
 import { isObject } from "../utils";
 import logger from "../logger";
 import {
@@ -22,7 +22,8 @@ const validateFtpMeta = function(ftpMeta: FtpMeta, filepath: string): void {
   }
 };
 
-const validate = function(ftp: FtpConfig[]): void {
+const validate = function(ftp: FtpConfig[]): FinalFtpConfig[] {
+  let finalFtpConfig: FinalFtpConfig[] = []
   // proprietary plugins and themes data
   if (!Array.isArray(ftp)) {
     console.log(ftp);
@@ -77,6 +78,7 @@ const validate = function(ftp: FtpConfig[]): void {
           readFileSync(ftpConfig.confpath, "utf8")
         );
         validateFtpMeta(ftpMeta, ftpConfig.confpath);
+        finalFtpConfig = [...finalFtpConfig, { ...ftpConfig, meta: ftpMeta }]
       } catch (err) {
         logger.error(err);
         process.exit(1);
@@ -105,6 +107,7 @@ const validate = function(ftp: FtpConfig[]): void {
             ftpMeta,
             `${serverConfigsDirpath}/${ftpConfig.confname}.json`
           );
+          finalFtpConfig = [...finalFtpConfig, { ...ftpConfig, meta: ftpMeta }]
         } catch (err) {
           logger.error(err);
           process.exit(1);
@@ -146,6 +149,7 @@ const validate = function(ftp: FtpConfig[]): void {
           }
 
           validateFtpMeta(allConfigs[ftpConfig.confname], ftpConfigsFilepath);
+          finalFtpConfig = [...finalFtpConfig, { ...ftpConfig, meta: allConfigs[ftpConfig.confname] }]
         } catch (err) {
           logger.error(err);
           process.exit(1);
@@ -171,67 +175,9 @@ const validate = function(ftp: FtpConfig[]): void {
         process.exit(1);
       }
     }
-
-    /* const fconfig = ftp[key];
-    if (!fconfig.host) {
-      logger.syntaxError(
-        `${logger.WHITE}The ${logger.YELLOW}host${
-          logger.WHITE
-        } key for ftp config ${logger.GREEN}${index + 1}${
-          logger.WHITE
-        } is not defined.`
-      );
-      process.exit(1);
-    }
-    if (!fconfig.user) {
-      logger.syntaxError(
-        `${logger.WHITE}The ${logger.YELLOW}user${
-          logger.WHITE
-        } key for ftp config ${logger.GREEN}${index + 1}${
-          logger.WHITE
-        } is not defined.`
-      );
-      process.exit(1);
-    }
-    if (!fconfig.password) {
-      logger.syntaxError(
-        `${logger.WHITE}The ${logger.YELLOW}password${
-          logger.WHITE
-        } key for ftp config ${logger.GREEN}${index + 1}${
-          logger.WHITE
-        } is not defined.`
-      );
-      process.exit(1);
-    }
-    if (fconfig.plugins) {
-      if (!Array.isArray(fconfig.plugins)) {
-        logger.syntaxError(
-          `${logger.WHITE}The ${logger.YELLOW}plugins${
-            logger.WHITE
-          } key for ftp config ${logger.GREEN}${index + 1}${
-            logger.WHITE
-          } is defined but not an array.`
-        );
-        process.exit(1);
-      }
-      fconfig.plugins.forEach(
-        remotepath =>
-          (alreadyInstalled = [...alreadyInstalled, path.basename(remotepath)])
-      );
-    }
-    if (fconfig.themes) {
-      if (!Array.isArray(fconfig.themes)) {
-        logger.syntaxError(
-          `${logger.WHITE}The ${logger.YELLOW}themes${
-            logger.WHITE
-          } key for ftp config ${logger.GREEN}${index + 1}${
-            logger.WHITE
-          } is defined but not an array.`
-        );
-        process.exit(1);
-      }
-    } */
   });
+
+  return finalFtpConfig
 };
 
 export default validate;
