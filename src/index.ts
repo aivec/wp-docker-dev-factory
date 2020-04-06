@@ -19,8 +19,8 @@ import logger from "./logger";
 const args = process.argv.slice(2);
 let configfolder = args[0] ? args[0] : null;
 let configfile = "./wp-instances.json";
-let topdir = cwd();
-let workingdir = topdir;
+let topdir = path.resolve(path.join(__dirname, '..'));
+let workingdir = cwd();
 
 if (configfolder) {
   workingdir = path.resolve(cwd(), configfolder);
