@@ -36,7 +36,7 @@ const runContainer = function(config: FinalInstanceConfig) {
     ...volumes,
     `-v ${config.topdir}/get_active_plugins.php:/app/get_active_plugins.php`
   ];
-  volumes = [...volumes, `-v ${config.topdir}/dumpfiles:/app/dumpfiles`];
+  volumes = [...volumes, `-v ${config.workingdir}/dumpfiles:/app/dumpfiles`];
   const v = volumes.join(" ");
 
   try {

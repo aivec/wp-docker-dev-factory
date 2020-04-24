@@ -86,7 +86,7 @@ const actionMap: {
     isRunning: true
   },
   {
-    title: "Create new host dumpfile with DB of currently mounted volume",
+    title: "Create new dumpfile with DB of currently mounted volume",
     value: createNewDump,
     isRunning: true
   },

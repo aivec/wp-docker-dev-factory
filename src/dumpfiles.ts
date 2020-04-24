@@ -42,14 +42,17 @@ export const createNewDump = async ({
 }: FinalInstanceConfig) => {
   try {
     logger.info(
-      "New dump-files are placed in a folder named dumpfiles in your project directory."
+      `New dumpfiles are placed in a folder named ${logger.yellow('dumpfiles')} in your project directory.`
     );
     const response = await prompts({
       type: "text",
       name: "filename",
       message:
-        "Please enter a file name for your new dump-file (.sql is not required):"
+        `Please enter a file name for your new dumpfile (.sql is not required):`
     });
+    if (!response.filename) {
+      throw new Error();
+    }
     exec(
       `docker exec -i ${containerName} /bin/sh -c "php redump.php root root ${DB_NAME} /app/dumpfiles/${response.filename}.sql"`,
       (error, stdout, stderr) => {
