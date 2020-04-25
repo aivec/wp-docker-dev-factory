@@ -6,6 +6,7 @@ RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp 
         libmcrypt-dev \
         libjpeg-dev \
         libpng-dev \
+        ssh \
         jq \
         nodejs
 RUN sudo -E docker-php-ext-configure gd --with-freetype-dir=/usr/freetype2 --with-png-dir=/usr --with-jpeg-dir=/usr

@@ -40,9 +40,9 @@ if [[ ! -z ${FTP_CONFIGS} ]]; then
     configi=0
     while [ $configi -le $configcount ]; do
         config=$(echo $FTP_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
-        host=$(echo $config | jq -r '.["meta"]["host"]')
-        user=$(echo $config | jq -r '.["meta"]["user"]')
-        password=$(echo $config | jq -r '.["meta"]["password"]')
+        host=$(echo $config | jq -r '.["host"]')
+        user=$(echo $config | jq -r '.["user"]')
+        password=$(echo $config | jq -r '.["password"]')
         plugins=$(echo $config | jq -r '.["plugins"]')
         themes=$(echo $config | jq -r '.["themes"]')
 
@@ -97,6 +97,78 @@ if [[ ! -z ${FTP_CONFIGS} ]]; then
         rm "$zipfile"
     done
 fi
+
+cd
+
+if [[ ! -z ${SSH_CONFIGS} ]]; then
+    mkdir -p /app/temp/ssh/plugins
+    mkdir -p /app/temp/ssh/themes
+    h2 "Pulling non-free plugins/themes from SSH server via scp. This may take some time..."
+    configcount=$(echo $SSH_CONFIGS | jq -r '. | length')
+    configcount=$(($configcount - 1))
+    configi=0
+    while [ $configi -le $configcount ]; do
+        config=$(echo $SSH_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
+        host=$(echo $config | jq -r '.["host"]')
+        user=$(echo $config | jq -r '.["user"]')
+        plugins=$(echo $config | jq -r '.["plugins"]')
+        themes=$(echo $config | jq -r '.["themes"]')
+        privateKeyFilename=$(echo $config | jq -r '.["privateKeyFilename"]')
+        privateKeyPath="/app/ssh/$privateKeyFilename"
+        #port=$(echo $config | jq -r '.["port"]')
+        #if [ "$plugins" != "null" ]; then
+        #    port="-P $port"
+        #else
+        #    port="-P 22"
+        #fi
+
+        if [ "$plugins" != "null" ] && [ ! -z "$plugins" ]; then
+            plugincount=$(echo $plugins | jq -r '. | length')
+            plugincount=$(($plugincount - 1))
+            plugini=0
+            while [ $plugini -le $plugincount ]; do
+                path=$(echo $plugins | jq -r --arg index "$plugini" '.[$index | tonumber]')
+                file="$path.zip"
+                scp -o StrictHostKeyChecking=no -i $privateKeyPath $user@$host:${file} /app/temp/ssh/plugins
+                plugini=$(($plugini + 1))
+            done
+        fi
+
+        if [ "$themes" != "null" ] && [ ! -z "$themes" ]; then
+            themecount=$(echo $themes | jq -r '. | length')
+            themecount=$(($themecount - 1))
+            themei=0
+            while [ $themei -le $themecount ]; do
+                path=$(echo $themes | jq -r --arg index "$themei" '.[$index | tonumber]')
+                file="$path.zip"
+                scp -o StrictHostKeyChecking=no -i $privateKeyPath $user@$host:${file} /app/temp/ssh/themes
+                themei=$(($themei + 1))
+            done
+        fi
+
+        configi=$(($configi + 1))
+    done
+
+    cd /app/temp/ssh/plugins
+    plugins=($(find . -maxdepth 1 -name '*.zip'))
+    echo "Installing downloaded plugins..." |& logger
+    for zipfile in "${plugins[@]}"; do
+        echo "$zipfile" |& logger
+        wp plugin install /app/temp/ssh/plugins/$zipfile |& logger
+        rm "$zipfile"
+    done
+
+    cd /app/temp/ssh/themes
+    themes=($(find . -maxdepth 1 -name '*.zip'))
+    echo "Installing downloaded themes..." |& logger
+    for zipfile in "${themes[@]}"; do
+        echo "$zipfile" |& logger
+        wp theme install /app/temp/ssh/themes/$zipfile |& logger
+        rm "$zipfile"
+    done
+fi
+
+cd
 
 if [[ -e "/data/db.sql" ]]; then
     h2 "Attempting to install active plugins from dump file. This may take some time..."

@@ -1,10 +1,10 @@
-import { FinalInstanceConfig } from "./config";
-import { execSync } from "child_process";
-import fs from "fs";
-import archiver from "archiver";
-import path from "path";
-import prompts from "prompts";
-import logger from "./logger";
+import { FinalInstanceConfig } from '../types';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import archiver from 'archiver';
+import path from 'path';
+import prompts from 'prompts';
+import logger from '../logger';
 
 const toggleDeploymentBundle = async (config: FinalInstanceConfig) => {
   try {
@@ -21,38 +21,32 @@ const toggleDeploymentBundle = async (config: FinalInstanceConfig) => {
     // console.log(`plugin parent dir path: ${pluginParentDirPath}`);
     // console.log(`plugin name: ${pluginName}`);
 
-    fs.open(
-      `${pluginParentDirPath}/${pluginName}.devrepo.zip`,
-      "r",
-      (err, fd) => {
-        if (err) {
-          if (err.code === "ENOENT") {
-            logger.info(
-              `${logger.WHITE}Replacing ${logger.YELLOW}${pluginName} ${logger.WHITE}volume with ${logger.GREEN}deployment${logger.WHITE} bundle`
-            );
+    fs.open(`${pluginParentDirPath}/${pluginName}.devrepo.zip`, 'r', (err, fd) => {
+      if (err) {
+        if (err.code === 'ENOENT') {
+          logger.info(
+            `${logger.WHITE}Replacing ${logger.YELLOW}${pluginName} ${logger.WHITE}volume with ${logger.GREEN}deployment${logger.WHITE} bundle`,
+          );
 
-            try {
-              execSync(`cd ${selected} && ./bundle.sh`, { stdio: "inherit" });
-            } catch (e) {
-              logger.error(`${e}`);
-              process.exit(1);
-            }
-
-            var output = fs.createWriteStream(
-              `${pluginParentDirPath}/${pluginName}.devrepo.zip`
-            );
-            var archive = archiver("zip", {
-              zlib: { level: 9 } // Sets the compression level.
-            });
+          try {
+            execSync(`cd ${selected} && ./bundle.sh`, { stdio: 'inherit' });
+          } catch (e) {
+            logger.error(`${e}`);
+            process.exit(1);
           }
-        } else {
-          logger.error(err);
-          process.exit(1);
+
+          const output = fs.createWriteStream(`${pluginParentDirPath}/${pluginName}.devrepo.zip`);
+          const archive = archiver('zip', {
+            zlib: { level: 9 }, // Sets the compression level.
+          });
         }
+      } else {
+        logger.error(err);
+        process.exit(1);
       }
-    );
+    });
   } catch (e) {
-    console.log("\nAborted.");
+    console.log('\nAborted.');
   }
 
   const bashcommand = `if [ -e "$plugin_name.devrepo.tar" ]; then

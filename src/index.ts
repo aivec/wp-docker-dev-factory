@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 
-import { InstanceConfig, FinalInstanceConfig } from "./config";
-import { existsSync, readFileSync } from "fs";
-import { execSync } from "child_process";
-import path from "path";
-import prompts from "prompts";
-import { cwd } from "process";
-import { createNewDump, overwriteDumpfile } from "./dumpfiles";
-import { isContainerRunning } from "./utils";
-import toggleDeploymentBundle from "./toggleDeploymentBundle";
-import validateConfig from "./validate";
-import runContainer from "./instance";
-import stopContainers from "./stop";
-import logContainer from "./logContainer";
-import runNgrok from "./ngrok";
-import logger from "./logger";
+import { InstanceConfig, FinalInstanceConfig } from './types';
+import { existsSync, readFileSync } from 'fs';
+import path from 'path';
+import prompts from 'prompts';
+import { cwd } from 'process';
+import { createNewDump, overwriteDumpfile } from './actions/dumpfiles';
+import { isContainerRunning } from './utils';
+import toggleDeploymentBundle from './actions/toggleDeploymentBundle';
+import validateConfig from './validation/validateAll';
+import buildFinalConfig from './buildFinalConfig/buildAll';
+import runContainer from './actions/instance';
+import stopContainers from './actions/stop';
+import logContainer from './actions/logContainer';
+import runNgrok from './actions/ngrok';
+import logger from './logger';
 
 const args = process.argv.slice(2);
-let configfolder = args[0] ? args[0] : null;
-let configfile = "./wp-instances.json";
-let topdir = path.resolve(path.join(__dirname, '..'));
+const configfolder = args[0] ? args[0] : null;
+let configfile = './wp-instances.json';
+const topdir = path.resolve(path.join(__dirname, '..'));
 let workingdir = cwd();
 
 if (configfolder) {
@@ -33,20 +33,22 @@ if (!existsSync(configfile)) {
 }
 
 // get JSON config
-let config: InstanceConfig | InstanceConfig[] = JSON.parse(readFileSync(configfile, "utf8"));
+const config: InstanceConfig | InstanceConfig[] = JSON.parse(readFileSync(configfile, 'utf8'));
 
-const iselect = async function(config: InstanceConfig | InstanceConfig[]) {
+const iselect = async function (
+  config: InstanceConfig | InstanceConfig[],
+): Promise<InstanceConfig> {
   if (Array.isArray(config)) {
     let instances: { title: string; value: any }[] = [];
-    (<InstanceConfig[]>config).forEach((cobj, index) => {
+    (config as InstanceConfig[]).forEach((cobj, index) => {
       instances = [...instances, { title: cobj.instanceName, value: index }];
     });
     const { index } = await prompts({
-      type: "select",
-      name: "index",
-      message: "Select an instance",
+      type: 'select',
+      name: 'index',
+      message: 'Select an instance',
       choices: instances,
-      initial: 0
+      initial: 0,
     });
     config = config[index];
     return config;
@@ -57,88 +59,108 @@ const iselect = async function(config: InstanceConfig | InstanceConfig[]) {
 
 const actionMap: {
   title: string;
-  isRunning: boolean;
-  value: (config: FinalInstanceConfig) => void;
+  value: {
+    isRunning: boolean;
+    requiresValidation: boolean;
+    func: (config: FinalInstanceConfig) => void;
+  };
 }[] = [
   {
-    title: "Run Containers",
-    isRunning: false,
-    value: runContainer
+    title: 'Run Containers',
+    value: {
+      isRunning: false,
+      requiresValidation: true,
+      func: runContainer,
+    },
   },
   {
-    title: "Stop WordPress Container",
-    value: stopContainers,
-    isRunning: true
+    title: 'Stop WordPress Container',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: stopContainers,
+    },
   },
   {
-    title: "Launch NGROK (local SSL)",
-    value: runNgrok,
-    isRunning: true
+    title: 'Launch NGROK (local SSL)',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: runNgrok,
+    },
   },
   {
-    title: "Log WordPress Container",
-    value: logContainer,
-    isRunning: true
+    title: 'Log WordPress Container',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: logContainer,
+    },
   },
   {
-    title: "Overwrite host dumpfile with DB of currently mounted volume",
-    value: overwriteDumpfile,
-    isRunning: true
+    title: 'Overwrite host dumpfile with DB of currently mounted volume',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: overwriteDumpfile,
+    },
   },
   {
-    title: "Create new dumpfile with DB of currently mounted volume",
-    value: createNewDump,
-    isRunning: true
+    title: 'Create new dumpfile with DB of currently mounted volume',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: createNewDump,
+    },
   },
   {
-    title: "Replace plugin volume with deployment ready bundle (Toggle)",
-    value: toggleDeploymentBundle,
-    isRunning: true
-  }
+    title: 'Replace plugin volume with deployment ready bundle (Toggle)',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: toggleDeploymentBundle,
+    },
+  },
 ];
-const actionSelect = async function(config: InstanceConfig) {
+const actionSelect = async function (config: InstanceConfig): Promise<prompts.Answers<'action'>> {
   return await prompts({
-    type: "select",
-    name: "action",
+    type: 'select',
+    name: 'action',
     message: `Select an operation to perform for ${config.instanceName}`,
     choices: actionMap,
-    initial: 0
+    initial: 0,
   });
 };
 
-(async () => {
+(async (): Promise<void> => {
   try {
-    let chosenConfig = await iselect(config);
+    const chosenConfig = await iselect(config);
 
-    chosenConfig = validateConfig(chosenConfig, workingdir);
-    chosenConfig.topdir = topdir;
-    chosenConfig.workingdir = workingdir;
-    chosenConfig.networkname = "wp-dev-instances";
-    chosenConfig.containerName = `${chosenConfig.instanceName}_dev_wp`;
+    const {
+      action: { func, isRunning, requiresValidation },
+    } = await actionSelect(chosenConfig);
 
-    chosenConfig.dockerBridgeIP = execSync(
-      "docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}'"
-    ).toString();
+    requiresValidation && validateConfig(chosenConfig, workingdir);
+    const finalConfig: FinalInstanceConfig = buildFinalConfig(chosenConfig, workingdir, topdir);
 
-    const finalConfig: FinalInstanceConfig = <FinalInstanceConfig>chosenConfig;
+    isContainerRunning(finalConfig.containerName, (running: boolean) => {
+      if (!running && isRunning) {
+        logger.error(
+          `Container ${logger.yellow(finalConfig.containerName)} isn't running. Aborting.`,
+        );
+        process.exit(1);
+      }
 
-    const { action } = await actionSelect(finalConfig);
+      if (running && !isRunning) {
+        logger.error(
+          `Container ${logger.yellow(finalConfig.containerName)} is already running. Aborting.`,
+        );
+        process.exit(1);
+      }
 
-    if (action.isRunning) {
-      isContainerRunning(finalConfig.containerName, (running: boolean) => {
-        if (!running) {
-          logger.error(
-            `Container '${finalConfig.containerName}' isn't running. Aborting.`
-          );
-          process.exit(1);
-        }
-
-        action(finalConfig);
-      });
-    } else {
-      action(finalConfig);
-    }
+      func(finalConfig);
+    });
   } catch (e) {
-    console.log("\nBye.");
+    console.log('\nBye.');
   }
 })();
