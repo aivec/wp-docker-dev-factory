@@ -37,7 +37,7 @@ const buildFinalConfig = (
   }
 
   if (configCopy.ssh) {
-    finalConfig.ssh = buildSSHConfig(configCopy.ssh);
+    finalConfig.ssh = buildSSHConfig(configCopy.ssh, workingdir);
   }
 
   return finalConfig;

@@ -1,5 +1,5 @@
 import validateFtpConfig from './validateFtpConfig';
-import jsonKeyExistsOrExit from './checkJsonKeyExistence';
+import jsonKeySetCheck from './checkJsonKeyExistence';
 import localPathsExistOrExit from './validateLocalPaths';
 import isArrayOrExit from './checkIsArray';
 import { InstanceConfig } from '../types';
@@ -7,8 +7,8 @@ import validatePrivateRemoteFilesConfig from './validatePrivateRemoteFilesConfig
 import validateSSHConfig from './validateSSHConfig';
 
 const validateConfig = (config: InstanceConfig, workingdir: string): void => {
-  jsonKeyExistsOrExit(config, 'containerPort');
-  jsonKeyExistsOrExit(config, 'instanceName');
+  jsonKeySetCheck(config, 'containerPort');
+  jsonKeySetCheck(config, 'instanceName');
 
   const arrayTypeKeys = ['localPlugins', 'localThemes', 'downloadPlugins', 'ftp', 'ssh'];
   arrayTypeKeys.forEach((key) => {
@@ -37,7 +37,7 @@ const validateConfig = (config: InstanceConfig, workingdir: string): void => {
   }
 
   if (config.ssh) {
-    validateSSHConfig(config.ssh);
+    validateSSHConfig(config.ssh, workingdir);
   }
 
   if (config.database) {

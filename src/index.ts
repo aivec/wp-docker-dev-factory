@@ -140,7 +140,13 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
       action: { func, isRunning, requiresValidation },
     } = await actionSelect(chosenConfig);
 
-    requiresValidation && validateConfig(chosenConfig, workingdir);
+    if (requiresValidation) {
+      try {
+        validateConfig(chosenConfig, workingdir);
+      } catch (error) {
+        process.exit(1);
+      }
+    }
     const finalConfig: FinalInstanceConfig = buildFinalConfig(chosenConfig, workingdir, topdir);
 
     isContainerRunning(finalConfig.containerName, (running: boolean) => {

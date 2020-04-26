@@ -1,3 +1,4 @@
+import path from 'path';
 import { exec } from 'child_process';
 import logger from './logger';
 
@@ -22,4 +23,11 @@ export const isContainerRunning = (containerName: string, callback: (found: bool
     // container was found and is running
     return callback(stdout ? true : false);
   });
+};
+
+export const resolvePathToAbsolute = (contextdirpath: string, p: string): string => {
+  if (path.isAbsolute(p)) {
+    p = `${process.env.HOME}${p}`;
+  }
+  return path.resolve(contextdirpath, p);
 };

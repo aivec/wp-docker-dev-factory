@@ -3,26 +3,17 @@ import { existsSync, readFileSync } from 'fs';
 import { PrivateRemoteFilesConfig, SSHMeta, SSHConfig } from '../types';
 import logger from '../logger';
 import { serverConfigsDirpath, sshConfigsFilepath } from '../constants';
+import { resolvePathToAbsolute } from '../utils';
 
-const resolveKeyFilePath = function (p: string): string {
-  if (path.isAbsolute(p)) {
-    return `${process.env.HOME}${p}`;
-  }
-  return p;
-};
-
-const buildSSHConfig = function (ssh: PrivateRemoteFilesConfig[]): SSHConfig[] {
+const buildSSHConfig = function (ssh: PrivateRemoteFilesConfig[], workingdir: string): SSHConfig[] {
   let finalSSHConfig: SSHConfig[] = [];
 
   ssh.forEach((sshConfig) => {
     if (sshConfig.confpath) {
       try {
-        let p = sshConfig.confpath;
-        if (path.isAbsolute(p)) {
-          p = `${process.env.HOME}${p}`;
-        }
+        const p = resolvePathToAbsolute(workingdir, sshConfig.confpath);
         const sshMeta: SSHMeta = JSON.parse(readFileSync(p, 'utf8'));
-        sshMeta.privateKeyPath = resolveKeyFilePath(sshMeta.privateKeyPath);
+        sshMeta.privateKeyPath = resolvePathToAbsolute(path.dirname(p), sshMeta.privateKeyPath);
         sshMeta.privateKeyFilename = path.basename(sshMeta.privateKeyPath);
         finalSSHConfig = [...finalSSHConfig, { ...sshConfig, ...sshMeta }];
       } catch (err) {
@@ -35,7 +26,10 @@ const buildSSHConfig = function (ssh: PrivateRemoteFilesConfig[]): SSHConfig[] {
           const sshMeta: SSHMeta = JSON.parse(
             readFileSync(`${serverConfigsDirpath}/${sshConfig.confname}.json`, 'utf8'),
           );
-          sshMeta.privateKeyPath = resolveKeyFilePath(sshMeta.privateKeyPath);
+          sshMeta.privateKeyPath = resolvePathToAbsolute(
+            serverConfigsDirpath,
+            sshMeta.privateKeyPath,
+          );
           sshMeta.privateKeyFilename = path.basename(sshMeta.privateKeyPath);
           finalSSHConfig = [...finalSSHConfig, { ...sshConfig, ...sshMeta }];
         } catch (err) {
@@ -46,7 +40,8 @@ const buildSSHConfig = function (ssh: PrivateRemoteFilesConfig[]): SSHConfig[] {
         try {
           const allConfigs = JSON.parse(readFileSync(sshConfigsFilepath, 'utf8'));
 
-          allConfigs[sshConfig.confname].privateKeyPath = resolveKeyFilePath(
+          allConfigs[sshConfig.confname].privateKeyPath = resolvePathToAbsolute(
+            serverConfigsDirpath,
             allConfigs[sshConfig.confname].privateKeyPath,
           );
           allConfigs[sshConfig.confname].privateKeyFilename = path.basename(
