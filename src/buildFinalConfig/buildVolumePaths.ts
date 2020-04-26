@@ -4,8 +4,11 @@ import { InstanceConfig } from '../types';
 const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] => {
   let volumes = [];
 
-  const localPathKeys = ['localPlugins', 'localThemes'];
-  localPathKeys.forEach((key) => {
+  const localPathKeys = [
+    { key: 'localPlugins', wpfolder: 'plugins' },
+    { key: 'localThemes', wpfolder: 'themes' },
+  ];
+  localPathKeys.forEach(({ key, wpfolder }) => {
     if (config[key]) {
       config[key].forEach((p) => {
         if (path.isAbsolute(p)) {
@@ -13,7 +16,7 @@ const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] 
         }
         const abspath = path.resolve(workingdir, p);
         const folder = path.basename(abspath);
-        volumes = [...volumes, `-v ${abspath}:/app/wp-content/plugins/${folder}`];
+        volumes = [...volumes, `-v ${abspath}:/app/wp-content/${wpfolder}/${folder}`];
       });
     }
   });
