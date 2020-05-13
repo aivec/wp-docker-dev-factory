@@ -1,7 +1,7 @@
 import { homedir } from 'os';
 
 export const serverConfigsDirname = 'aivec-devenv-configs';
-export const serverConfigsDirpath = `${homedir() || process.env.USERPROFILE}/${serverConfigsDirname}`;
+export const serverConfigsDirpath = `${homedir()}/${serverConfigsDirname}`;
 export const sshConfigsFilename = 'ssh.json';
 export const sshConfigsFilepath = `${serverConfigsDirpath}/${sshConfigsFilename}`;
 export const ftpConfigsFilename = 'ftp.json';

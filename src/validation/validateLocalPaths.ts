@@ -1,11 +1,12 @@
 import path from 'path';
 import logger from '../logger';
 import { existsSync } from 'fs';
+import { homedir } from 'os';
 
 const validateLocalPaths = (type: string, localFolders: string[], workingdir: string): void => {
   localFolders.forEach((p) => {
     if (path.isAbsolute(p)) {
-      p = `${process.env.HOME}${p}`;
+      p = `${homedir()}${p}`;
     }
     const abspath = path.resolve(workingdir, p);
     if (!existsSync(abspath)) {

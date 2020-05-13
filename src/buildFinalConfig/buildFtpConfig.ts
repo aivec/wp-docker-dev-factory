@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'fs';
 import { PrivateRemoteFilesConfig, FtpMeta, FtpConfig } from '../types';
 import logger from '../logger';
 import { serverConfigsDirpath, ftpConfigsFilepath } from '../constants';
+import { homedir } from 'os';
 
 const buildFtpConfig = function (ftp: PrivateRemoteFilesConfig[]): FtpConfig[] {
   let finalFtpConfig: FtpConfig[] = [];
@@ -12,7 +13,7 @@ const buildFtpConfig = function (ftp: PrivateRemoteFilesConfig[]): FtpConfig[] {
       try {
         let p = ftpConfig.confpath;
         if (path.isAbsolute(p)) {
-          p = `${process.env.HOME}${p}`;
+          p = `${homedir()}${p}`;
         }
         const ftpMeta: FtpMeta = JSON.parse(readFileSync(p, 'utf8'));
         finalFtpConfig = [...finalFtpConfig, { ...ftpConfig, ...ftpMeta }];

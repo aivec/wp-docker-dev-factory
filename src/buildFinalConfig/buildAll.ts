@@ -23,7 +23,7 @@ const buildFinalConfig = (
     networkname: 'wp-dev-instances',
     containerName: `${configCopy.instanceName}_dev_wp`,
     dockerBridgeIP: execSync(
-      "docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}'",
+      'docker network inspect bridge -f "{{ (index .IPAM.Config 0).Gateway }}"',
     ).toString(),
     envvars: buildEnvVars(configCopy),
     volumes: buildVolumePaths(configCopy, workingdir),

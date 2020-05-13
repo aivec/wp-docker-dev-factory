@@ -1,6 +1,7 @@
 import path from 'path';
 import { exec } from 'child_process';
 import logger from './logger';
+import { homedir } from 'os';
 
 export const isObject = (vartocheck: any): boolean =>
   vartocheck === Object(vartocheck) &&
@@ -27,7 +28,7 @@ export const isContainerRunning = (containerName: string, callback: (found: bool
 
 export const resolvePathToAbsolute = (contextdirpath: string, p: string): string => {
   if (path.isAbsolute(p)) {
-    p = `${process.env.HOME}${p}`;
+    p = `${homedir()}${p}`;
   }
   return path.resolve(contextdirpath, p);
 };

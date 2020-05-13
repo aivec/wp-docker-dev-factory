@@ -1,5 +1,6 @@
 import path from 'path';
 import { InstanceConfig } from '../types';
+import { homedir } from 'os';
 
 const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] => {
   let volumes = [];
@@ -12,7 +13,7 @@ const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] 
     if (config[key]) {
       config[key].forEach((p) => {
         if (path.isAbsolute(p)) {
-          p = `${process.env.HOME}${p}`;
+          p = `${homedir()}${p}`;
         }
         const abspath = path.resolve(workingdir, p);
         const folder = path.basename(abspath);
@@ -26,7 +27,7 @@ const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] 
     if (mysqlDumpfile) {
       let p = mysqlDumpfile;
       if (path.isAbsolute(p)) {
-        p = `${process.env.HOME}${p}`;
+        p = `${homedir()}${p}`;
       }
       const abspath = path.resolve(workingdir, p);
       volumes = [...volumes, `-v ${abspath}:/data/db.sql`];

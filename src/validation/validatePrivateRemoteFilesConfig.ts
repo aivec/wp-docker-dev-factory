@@ -4,6 +4,7 @@ import { PrivateRemoteFilesConfig } from '../types';
 import { isObject } from '../utils';
 import logger from '../logger';
 import { serverConfigsDirpath, instanceConfFilename } from '../constants';
+import { homedir } from 'os';
 
 const validatePrivateRemoteFilesConfig = function (
   prfconfigs: PrivateRemoteFilesConfig[],
@@ -42,7 +43,7 @@ const validatePrivateRemoteFilesConfig = function (
     if (prfconfig.confpath) {
       let p = prfconfig.confpath;
       if (path.isAbsolute(p)) {
-        p = `${process.env.HOME}${p}`;
+        p = `${homedir()}${p}`;
       }
       if (!existsSync(p)) {
         logger.error(`No such file exists: ${logger.yellow(p)}`);
