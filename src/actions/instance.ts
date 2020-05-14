@@ -1,5 +1,6 @@
 import { FinalInstanceConfig } from '../types';
 import { execSync } from 'child_process';
+import { _ } from "lodash";
 import makeContainers from './dbcontainers';
 import logger from '../logger';
 
@@ -28,18 +29,27 @@ const runContainer = function (config: FinalInstanceConfig): void {
   });
   const envs = envvars.join(' ');
 
+  // on Windows, strings have to be escaped which is why we need to invoke JSON.stringify twice...
+  const isWin = process.platform === "win32"
+
   let ftpenv = '';
   if (ftp) {
-    ftpenv = `--env FTP_CONFIGS='${JSON.stringify(ftp)}'`;
+    ftpenv = `--env FTP_CONFIGS=${isWin ? JSON.stringify(JSON.stringify(ftp)).trim() : JSON.stringify(ftp)}`;
   }
 
   let sshenv = '';
   if (ssh) {
-    sshenv = `--env SSH_CONFIGS='${JSON.stringify(ssh)}'`;
-    const keyPathVolumes = ssh.map(
-      ({ privateKeyPath, privateKeyFilename }) =>
-        `-v ${privateKeyPath}:/app/ssh/${privateKeyFilename}`,
+    const sshCopy = _.cloneDeep(ssh)
+    const keyPathVolumes = sshCopy.map(
+      ({ privateKeyPath, privateKeyFilename }, index) =>
+        {
+          // remove since Windows paths break JSON
+          delete ssh[index].privateKeyPath;
+          return `-v ${privateKeyPath}:/app/ssh/${privateKeyFilename}`
+        },
     );
+    
+    sshenv = `--env SSH_CONFIGS=${isWin ? JSON.stringify(JSON.stringify(ssh)).trim() : JSON.stringify(ssh)}`;
     volumes = [...volumes, ...keyPathVolumes];
   }
 
@@ -60,12 +70,12 @@ const runContainer = function (config: FinalInstanceConfig): void {
         ${envs} \
         ${sshenv} \
         ${ftpenv} \
-        --env XDEBUG_CONFIG=remote_host="${dockerBridgeIP}" \
+        --env XDEBUG_CONFIG=remote_host="${dockerBridgeIP.trim()}" \
         --env AVC_NODE_ENV=development \
-        --env DOCKER_BRIDGE_IP="${dockerBridgeIP}" \
+        --env DOCKER_BRIDGE_IP="${dockerBridgeIP.trim()}" \
         --env DOCKER_CONTAINER_PORT=${containerPort} \
         --env INSTANCE_NAME=${instanceName} \
-        --env ALREADY_INSTALLED_PLUGINS='${JSON.stringify(alreadyInstalled)}' \
+        --env ALREADY_INSTALLED_PLUGINS=${isWin ? JSON.stringify(JSON.stringify(alreadyInstalled)).trim() : JSON.stringify(alreadyInstalled)} \
         --env WP_LOCALE=${locale} \
         --env WP_DEBUG=1 \
         --env WP_DEBUG_DISPLAY=1 \
