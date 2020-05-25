@@ -115,7 +115,7 @@ if [[ ! -z ${SSH_CONFIGS} ]]; then
         themes=$(echo $config | jq -r '.["themes"]')
         privateKeyFilename=$(echo $config | jq -r '.["privateKeyFilename"]')
         privateKeyPath="/app/ssh/$privateKeyFilename"
-        chmod 600 "$privateKeyPath"
+        chmod 600 $privateKeyPath
         #port=$(echo $config | jq -r '.["port"]')
         #if [ "$plugins" != "null" ]; then
         #    port="-P $port"
