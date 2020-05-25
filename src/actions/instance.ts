@@ -47,10 +47,11 @@ const runContainer = function (config: FinalInstanceConfig): void {
     volumes = [...volumes, ...keyPathVolumes];
   }
 
-  volumes = [...volumes, `-v ${config.topdir}/initwp.sh:/docker-entrypoint-initwp.d/initwp.sh`];
-  volumes = [...volumes, `-v ${config.topdir}/redump.php:/app/redump.php`];
-  volumes = [...volumes, `-v ${config.topdir}/get_active_plugins.php:/app/get_active_plugins.php`];
-  volumes = [...volumes, `-v ${config.workingdir}/dumpfiles:/app/dumpfiles`];
+  if (process.platform === 'win32' && process.env.DOCKER_TOOLBOX_INSTALL_PATH) {
+    volumes = volumes.map(vpath => vpath.replace(/C:\\/gi, '/c/'));
+    volumes = volumes.map(vpath => vpath.replace(/\\/gi, '/'));
+    volumes = volumes.map(vpath => vpath.replace(/:\//gi, '://'));
+  }
   const v = volumes.join(' ');
 
   try {

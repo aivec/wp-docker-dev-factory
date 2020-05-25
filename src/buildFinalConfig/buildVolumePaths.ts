@@ -2,7 +2,7 @@ import path from 'path';
 import { InstanceConfig } from '../types';
 import { homedir } from 'os';
 
-const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] => {
+const buildVolumePaths = (config: InstanceConfig, workingdir: string, topdir: string): string[] => {
   let volumes = [];
 
   const localPathKeys = [
@@ -33,6 +33,11 @@ const buildVolumePaths = (config: InstanceConfig, workingdir: string): string[] 
       volumes = [...volumes, `-v ${abspath}:/data/db.sql`];
     }
   }
+
+  volumes = [...volumes, `-v ${path.resolve(topdir, 'initwp.sh')}:/docker-entrypoint-initwp.d/initwp.sh`];
+  volumes = [...volumes, `-v ${path.resolve(topdir, 'redump.php')}:/app/redump.php`];
+  volumes = [...volumes, `-v ${path.resolve(topdir, 'get_active_plugins.php')}:/app/get_active_plugins.php`];
+  volumes = [...volumes, `-v ${path.resolve(workingdir, 'dumpfiles')}:/app/dumpfiles`];
 
   return volumes;
 };
