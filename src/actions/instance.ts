@@ -48,9 +48,9 @@ const runContainer = function (config: FinalInstanceConfig): void {
   }
 
   if (process.platform === 'win32' && process.env.DOCKER_TOOLBOX_INSTALL_PATH) {
-    volumes = volumes.map(vpath => vpath.replace(/C:\\/gi, '/c/'));
-    volumes = volumes.map(vpath => vpath.replace(/\\/gi, '/'));
-    volumes = volumes.map(vpath => vpath.replace(/:\//gi, '://'));
+    volumes = volumes.map((vpath) => vpath.replace(/C:\\/gi, '/c/'));
+    volumes = volumes.map((vpath) => vpath.replace(/\\/gi, '/'));
+    volumes = volumes.map((vpath) => vpath.replace(/:\//gi, '://'));
   }
   const v = volumes.join(' ');
 
