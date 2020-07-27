@@ -7,6 +7,9 @@ export interface InstanceConfig {
     dbName?: string;
     dbPrefix: string;
   };
+  env?: {
+    [key: string]: string | number | boolean
+  },
   downloadPlugins?: string[];
   localPlugins?: string[];
   localThemes?: string[];

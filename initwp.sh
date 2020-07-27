@@ -22,7 +22,12 @@ sudo sh -c "echo 'xdebug.remote_host=${DOCKER_BRIDGE_IP}' >> /usr/local/etc/php/
 
 # PHP doesnt seem to pick up on environment variables when started via apache so we
 # have to explicitly list them for apache
-echo "export AVC_NODE_ENV=${AVC_NODE_ENV}" | sudo tee -a /etc/apache2/envvars >/dev/null
+if [[ ! -z ${APACHE_ENV_VARS} ]]; then
+    echo $APACHE_ENV_VARS | jq -r 'keys[]' | while read key; do
+        val=$(echo $APACHE_ENV_VARS | jq -r ".[\"$key\"]")
+        echo "export ${key}=${val}" | sudo tee -a /etc/apache2/envvars >/dev/null
+    done
+fi
 
 h2 "Updating blogname..."
 wp option update blogname "${INSTANCE_NAME}" |& logger

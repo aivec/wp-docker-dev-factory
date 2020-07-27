@@ -24,6 +24,11 @@ const runContainer = function (config: FinalInstanceConfig): void {
   downloadPlugins = [...downloadPlugins, 'relative-url'];
   const dplugins = `--env PLUGINS="${downloadPlugins.join(' ')}"`;
 
+  config.envvars['DOCKER_BRIDGE_IP'] = dockerBridgeIP.trim();
+  config.envvars['DOCKER_CONTAINER_PORT'] = containerPort;
+  const apacheEnvVars = config.envvars
+    ? `--env APACHE_ENV_VARS=${JSON.stringify(JSON.stringify(config.envvars)).trim()}`
+    : '';
   const envvars = Object.keys(config.envvars).map((key) => {
     return `--env ${key}=${config.envvars[key]}`;
   });
@@ -65,8 +70,8 @@ const runContainer = function (config: FinalInstanceConfig): void {
         ${envs} \
         ${sshenv} \
         ${ftpenv} \
+        ${apacheEnvVars} \
         --env XDEBUG_CONFIG=remote_host="${dockerBridgeIP.trim()}" \
-        --env AVC_NODE_ENV=development \
         --env DOCKER_BRIDGE_IP="${dockerBridgeIP.trim()}" \
         --env DOCKER_CONTAINER_PORT=${containerPort} \
         --env INSTANCE_NAME=${instanceName} \

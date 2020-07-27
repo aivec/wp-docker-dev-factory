@@ -1,7 +1,7 @@
 import { InstanceConfig, EnvVars } from '../types';
 
 const buildEnvVars = (config: InstanceConfig): EnvVars => {
-  const envvars = {};
+  let envvars = {};
   envvars['DB_NAME'] = config.instanceName;
   envvars['DB_PREFIX'] = 'wp_';
   if (config.database) {
@@ -14,6 +14,8 @@ const buildEnvVars = (config: InstanceConfig): EnvVars => {
     }
   }
 
+  const env = config.env ? config.env : {};
+  envvars = { ...envvars, ...env };
   return envvars;
 };
 
