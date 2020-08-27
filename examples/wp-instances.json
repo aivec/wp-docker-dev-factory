@@ -7,6 +7,10 @@
     "dbName": "dbname",
     "dbPrefix": "dbprefix_"
   },
+  "env": {
+    "ARBITRARY_ENVIRONMENT_VARIABLE_1": "value1",
+    "ARBITRARY_ENVIRONMENT_VARIABLE_2": "value2"
+  },
   "downloadPlugins": ["wordpress-plugin-1", "wordpress-plugin-2"],
   "localPlugins": [
     "/absolute/path/to/plugin/directory",
@@ -20,9 +24,14 @@
   ],
   "ftp": [
     {
-      "host": "myserver.com",
-      "user": "user@domain",
-      "password": "mypassword",
+      "confname": "my-ftp-config",
+      "plugins": ["relative/path/to/plugin/zipfile/noextension"],
+      "themes": ["relative/path/to/theme/zipfile/noextension"]
+    }
+  ],
+  "ssh": [
+    {
+      "confname": "my-ssh-config",
       "plugins": ["relative/path/to/plugin/zipfile/noextension"],
       "themes": ["relative/path/to/theme/zipfile/noextension"]
     }

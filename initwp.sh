@@ -200,6 +200,8 @@ if [[ -e "/data/db.sql" ]]; then
     mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST -uroot -e "DROP DATABASE temp" |& logger
 fi
 
+wp plugin deactivate relative-url |& logger
+
 #h2 "Generating a self-signed cert and configuring Apache for localhost SSL..."
 #
 #sudo su -c 'openssl genrsa -out /etc/ssl/private/apache-selfsigned.key 3072'

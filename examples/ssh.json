@@ -1,0 +1,12 @@
+{
+  "my-ssh-config": {
+    "host": "my-server.com",
+    "user": "share-dl",
+    "privateKeyPath": "relativepath/sshkeys/my_key"
+  },
+  "my-ssh-config-2": {
+    "host": "my-server-2.com",
+    "user": "share-dl-2",
+    "privateKeyPath": "/absolutepath/starting/at/home/dir/sshkeys/my_key"
+  }
+}
