@@ -245,7 +245,7 @@ Reference for the `wp-instances.json` config file.
 ### -- database
 - *Optional*
 - *Type: `Object`*
-### -- databasemysqldumpfile
+### -- database.mysqldumpfile
 - *Optional*
 - *Type: `String`*
 - Description: A relative or absolute path to a `MySQL` dump file with the extension `.sql`. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
@@ -301,12 +301,13 @@ Reference for the `wp-instances.json` config file.
 ### -- ftp[{}.confname]
 - *Optional\**
 - *Type: `String`*
-- Description: If you include an `ftp` config, you must specify either `confname` or `confpath`. `confname` can refer to either a file of the same name in a folder called `aivec-devenv-configs` which exists in your home folder, or the name of one of the properties specified in a file called `ftp.json` which exists in the `aivec-devenv-configs` folder. If you do not have a `aivec-devenv-configs` folder, create one in your home directory. For more information about FTP config files, refer to the [FTP Config Files section](#ftp-config-files).
+- Description: Can refer to either a file of the same name in a folder called `aivec-devenv-configs` which exists in your home folder, or the name of one of the properties specified in a file called `ftp.json` which exists in the `aivec-devenv-configs` folder. If you do not have an `aivec-devenv-configs` folder, create one in your home directory. For more information about FTP config files, refer to the [FTP Config Files section](#ftp-config-files).
 - \* *Required if `confpath` is not set*
 ### -- ftp[{}.confpath]
 - *Optional\**
 - *Type: `String`*
-- Description: If you include an `ftp` config, you must specify either `confname` or `confpath`. `confpath` can be either a relative or absolute path pointing to a `.json` file containing login information. If both `confname` and `confpath` are set, `confpath` will take precedence. For information about FTP config files, refer to [FTP Config Files section](#ftp-config-files).
+- Description: Can be either a relative or absolute path pointing to a `.json` file containing login information. If both `confname` and `confpath` are set, `confpath` will take precedence. For information about FTP config files, refer to the [FTP Config Files section](#ftp-config-files).
+- \* *Required if `confname` is not set*
 ### -- ftp[{}.plugins]
 - *Optional*
 - *Type: `String[]`*
@@ -323,6 +324,11 @@ Reference for the `wp-instances.json` config file.
             "confname": "my-ftp-config",
             "plugins": ["relative/path/to/plugin/zipfile/noextension"],
             "themes": ["relative/path/to/theme/zipfile/noextension"]
+        },
+        {
+            "confpath": "path/to/ftp-config.json",
+            "plugins": ["relative/path/to/plugin/zipfile/noextension"],
+            "themes": ["relative/path/to/theme/zipfile/noextension"]
         }
     ]
 }
@@ -336,12 +342,13 @@ Reference for the `wp-instances.json` config file.
 ### -- ssh[{}.confname]
 - *Optional\**
 - *Type: `String`*
-- Description: If you include an `ssh` config, you must specify either `confname` or `confpath`. `confname` can refer to either a file of the same name in a folder called `aivec-devenv-configs` which exists in your home folder, or the name of one of the properties specified in a file called `ssh.json` which exists in the `aivec-devenv-configs` folder. If you do not have a `aivec-devenv-configs` folder, create one in your home directory. For more information about SSH config files, refer to the [SSH Config Files section](#ssh-config-files).
+- Description: Can refer to either a file of the same name in a folder called `aivec-devenv-configs` which exists in your home folder, or the name of one of the properties specified in a file called `ssh.json` which exists in the `aivec-devenv-configs` folder. If you do not have an `aivec-devenv-configs` folder, create one in your home directory. For more information about SSH config files, refer to the [SSH Config Files section](#ssh-config-files).
 - \* *Required if `confpath` is not set*
 ### -- ssh[{}.confpath]
 - *Optional\**
 - *Type: `String`*
-- Description: If you include an `ssh` config, you must specify either `confname` or `confpath`. `confpath` can be either a relative or absolute path pointing to a `.json` file containing login information. If both `confname` and `confpath` are set, `confpath` will take precedence. For information about SSH config files, refer to [SSH Config Files section](#ssh-config-files).
+- Description: Can be either a relative or absolute path pointing to a `.json` file containing login information. If both `confname` and `confpath` are set, `confpath` will take precedence. For information about SSH config files, refer to the [SSH Config Files section](#ssh-config-files).
+- \* *Required if `confname` is not set*
 ### -- ssh[{}.plugins]
 - *Optional*
 - *Type: `String[]`*
@@ -358,6 +365,11 @@ Reference for the `wp-instances.json` config file.
             "confname": "my-ssh-config",
             "plugins": ["relative/path/to/plugin/zipfile/noextension"],
             "themes": ["relative/path/to/theme/zipfile/noextension"]
+        },
+        {
+            "confpath": "path/to/ssh-config.json",
+            "plugins": ["relative/path/to/plugin/zipfile/noextension"],
+            "themes": ["relative/path/to/theme/zipfile/noextension"]
         }
     ]
 }
@@ -365,7 +377,7 @@ Reference for the `wp-instances.json` config file.
 <hr>
 
 ## FTP/SSH Config Files
-For security reasons, FTP and SSH login information is not put directly into the `wp-instances.json` schema. Instead, the SSH and FTP properties in `wp-instances.json` contain a reference to their respective config files that exist elsewhere. This makes it easier and safer to share `wp-instances.json` config files between colleagues and teammates.
+For security reasons, FTP and SSH login information is not part of the `wp-instances.json` schema. Instead, the SSH and FTP properties in `wp-instances.json` contain a reference to their respective config files that exist elsewhere. This makes it easier and safer to share `wp-instances.json` config files between colleagues and teammates.
 
 ### <a name="ftp-config-files"></a>FTP
 If [`confname`](#---ftpconfname) is used for your FTP config and a file named `<confname>.json` exists in the `aivec-devenv-configs` folder in your home directory, the file must have the following `JSON` structure:
@@ -379,7 +391,7 @@ If [`confname`](#---ftpconfname) is used for your FTP config and a file named `<
 
 If [`confpath`](#---ftpconfpath) is used for your FTP config then the `JSON` structure of the file must be the same as above.
 
-Alternatively, if [`confname`](#---ftpconfname) is used for your FTP config and a file named `<confname>.json` *does not exist* in the `aivec-devenv-configs` folder in your home directory, the CLI will look for a key in `aivec-devenv-configs/ftp.json` with the same name as [`confname`](#---ftpconfname). For example, given that [`confname`](#---ftpconfname) is `my-ftp-conf`, the `ftp.json` might look like this:
+Alternatively, if [`confname`](#---ftpconfname) is used for your FTP config and a file named `<confname>.json` *does not exist* in the `aivec-devenv-configs` folder in your home directory, the CLI will look for a key in `aivec-devenv-configs/ftp.json` with the same name as [`confname`](#---ftpconfname). For example, given that [`confname`](#---ftpconfname) is `my-ftp-conf`, the `ftp.json` would look like this:
 ```json
 {
   "my-ftp-conf": {
@@ -402,4 +414,4 @@ The same rules used for FTP config resolution also apply to SSH configs. SSH con
 ```
 `privateKeyPath` can be either a relative or absolute path. Relative paths are resolved **starting from the same folder as the ssh config file**, while absolute paths are resolved **starting from the users home directory**.
 
-Additionally, the private key **must not be password protected**. There are tools out there like `sshpass` for automating password input for password protected SSH keys, but in our experience it is not very reliable and not worth the effort. Our recommendation is to generate a passwordless SSH key pair where only non-interactive downloads are allowed.
+Additionally, the private key **must not be password protected**. There are tools out there like `sshpass` for automating password input for password protected SSH keys, but in our experience this is not very reliable and not worth the effort. Our recommendation is to generate a passwordless SSH key pair where only non-interactive downloads are allowed.
