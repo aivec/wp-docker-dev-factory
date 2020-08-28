@@ -245,7 +245,7 @@ Reference for the `wp-instances.json` config file.
 ### -- database
 - *Optional*
 - *Type: `Object`*
-### -- --databasemysqldumpfile
+### -- databasemysqldumpfile
 - *Optional*
 - *Type: `String`*
 - Description: A relative or absolute path to a `MySQL` dump file with the extension `.sql`. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
