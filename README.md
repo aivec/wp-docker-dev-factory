@@ -26,27 +26,27 @@ This library is **only for managing development environments** and is not intend
     -   [Lifecycle Details](#lifecycle-details)
 -   [PHP Debugging](#php-debugging)
 -   [JSON Structure](#json-structure)
-    -   [`instanceName`](#--instancename)
-    -   [`containerPort`](#--containerPort)
-    -   [`locale`](#--locale)
-    -   [`database`](#--database)
-        -   [`mysqlDumpFile`](#--databasemysqldumpfile)
-        -   [`dbName`](#--databasedbname)
-        -   [`dbPrefix`](#--databasedbprefix)
-    -   [`env`](#--env)
-    -   [`downloadPlugins`](#--downloadplugins)
-    -   [`localPlugins`](#--localplugins)
-    -   [`localThemes`](#--localthemes)
-    -   [`ftp`](#--ftp)
-        -   [`confname`](#--ftpconfname)
-        -   [`confpath`](#--ftpconfpath)
-        -   [`plugins`](#--ftpplugins)
-        -   [`themes`](#--ftpthemes)
-    -   [`ssh`](#--ssh)
-        -   [`confname`](#--sshconfname)
-        -   [`confpath`](#--sshconfpath)
-        -   [`plugins`](#--sshplugins)
-        -   [`themes`](#--sshthemes)
+    -   [`instanceName`](#---instancename)
+    -   [`containerPort`](#---containerPort)
+    -   [`locale`](#---locale)
+    -   [`database`](#---database)
+        -   [`mysqlDumpFile`](#---databasemysqldumpfile)
+        -   [`dbName`](#---databasedbname)
+        -   [`dbPrefix`](#---databasedbprefix)
+    -   [`env`](#---env)
+    -   [`downloadPlugins`](#---downloadplugins)
+    -   [`localPlugins`](#---localplugins)
+    -   [`localThemes`](#---localthemes)
+    -   [`ftp`](#---ftp)
+        -   [`confname`](#---ftpconfname)
+        -   [`confpath`](#---ftpconfpath)
+        -   [`plugins`](#---ftpplugins)
+        -   [`themes`](#---ftpthemes)
+    -   [`ssh`](#---ssh)
+        -   [`confname`](#---sshconfname)
+        -   [`confpath`](#---sshconfpath)
+        -   [`plugins`](#---sshplugins)
+        -   [`themes`](#---sshthemes)
 -   [FTP/SSH Config Files](#ftpssh-config-files)
     -   [`FTP`](#ftp-config-files)
     -   [`SSH`](#ssh-config-files)
@@ -82,12 +82,12 @@ To spin-up a minimal environment, create a file named `wp-instances.json` with t
 }
 ```
 Where:
-- [`instanceName`](#--instancename) is the title of your website.
-- [`containerPort`](#--containerPort) is the port number the environment will expose. In this case the final URL will be `localhost:8000`.
-- [`locale`](#--locale) is the language you want for the WordPress install.
-- [`downloadPlugins`](#--downloadplugins) is a list of any number of publicly available WordPress plugins to be downloaded.
-- [`localPlugins`](#--localplugins) is a list of absolute or relative paths to any number of local plugin folders.
-- [`localThemes`](#--localthemes) is a list of absolute or relative paths to any number of local theme folders.
+- [`instanceName`](#---instancename) is the title of your website.
+- [`containerPort`](#---containerPort) is the port number the environment will expose. In this case the final URL will be `localhost:8000`.
+- [`locale`](#---locale) is the language you want for the WordPress install.
+- [`downloadPlugins`](#---downloadplugins) is a list of any number of publicly available WordPress plugins to be downloaded.
+- [`localPlugins`](#---localplugins) is a list of absolute or relative paths to any number of local plugin folders.
+- [`localThemes`](#---localthemes) is a list of absolute or relative paths to any number of local theme folders.
 
 After setting up your config file, invoke the CLI tool from within the folder where your `wp-instances.json` file is saved:
 ```sh
@@ -123,7 +123,7 @@ The CLI has seven different operations:
 | `Stop WordPress Container` | This will stop the `WordPress` container for the selected environment. It **will not** stop the `MySQL` and `phpMyAdmin` containers. |
 | `Launch NGROK (local SSL)` | This will start the `ngrok` client for local SSL. Ctrl+c to stop the client. If you use `ngrok`, we **highly recommend** creating a free account on [ngrok.com](https://ngrok.com) so that you get more connections per minute. |
 | `Log WordPress Container` | By default, when you start a `WordPress` container with `Run Containers`, it will stream the `Apache` logs to standard input. You can use this command to pipe the log stream to your console again if you have exited the stream. |
-| `Overwrite host dumpfile with DB of currently mounted volume` | This will only work if you specified [mysqlDumpFile](#--databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
+| `Overwrite host dumpfile with DB of currently mounted volume` | This will only work if you specified [mysqlDumpFile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
 | `Create new dumpfile with DB of currently mounted volume` | This will create a dumpfile from the database of the selected environment and prompt the user to name the dumpfile. The resultant dumpfile will be placed in a folder called `dumpfiles` in the same folder as `wp-instances.json`. If a `dumpfiles` folder does not already exist, it will be created. |
 | `Replace plugin volume with deployment ready bundle (Toggle)` | **NOT YET IMPLEMENTED**. This operation will prompt the user to select a plugin from a list of mounted plugins for the selected environment. If the plugin contains a script named `bundle.sh`, it will be executed and the contents of the generated `.zip` file will temporarily replace the plugin folder contents. Running this command again will revert the plugin back to its original contents. If a `bundle.sh` script does not exist or cannot be executed, an error will occur. |
 
@@ -152,17 +152,17 @@ Every environment has exactly one `WordPress` container associated with it. Conv
 | ----- | ---- | ------ |
 | `MySQL` | aivec_wp_mysql | |
 | `phpMyAdmin` | aivec_wp_pma | |
-| `WordPress` | [instanceName](#--instancename) + _dev_wp | test-wordpress_dev_wp |
+| `WordPress` | [instanceName](#---instancename) + _dev_wp | test-wordpress_dev_wp |
 ### Logging in
 You can access `phpMyAdmin` at [localhost:22222](localhost:22222) with the following login information:
 - Username: `root`
 - Password: `root`
 
-For `WordPress` environments that **do not** specify a [mysqlDumpfile](#--databasemysqldumpfile), the login information is the same:
+For `WordPress` environments that **do not** specify a [mysqlDumpfile](#---databasemysqldumpfile), the login information is the same:
 - Username: `root`
 - Password: `root`
 ### Lifecycle details
-If you specify a [mysqlDumpfile](#--databasemysqldumpfile) in your `wp-instances.json` configuration file, it will only be dumped **the first time that environment is created**. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so the dumpfile will not be used. If you want a fresh environment every time you [run the containers](#cli-usage), you should delete the database associated with your environment first.
+If you specify a [mysqlDumpfile](#---databasemysqldumpfile) in your `wp-instances.json` configuration file, it will only be dumped **the first time that environment is created**. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so the dumpfile will not be used. If you want a fresh environment every time you [run the containers](#cli-usage), you should delete the database associated with your environment first.
 
 ## PHP Debugging
 Any environment you create will have `XDebug` installed and configured by default listening on port `9900`. Visual Studio Code users can debug with the [PHP Debug extension](https://marketplace.visualstudio.com/items?itemName=felixfbecker.php-debug). Create a `launch.json` file and place it either in the `.vscode` directory of a workspace folder for a plugin/theme, or the `.vscode` directory of a workspace folder specifically for managing PHP debugging.
@@ -368,7 +368,7 @@ Reference for the `wp-instances.json` config file.
 For security reasons, FTP and SSH login information is not put directly into the `wp-instances.json` schema. Instead, the SSH and FTP properties in `wp-instances.json` contain a reference to their respective config files that exist elsewhere. This makes it easier and safer to share `wp-instances.json` config files between colleagues and teammates.
 
 ### <a name="ftp-config-files"></a>FTP
-If [`confname`](#--ftpconfname) is used for your FTP config and a file named `<confname>.json` exists in the `aivec-devenv-configs` folder in your home directory, the file must have the following `JSON` structure:
+If [`confname`](#---ftpconfname) is used for your FTP config and a file named `<confname>.json` exists in the `aivec-devenv-configs` folder in your home directory, the file must have the following `JSON` structure:
 ```json
 {
   "host": "some-host.com",
@@ -377,9 +377,9 @@ If [`confname`](#--ftpconfname) is used for your FTP config and a file named `<c
 }
 ```
 
-If [`confpath`](#--ftpconfpath) is used for your FTP config then the `JSON` structure of the file must be the same as above.
+If [`confpath`](#---ftpconfpath) is used for your FTP config then the `JSON` structure of the file must be the same as above.
 
-Alternatively, if [`confname`](#--ftpconfname) is used for your FTP config and a file named `<confname>.json` *does not exist* in the `aivec-devenv-configs` folder in your home directory, the CLI will look for a key in `aivec-devenv-configs/ftp.json` with the same name as [`confname`](#--ftpconfname). For example, given that [`confname`](#--ftpconfname) is `my-ftp-conf`, the `ftp.json` might look like this:
+Alternatively, if [`confname`](#---ftpconfname) is used for your FTP config and a file named `<confname>.json` *does not exist* in the `aivec-devenv-configs` folder in your home directory, the CLI will look for a key in `aivec-devenv-configs/ftp.json` with the same name as [`confname`](#---ftpconfname). For example, given that [`confname`](#---ftpconfname) is `my-ftp-conf`, the `ftp.json` might look like this:
 ```json
 {
   "my-ftp-conf": {
