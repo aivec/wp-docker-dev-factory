@@ -35,6 +35,7 @@ This library is **only for managing development environments** and is not intend
     -   [`locale`](#---locale)
     -   [`database`](#---database)
         -   [`mysqlDumpFile`](#---databasemysqldumpfile)
+        -   [`flushOnRestart`](#---databaseflushonrestart)
         -   [`dbName`](#---databasedbname)
         -   [`dbPrefix`](#---databasedbprefix)
     -   [`env`](#---env)
@@ -167,7 +168,7 @@ For `WordPress` environments that **do not** specify a [mysqlDumpfile](#---datab
 - Username: `root`
 - Password: `root`
 ### Lifecycle details
-If you specify a [mysqlDumpfile](#---databasemysqldumpfile) in your `wp-instances.json` configuration file, it will only be dumped **the first time that environment is created**. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so the dumpfile will not be used. If you want a fresh environment every time you [run the containers](#cli-usage), you should delete the database associated with your environment first.
+If you specify a [mysqlDumpfile](#---databasemysqldumpfile) in your `wp-instances.json` configuration file, it will only be dumped **the first time that environment is created**. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so the dumpfile will not be used. If you want a fresh environment every time you [run the containers](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
 
 ## PHP Debugging
 Any environment you create will have `XDebug` installed and configured by default listening on port `9900`. Visual Studio Code users can debug with the [PHP Debug extension](https://marketplace.visualstudio.com/items?itemName=felixfbecker.php-debug). Create a `launch.json` file and place it either in the `.vscode` directory of a workspace folder for a plugin/theme, or the `.vscode` directory of a workspace folder specifically for managing PHP debugging.
@@ -264,10 +265,15 @@ Reference for the `wp-instances.json` config file.
 ### -- database
 - *Optional*
 - *Type: `Object`*
-### -- database.mysqldumpfile
+### -- database.mysqlDumpfile
 - *Optional*
 - *Type: `String`*
 - Description: A relative or absolute path to a `MySQL` dump file with the extension `.sql`. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
+### -- database.flushOnRestart
+- *Optional*
+- *Type: `Boolean`*
+- *Default: `false`*
+- Description: If `true`, the database will be re-created every time the WordPress container is stopped and started again.
 ### -- database.dbName
 - *Optional*
 - *Type: `String`*
@@ -282,6 +288,7 @@ Reference for the `wp-instances.json` config file.
 {
     "database": {
         "mysqlDumpfile": "dumpfiles/testdatabase.sql",
+        "flushOnRestart": true,
         "dbName": "dbname",
         "dbPrefix": "dbprefix_"
     }

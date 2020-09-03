@@ -1,6 +1,5 @@
 import { FinalInstanceConfig } from '../types';
 import { execSync } from 'child_process';
-import { _ } from 'lodash';
 import makeContainers from './dbcontainers';
 import logger from '../logger';
 
@@ -11,14 +10,26 @@ const runContainer = function (config: FinalInstanceConfig): void {
     phpVersion,
     wordpressVersion,
     locale,
+    flushOnRestart,
     instanceName,
     networkname,
     containerName,
     containerPort,
     dockerBridgeIP,
+    envvarsMap,
     envvars,
     volumes,
   } = config;
+
+  if (flushOnRestart) {
+    try {
+      execSync(
+        `docker exec -i aivec_wp_mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS \`${envvarsMap.DB_NAME}\`;'`,
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   try {
     execSync(

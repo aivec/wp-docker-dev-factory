@@ -1,10 +1,11 @@
 import path from 'path';
 import _ from 'lodash';
-import { FinalInstanceConfig } from '../types';
+import { FinalInstanceConfig, InstanceConfig } from '../types';
 import { homedir } from 'os';
 
 const buildVolumePaths = (
   config: FinalInstanceConfig,
+  rawconfig: InstanceConfig,
   workingdir: string,
   topdir: string,
 ): string => {
@@ -27,8 +28,8 @@ const buildVolumePaths = (
     }
   });
 
-  if (config.database) {
-    const { mysqlDumpfile } = config.database;
+  if (rawconfig.database) {
+    const { mysqlDumpfile } = rawconfig.database;
     if (mysqlDumpfile) {
       let p = mysqlDumpfile;
       if (path.isAbsolute(p)) {

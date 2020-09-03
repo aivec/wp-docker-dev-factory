@@ -23,12 +23,17 @@ const buildFinalConfig = (
   if (configCopy.wordpressVersion === 'nightly') {
     locale = 'en_US';
   }
+  let flushOnRestart = false;
+  if (config.database) {
+    flushOnRestart = !!config.database.flushOnRestart;
+  }
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
     containerPort: configCopy.containerPort,
     phpVersion,
     wordpressVersion: configCopy.wordpressVersion ? configCopy.wordpressVersion : 'latest',
     locale,
+    flushOnRestart,
     env: configCopy.env ? configCopy.env : null,
     localPlugins: configCopy.localPlugins ? configCopy.localPlugins : [],
     localThemes: configCopy.localThemes ? configCopy.localThemes : [],
@@ -50,7 +55,7 @@ const buildFinalConfig = (
     finalConfig.ssh = buildSSHConfig(configCopy.ssh, workingdir);
   }
 
-  finalConfig.volumes = buildVolumePaths(finalConfig, workingdir, topdir);
+  finalConfig.volumes = buildVolumePaths(finalConfig, configCopy, workingdir, topdir);
   finalConfig.envvarsMap = buildEnvVars(finalConfig);
   finalConfig.envvars = Object.keys(finalConfig.envvarsMap)
     .map((key) => {

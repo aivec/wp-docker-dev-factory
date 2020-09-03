@@ -6,6 +6,7 @@ export interface InstanceConfig {
   locale?: string;
   database?: {
     mysqlDumpfile?: string;
+    flushOnRestart?: boolean;
     dbName?: string;
     dbPrefix: string;
   };
@@ -62,6 +63,7 @@ export interface FinalInstanceConfig extends InstanceConfig {
   topdir: string;
   workingdir: string;
   networkname: string;
+  flushOnRestart: boolean;
   dockerBridgeIP: string;
   alreadyInstalled: string[];
   envvarsMap?: EnvVarsMap;
