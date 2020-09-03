@@ -5,12 +5,24 @@ import isArrayOrExit from './checkIsArray';
 import { InstanceConfig } from '../types';
 import validatePrivateRemoteFilesConfig from './validatePrivateRemoteFilesConfig';
 import validateSSHConfig from './validateSSHConfig';
+import validatePhpVersion from './validatePhpVersion';
 
 const validateConfig = (config: InstanceConfig, workingdir: string): void => {
   jsonKeySetCheck(config, 'containerPort');
   jsonKeySetCheck(config, 'instanceName');
 
-  const arrayTypeKeys = ['localPlugins', 'localThemes', 'downloadPlugins', 'ftp', 'ssh'];
+  if (config.phpVersion) {
+    validatePhpVersion(config.phpVersion);
+  }
+
+  const arrayTypeKeys = [
+    'localPlugins',
+    'localThemes',
+    'downloadPlugins',
+    'downloadThemes',
+    'ftp',
+    'ssh',
+  ];
   arrayTypeKeys.forEach((key) => {
     if (config[key]) {
       isArrayOrExit(config, key);

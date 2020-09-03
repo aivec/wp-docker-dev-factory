@@ -1,6 +1,8 @@
 {
   "instanceName": "my-local-wordpress",
   "containerPort": 8060,
+  "phpVersion": "7.3",
+  "wordpressVersion": "latest",
   "locale": "en_US",
   "database": {
     "mysqlDumpfile": "dumpfiles/testdatabase.sql",
@@ -12,6 +14,7 @@
     "ARBITRARY_ENVIRONMENT_VARIABLE_2": "value2"
   },
   "downloadPlugins": ["wordpress-plugin-1", "wordpress-plugin-2"],
+  "downloadThemes": ["wordpress-theme-1", "wordpress-theme-2"],
   "localPlugins": [
     "/absolute/path/to/plugin/directory",
     "relative/path/to/plugin/directory",

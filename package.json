@@ -1,6 +1,6 @@
 {
   "name": "@aivec/wp-docker-dev-factory",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Spin up local WordPress environments with Docker.",
   "bin": {
     "aivec-wpdocker": "./dist/index.js"
@@ -15,7 +15,7 @@
     "prompts": "^2.3.2"
   },
   "devDependencies": {
-    "@types/node": "^13.13.15",
+    "@types/node": "^13.13.16",
     "@types/prompts": "^2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",

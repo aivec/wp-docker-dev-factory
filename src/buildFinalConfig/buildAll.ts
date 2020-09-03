@@ -13,20 +13,30 @@ const buildFinalConfig = (
   topdir: string,
 ): FinalInstanceConfig => {
   const configCopy: InstanceConfig = _.cloneDeep(config);
+  const phpVersion = configCopy.phpVersion ? configCopy.phpVersion : '7.3';
+  const dockerBridgeIP = execSync(
+    'docker network inspect bridge -f "{{ (index .IPAM.Config 0).Gateway }}"',
+  )
+    .toString()
+    .trim();
+  let locale = configCopy.locale ? configCopy.locale : 'en_US';
+  if (configCopy.wordpressVersion === 'nightly') {
+    locale = 'en_US';
+  }
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
     containerPort: configCopy.containerPort,
-    locale: configCopy.locale ? configCopy.locale : 'en_US',
+    phpVersion,
+    wordpressVersion: configCopy.wordpressVersion ? configCopy.wordpressVersion : 'latest',
+    locale,
+    env: configCopy.env ? configCopy.env : null,
     localPlugins: configCopy.localPlugins ? configCopy.localPlugins : [],
     localThemes: configCopy.localThemes ? configCopy.localThemes : [],
     downloadPlugins: configCopy.downloadPlugins ? configCopy.downloadPlugins : [],
+    downloadThemes: configCopy.downloadThemes ? configCopy.downloadThemes : [],
     networkname: 'wpdevinstances',
-    containerName: `${configCopy.instanceName}_dev_wp`,
-    dockerBridgeIP: execSync(
-      'docker network inspect bridge -f "{{ (index .IPAM.Config 0).Gateway }}"',
-    ).toString(),
-    envvars: buildEnvVars(configCopy),
-    volumes: buildVolumePaths(configCopy, workingdir, topdir),
+    containerName: `${configCopy.instanceName}-${phpVersion}_dev_wp`,
+    dockerBridgeIP,
     alreadyInstalled: buildPluginAutoInstallWhitelist(configCopy, workingdir),
     topdir,
     workingdir,
@@ -39,6 +49,14 @@ const buildFinalConfig = (
   if (configCopy.ssh) {
     finalConfig.ssh = buildSSHConfig(configCopy.ssh, workingdir);
   }
+
+  finalConfig.volumes = buildVolumePaths(finalConfig, workingdir, topdir);
+  finalConfig.envvarsMap = buildEnvVars(finalConfig);
+  finalConfig.envvars = Object.keys(finalConfig.envvarsMap)
+    .map((key) => {
+      return `--env ${key}=${finalConfig.envvarsMap[key]}`;
+    })
+    .join(' ');
 
   return finalConfig;
 };

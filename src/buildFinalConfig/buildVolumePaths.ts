@@ -1,8 +1,13 @@
 import path from 'path';
-import { InstanceConfig } from '../types';
+import _ from 'lodash';
+import { FinalInstanceConfig } from '../types';
 import { homedir } from 'os';
 
-const buildVolumePaths = (config: InstanceConfig, workingdir: string, topdir: string): string[] => {
+const buildVolumePaths = (
+  config: FinalInstanceConfig,
+  workingdir: string,
+  topdir: string,
+): string => {
   let volumes = [];
 
   const localPathKeys = [
@@ -34,6 +39,17 @@ const buildVolumePaths = (config: InstanceConfig, workingdir: string, topdir: st
     }
   }
 
+  if (config.ssh) {
+    const sshCopy = _.cloneDeep(config.ssh);
+    const keyPathVolumes = sshCopy.map(({ privateKeyPath, privateKeyFilename }, index: number) => {
+      // remove since Windows paths break JSON
+      delete config.ssh[index].privateKeyPath;
+      return `-v ${privateKeyPath}:/app/ssh/${privateKeyFilename}`;
+    });
+
+    volumes = [...volumes, ...keyPathVolumes];
+  }
+
   volumes = [
     ...volumes,
     `-v ${path.resolve(topdir, 'initwp.sh')}:/docker-entrypoint-initwp.d/initwp.sh`,
@@ -45,7 +61,13 @@ const buildVolumePaths = (config: InstanceConfig, workingdir: string, topdir: st
   ];
   volumes = [...volumes, `-v ${path.resolve(workingdir, 'dumpfiles')}:/app/dumpfiles`];
 
-  return volumes;
+  if (process.platform === 'win32' && process.env.DOCKER_TOOLBOX_INSTALL_PATH) {
+    volumes = volumes.map((vpath) => vpath.replace(/C:\\/gi, '/c/'));
+    volumes = volumes.map((vpath) => vpath.replace(/\\/gi, '/'));
+    volumes = volumes.map((vpath) => vpath.replace(/:\//gi, '://'));
+  }
+
+  return volumes.join(' ');
 };
 
 export default buildVolumePaths;

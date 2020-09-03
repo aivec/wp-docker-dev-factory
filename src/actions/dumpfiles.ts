@@ -5,7 +5,7 @@ import logger from '../logger';
 
 export const overwriteDumpfile = ({
   containerName,
-  envvars: { DB_NAME },
+  envvarsMap: { DB_NAME },
 }: FinalInstanceConfig): void => {
   try {
     exec(
@@ -38,7 +38,7 @@ export const overwriteDumpfile = ({
 
 export const createNewDump = async ({
   containerName,
-  envvars: { DB_NAME },
+  envvarsMap: { DB_NAME },
 }: FinalInstanceConfig): Promise<void> => {
   try {
     logger.info(

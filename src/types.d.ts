@@ -1,6 +1,8 @@
 export interface InstanceConfig {
   instanceName: string;
   containerPort: number;
+  phpVersion?: string;
+  wordpressVersion?: string;
   locale?: string;
   database?: {
     mysqlDumpfile?: string;
@@ -8,9 +10,10 @@ export interface InstanceConfig {
     dbPrefix: string;
   };
   env?: {
-    [key: string]: string | number | boolean
-  },
+    [key: string]: string | number | boolean;
+  };
   downloadPlugins?: string[];
+  downloadThemes?: string[];
   localPlugins?: string[];
   localThemes?: string[];
   ftp?: PrivateRemoteFilesConfig[];
@@ -41,10 +44,17 @@ export interface FtpMeta {
 }
 
 export interface FtpConfig extends PrivateRemoteFilesConfig, FtpMeta {}
-
-export interface EnvVars {
-  DB_NAME?: string;
-  DB_PREFIX?: string;
+export interface EnvVarsMap {
+  DB_NAME: string;
+  DB_PREFIX: string;
+  DOCKER_BRIDGE_IP: string;
+  DOCKER_CONTAINER_PORT: string;
+  ALREADY_INSTALLED_PLUGINS: string;
+  PLUGINS: string;
+  THEMES?: string;
+  APACHE_ENV_VARS?: string;
+  FTP_CONFIGS?: string;
+  SSH_CONFIGS?: string;
 }
 
 export interface FinalInstanceConfig extends InstanceConfig {
@@ -53,9 +63,10 @@ export interface FinalInstanceConfig extends InstanceConfig {
   workingdir: string;
   networkname: string;
   dockerBridgeIP: string;
-  volumes: string[];
   alreadyInstalled: string[];
-  envvars: EnvVars;
+  envvarsMap?: EnvVarsMap;
+  volumes?: string;
+  envvars?: string;
   ftp?: FtpConfig[];
   ssh?: SSHConfig[];
 }

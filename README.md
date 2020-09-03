@@ -12,6 +12,8 @@ Features of this library include:
 - `ngrok` support for easy SSL testing on localhost
 - A single `phpMyAdmin` container for all of your environments
 - Configurable PHP environment variables
+- Ability to specify PHP version (`7.2`, `7.3`, or `7.4`)
+- Ability to specify WordPress version
 
 This library is **only for managing development environments** and is not intended for creating production ready containers.
 
@@ -28,6 +30,8 @@ This library is **only for managing development environments** and is not intend
 -   [JSON Structure](#json-structure)
     -   [`instanceName`](#---instancename)
     -   [`containerPort`](#---containerPort)
+    -   [`phpVersion`](#---phpVersion)
+    -   [`wordpressVersion`](#---wordpressVersion)
     -   [`locale`](#---locale)
     -   [`database`](#---database)
         -   [`mysqlDumpFile`](#---databasemysqldumpfile)
@@ -35,6 +39,7 @@ This library is **only for managing development environments** and is not intend
         -   [`dbPrefix`](#---databasedbprefix)
     -   [`env`](#---env)
     -   [`downloadPlugins`](#---downloadplugins)
+    -   [`downloadThemes`](#---downloadthemes)
     -   [`localPlugins`](#---localplugins)
     -   [`localThemes`](#---localthemes)
     -   [`ftp`](#---ftp)
@@ -152,7 +157,7 @@ Every environment has exactly one `WordPress` container associated with it. Conv
 | ----- | ---- | ------ |
 | `MySQL` | aivec_wp_mysql | |
 | `phpMyAdmin` | aivec_wp_pma | |
-| `WordPress` | [instanceName](#---instancename) + _dev_wp | test-wordpress_dev_wp |
+| `WordPress` | [instanceName](#---instancename) + -[phpVersion](#---phpversion)_dev_wp | test-wordpress-7.3_dev_wp |
 ### Logging in
 You can access `phpMyAdmin` at [localhost:22222](localhost:22222) with the following login information:
 - Username: `root`
@@ -235,6 +240,20 @@ Reference for the `wp-instances.json` config file.
 - Description: This is the port number for the WordPress installation. The final URL is `localhost` with this port number appended. A `containerPort` of 8000 would result in `localhost:8000`.
 <hr>
 
+### -- phpVersion
+- *Optional*
+- *Type: `String`*
+- *Default: `7.3`*
+- Description: This is the PHP version Apache will use. Possible values are `7.2`, `7.3`, and `7.4`.
+<hr>
+
+### -- wordpressVersion
+- *Optional*
+- *Type: `String`*
+- *Default: `latest`*
+- Description: Specify the WordPress version to install. Accepts any valid semver number, `latest`, or `nightly` for beta builds. Note that `nightly` builds only support the `en_US` [locale](#---locale). If you set this to `nightly` and the [locale](#---locale) is not `en_US`, `en_US` will be used anyways.
+<hr>
+
 ### -- locale
 - *Optional*
 - *Type: `String`*
@@ -280,6 +299,12 @@ Reference for the `wp-instances.json` config file.
 - *Optional*
 - *Type: `String[]`*
 - Description: May be any number of plugins that you want to be installed during environment creation. You must use the plugin `slug` (name of the plugins base folder), not the name. Also, the plugin must be available on `wordpress.org`.
+<hr>
+
+### -- downloadThemes
+- *Optional*
+- *Type: `String[]`*
+- Description: May be any number of themes that you want to be installed during environment creation. You must use the theme `slug` (name of the themes base folder), not the name. Also, the theme must be available on `wordpress.org`.
 <hr>
 
 ### -- localPlugins
