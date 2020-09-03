@@ -34,7 +34,7 @@ This library is **only for managing development environments** and is not intend
     -   [`wordpressVersion`](#---wordpressVersion)
     -   [`locale`](#---locale)
     -   [`database`](#---database)
-        -   [`mysqlDumpFile`](#---databasemysqldumpfile)
+        -   [`mysqlDumpfile`](#---databasemysqldumpfile)
         -   [`flushOnRestart`](#---databaseflushonrestart)
         -   [`dbName`](#---databasedbname)
         -   [`dbPrefix`](#---databasedbprefix)
@@ -129,7 +129,7 @@ The CLI has seven different operations:
 | `Stop WordPress Container` | This will stop the `WordPress` container for the selected environment. It **will not** stop the `MySQL` and `phpMyAdmin` containers. |
 | `Launch NGROK (local SSL)` | This will start the `ngrok` client for local SSL. Ctrl+c to stop the client. If you use `ngrok`, we **highly recommend** creating a free account on [ngrok.com](https://ngrok.com) so that you get more connections per minute. |
 | `Log WordPress Container` | By default, when you start a `WordPress` container with `Run Containers`, it will stream the `Apache` logs to standard input. You can use this command to pipe the log stream to your console again if you have exited the stream. |
-| `Overwrite host dumpfile with DB of currently mounted volume` | This will only work if you specified [mysqlDumpFile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
+| `Overwrite host dumpfile with DB of currently mounted volume` | This will only work if you specified [mysqlDumpfile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
 | `Create new dumpfile with DB of currently mounted volume` | This will create a dumpfile from the database of the selected environment and prompt the user to name the dumpfile. The resultant dumpfile will be placed in a folder called `dumpfiles` in the same folder as `wp-instances.json`. If a `dumpfiles` folder does not already exist, it will be created. |
 | `Replace plugin volume with deployment ready bundle (Toggle)` | **NOT YET IMPLEMENTED**. This operation will prompt the user to select a plugin from a list of mounted plugins for the selected environment. If the plugin contains a script named `bundle.sh`, it will be executed and the contents of the generated `.zip` file will temporarily replace the plugin folder contents. Running this command again will revert the plugin back to its original contents. If a `bundle.sh` script does not exist or cannot be executed, an error will occur. |
 
@@ -168,7 +168,7 @@ For `WordPress` environments that **do not** specify a [mysqlDumpfile](#---datab
 - Username: `root`
 - Password: `root`
 ### Lifecycle details
-If you specify a [mysqlDumpfile](#---databasemysqldumpfile) in your `wp-instances.json` configuration file, it will only be dumped **the first time that environment is created**. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so the dumpfile will not be used. If you want a fresh environment every time you [run the containers](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
+The database for each WordPress environment will only be created **the first time that environment is started**, regardless of whether you set a [mysqlDumpfile](#---databasemysqldumpfile) or not. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so it will not be created. If you want the database to be re-created every time you [run the containers](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
 
 ## PHP Debugging
 Any environment you create will have `XDebug` installed and configured by default listening on port `9900`. Visual Studio Code users can debug with the [PHP Debug extension](https://marketplace.visualstudio.com/items?itemName=felixfbecker.php-debug). Create a `launch.json` file and place it either in the `.vscode` directory of a workspace folder for a plugin/theme, or the `.vscode` directory of a workspace folder specifically for managing PHP debugging.
