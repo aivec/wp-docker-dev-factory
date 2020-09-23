@@ -33,6 +33,7 @@ This library is **only for managing development environments** and is not intend
     -   [`phpVersion`](#---phpVersion)
     -   [`wordpressVersion`](#---wordpressVersion)
     -   [`locale`](#---locale)
+    -   [`customInitScripts`](#---customInitScripts)
     -   [`database`](#---database)
         -   [`mysqlDumpfile`](#---databasemysqldumpfile)
         -   [`flushOnRestart`](#---databaseflushonrestart)
@@ -260,6 +261,12 @@ Reference for the `wp-instances.json` config file.
 - *Type: `String`*
 - *Default: `en_US`*
 - Description: This is the locale used by WordPress to determine which language to use.
+<hr>
+
+### -- customInitScripts
+- *Optional*
+- *Type: `String[]`*
+- Description: May be any number of absolute or relative paths to `sh` or `bash` scripts to be executed at the end of environment creation. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
 <hr>
 
 ### -- database

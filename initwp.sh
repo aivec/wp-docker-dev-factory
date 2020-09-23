@@ -202,42 +202,9 @@ fi
 
 wp plugin deactivate relative-url |& logger
 
-#h2 "Generating a self-signed cert and configuring Apache for localhost SSL..."
-#
-#sudo su -c 'openssl genrsa -out /etc/ssl/private/apache-selfsigned.key 3072'
-#sudo su -c 'openssl req -new -out website.csr -sha256 -key /etc/ssl/private/apache-selfsigned.key \
-#    -subj "/C=AT/ST=Vienna/L=Vienna/O=Security/OU=Development/CN=localhost"'
-#sudo su -c 'openssl x509 -req -in website.csr -days 365 \
-#    -signkey /etc/ssl/private/apache-selfsigned.key \
-#    -out /etc/ssl/certs/apache-selfsigned.crt -outform PEM'
-
-#sudo su -c 'chmod 600 /etc/ssl/certs/apache-selfsigned.crt'
-#sudo su -c 'chmod 600 /etc/ssl/private/apache-selfsigned.key'
-
-#sudo tee -a /etc/apache2/conf-available/ssl-params.conf >/dev/null <<EOT
-#SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
-#SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
-#SSLHonorCipherOrder On
-## Disable preloading HSTS for now.  You can use the commented out header line that includes
-## the "preload" directive if you understand the implications.
-## Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-#Header always set X-Frame-Options DENY
-#Header always set X-Content-Type-Options nosniff
-## Requires Apache >= 2.4
-#SSLCompression off
-#SSLUseStapling off
-#SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
-## Requires Apache >= 2.4.11
-#SSLSessionTickets Off
-#EOT
-
-#sudo su -c 'sed -i "/^\s*SSLCertificateFile/c\SSLCertificateFile \/etc\/ssl\/certs\/apache-selfsigned.crt" /etc/apache2/sites-available/default-ssl.conf'
-#sudo su -c 'sed -i "/^\s*SSLCertificateKeyFile/c\SSLCertificateKeyFile \/etc\/ssl\/private\/apache-selfsigned.key" /etc/apache2/sites-available/default-ssl.conf'
-#sudo su -c 'sed -i "/^\s*ServerAdmin/ a ServerName localhost" /etc/apache2/sites-available/default-ssl.conf'
-#sudo su -c 'sed -i "s/_default_/*/g" /etc/apache2/sites-available/default-ssl.conf'
-#sudo su -c 'a2enmod rewrite'
-#sudo su -c 'a2enmod headers'
-#sudo su -c 'a2ensite default-ssl'
-#sudo su -c 'a2enmod ssl'
-#sudo su -c 'a2enconf ssl-params'
-#wp plugin deactivate relative-url
+if [[ -e /devenv-custom-scripts ]]; then
+    h2 "Executing custom user scripts..."
+    for file in /devenv-custom-scripts/*; do
+        [[ -x $file ]] && "$file"
+    done
+fi
