@@ -13,9 +13,6 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   if (config.downloadThemes) {
     envvars['THEMES'] = `"${config.downloadThemes.join(' ')}"`;
   }
-  if (config.env) {
-    envvars['APACHE_ENV_VARS'] = JSON.stringify(JSON.stringify(config.env)).trim();
-  }
   if (config.ftp) {
     envvars['FTP_CONFIGS'] = JSON.stringify(JSON.stringify(config.ftp)).trim();
   }
@@ -30,6 +27,12 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
     if (dbPrefix) {
       envvars['DB_PREFIX'] = dbPrefix;
     }
+  }
+
+  if (config.env) {
+    envvars['APACHE_ENV_VARS'] = JSON.stringify(
+      JSON.stringify({ ...config.env, ...envvars }),
+    ).trim();
   }
 
   const env = config.env ? config.env : {};

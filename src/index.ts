@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-import { InstanceConfig, FinalInstanceConfig } from './types';
+import yargs from 'yargs';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import prompts from 'prompts';
 import { cwd } from 'process';
+import { InstanceConfig, FinalInstanceConfig } from './types';
 import { createNewDump, overwriteDumpfile } from './actions/dumpfiles';
 import { isContainerRunning } from './utils';
 import toggleDeploymentBundle from './actions/toggleDeploymentBundle';
