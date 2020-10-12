@@ -28,6 +28,15 @@ const buildVolumePaths = (
     }
   });
 
+  rawconfig.customInitScripts.forEach((p) => {
+    if (path.isAbsolute(p)) {
+      p = `${homedir()}${p}`;
+    }
+    const abspath = path.resolve(workingdir, p);
+    const script = path.basename(abspath);
+    volumes = [...volumes, `-v ${abspath}:/devenv-custom-scripts/${script}`];
+  });
+
   if (rawconfig.database) {
     const { mysqlDumpfile } = rawconfig.database;
     if (mysqlDumpfile) {

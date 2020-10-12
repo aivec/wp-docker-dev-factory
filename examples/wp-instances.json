@@ -14,6 +14,11 @@
     "ARBITRARY_ENVIRONMENT_VARIABLE_1": "value1",
     "ARBITRARY_ENVIRONMENT_VARIABLE_2": "value2"
   },
+  "customInitScripts": [
+    "/absolute/path/to/script",
+    "relative/path/to/script",
+    "../relative/path/to/script"
+  ],
   "downloadPlugins": ["wordpress-plugin-1", "wordpress-plugin-2"],
   "downloadThemes": ["wordpress-theme-1", "wordpress-theme-2"],
   "localPlugins": [

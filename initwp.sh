@@ -195,3 +195,10 @@ if [[ -e "/data/db.sql" ]]; then
 fi
 
 wp plugin deactivate relative-url |& logger
+
+if [[ -e /devenv-custom-scripts ]]; then
+    h2 "Executing custom user scripts..."
+    for file in /devenv-custom-scripts/*; do
+        [[ -x $file ]] && "$file"
+    done
+fi

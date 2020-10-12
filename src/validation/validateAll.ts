@@ -6,6 +6,7 @@ import { InstanceConfig } from '../types';
 import validatePrivateRemoteFilesConfig from './validatePrivateRemoteFilesConfig';
 import validateSSHConfig from './validateSSHConfig';
 import validatePhpVersion from './validatePhpVersion';
+import vaidateCustomScriptsMode from './validateCustomScriptsMode';
 
 const validateConfig = (config: InstanceConfig, workingdir: string): void => {
   jsonKeySetCheck(config, 'containerPort');
@@ -20,6 +21,7 @@ const validateConfig = (config: InstanceConfig, workingdir: string): void => {
     'localThemes',
     'downloadPlugins',
     'downloadThemes',
+    'customInitScripts',
     'ftp',
     'ssh',
   ];
@@ -35,6 +37,11 @@ const validateConfig = (config: InstanceConfig, workingdir: string): void => {
 
   if (config.localThemes) {
     localPathsExistOrExit('theme', config.localThemes, workingdir);
+  }
+
+  if (config.customInitScripts) {
+    localPathsExistOrExit('script', config.customInitScripts, workingdir);
+    // vaidateCustomScriptsMode(config.customInitScripts, workingdir);
   }
 
   const prfConfigKeys = ['ssh', 'ftp'];
