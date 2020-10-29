@@ -168,7 +168,6 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
       func(finalConfig);
     });
   } catch (e) {
-    console.log(e);
     console.log('\nBye.');
   }
 })();

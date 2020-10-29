@@ -25,4 +25,6 @@ RUN yes | sudo pecl install xdebug \
     && sudo sh -c 'echo "xdebug.profiler_output_name=cachegrind.out.%t" >> /usr/local/etc/php/conf.d/xdebug.ini' \
     && sudo sh -c 'echo "xdebug.profiler_output_dir=/tmp" >> /usr/local/etc/php/conf.d/xdebug.ini'
 
+COPY docker/scripts /app/scripts
+
 CMD ["/run.sh"]

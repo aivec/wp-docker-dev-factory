@@ -175,7 +175,7 @@ if [[ -e "/data/db.sql" ]]; then
     mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST -uroot -e "CREATE DATABASE temp" |& logger
     mysql --user=$DB_USER --password=$DB_PASS --host=$DB_HOST temp </data/db.sql |& logger
 
-    active_plugins=$(php /app/get_active_plugins.php ${DB_USER} ${DB_PASS} temp ${DB_PREFIX})
+    active_plugins=$(php /app/scripts/get_active_plugins.php ${DB_USER} ${DB_PASS} temp ${DB_PREFIX})
     for active_plugin in $(echo $active_plugins | jq -r '.[]'); do
         alreadyInstalled='0'
         for installed in $(echo $ALREADY_INSTALLED_PLUGINS | jq -r '.[]'); do
@@ -195,6 +195,9 @@ if [[ -e "/data/db.sql" ]]; then
 fi
 
 wp plugin deactivate relative-url |& logger
+mkdir -p /app/wp-content/plugins/mailhog
+mv /app/scripts/mailhog.php /app/wp-content/plugins/mailhog/
+wp plugin activate mailhog |& logger
 
 if [[ -e /devenv-custom-scripts ]]; then
     h2 "Executing custom user scripts..."

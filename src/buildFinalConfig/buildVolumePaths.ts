@@ -66,11 +66,7 @@ const buildVolumePaths = (
     ...volumes,
     `-v ${path.resolve(topdir, 'initwp.sh')}:/docker-entrypoint-initwp.d/initwp.sh`,
   ];
-  volumes = [...volumes, `-v ${path.resolve(topdir, 'redump.php')}:/app/redump.php`];
-  volumes = [
-    ...volumes,
-    `-v ${path.resolve(topdir, 'get_active_plugins.php')}:/app/get_active_plugins.php`,
-  ];
+
   volumes = [...volumes, `-v ${path.resolve(workingdir, 'dumpfiles')}:/app/dumpfiles`];
 
   if (process.platform === 'win32' && process.env.DOCKER_TOOLBOX_INSTALL_PATH) {

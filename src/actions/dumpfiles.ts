@@ -9,7 +9,7 @@ export const overwriteDumpfile = ({
 }: FinalInstanceConfig): void => {
   try {
     exec(
-      `docker exec -i ${containerName} /bin/sh -c "php redump.php root root ${DB_NAME} /data/db.sql"`,
+      `docker exec -i ${containerName} /bin/sh -c "php scripts/redump.php root root ${DB_NAME} /data/db.sql"`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(error);
@@ -55,7 +55,7 @@ export const createNewDump = async ({
       throw new Error();
     }
     exec(
-      `docker exec -i ${containerName} /bin/sh -c "php redump.php root root ${DB_NAME} /app/dumpfiles/${response.filename}.sql"`,
+      `docker exec -i ${containerName} /bin/sh -c "php scripts/redump.php root root ${DB_NAME} /app/dumpfiles/${response.filename}.sql"`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(error);

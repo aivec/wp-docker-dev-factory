@@ -14,6 +14,7 @@ Features of this library include:
 - Configurable PHP environment variables
 - Ability to specify PHP version (`7.2`, `7.3`, or `7.4`)
 - Ability to specify WordPress version
+- Local SMTP mail server with [MailHog](https://github.com/mailhog/MailHog)
 
 This library is **only for managing development environments** and is not intended for creating production ready containers.
 
@@ -26,6 +27,7 @@ This library is **only for managing development environments** and is not intend
 -   [Environments](#environments)
     -   [Logging in](#logging-in)
     -   [Lifecycle Details](#lifecycle-details)
+-   [MailHog](#mailhog)
 -   [PHP Debugging](#php-debugging)
 -   [JSON Structure](#json-structure)
     -   [`instanceName`](#---instancename)
@@ -76,6 +78,7 @@ To spin-up a minimal environment, create a file named `wp-instances.json` with t
   "containerPort": 8000,
   "locale": "en_US",
   "downloadPlugins": ["wordpress-plugin-1", "wordpress-plugin-2"],
+  "downloadThemes": ["wordpress-theme-1", "wordpress-theme-2"],
   "localPlugins": [
     "/absolute/path/to/plugin/directory",
     "relative/path/to/plugin/directory",
@@ -93,6 +96,7 @@ Where:
 - [`containerPort`](#---containerPort) is the port number the environment will expose. In this case the final URL will be `localhost:8000`.
 - [`locale`](#---locale) is the language you want for the WordPress install.
 - [`downloadPlugins`](#---downloadplugins) is a list of any number of publicly available WordPress plugins to be downloaded.
+- [`downloadThemes`](#---downloadthemes) is a list of any number of publicly available WordPress themes to be downloaded.
 - [`localPlugins`](#---localplugins) is a list of absolute or relative paths to any number of local plugin folders.
 - [`localThemes`](#---localthemes) is a list of absolute or relative paths to any number of local theme folders.
 
@@ -170,6 +174,9 @@ For `WordPress` environments that **do not** specify a [mysqlDumpfile](#---datab
 - Password: `root`
 ### Lifecycle details
 The database for each WordPress environment will only be created **the first time that environment is started**, regardless of whether you set a [mysqlDumpfile](#---databasemysqldumpfile) or not. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so it will not be created. If you want the database to be re-created every time you [run the containers](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
+
+## MailHog
+Emails sent via WordPress' built-in `wp_mail` function are caught by [MailHog](#mailhog). All outgoing email can be viewed in a web UI at [localhost:8025](localhost:8025)
 
 ## PHP Debugging
 Any environment you create will have `XDebug` installed and configured by default listening on port `9900`. Visual Studio Code users can debug with the [PHP Debug extension](https://marketplace.visualstudio.com/items?itemName=felixfbecker.php-debug). Create a `launch.json` file and place it either in the `.vscode` directory of a workspace folder for a plugin/theme, or the `.vscode` directory of a workspace folder specifically for managing PHP debugging.
