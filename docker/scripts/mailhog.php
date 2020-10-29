@@ -62,10 +62,10 @@ class WPMailHog {
      * Overrides `PHPMailer` settings to point to our MailHog Docker container
      *
      * @author Evan D Shaw <evandanielshaw@gmail.com>
-     * @param PHPMailer $phpmailer
+     * @param mixed $phpmailer
      * @return void
      */
-    public function setPhpMailerToMailHog(PHPMailer $phpmailer) {
+    public function setPhpMailerToMailHog($phpmailer) {
         $phpmailer->From = WP_MAILHOG_FROM;
         $phpmailer->Host = WP_MAILHOG_HOST;
         $phpmailer->Port = WP_MAILHOG_PORT;
