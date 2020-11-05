@@ -1,6 +1,6 @@
 {
   "name": "@aivec/wp-docker-dev-factory",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "description": "Spin up local WordPress environments with Docker.",
   "bin": {
     "aivec-wpdocker": "./dist/index.js"
