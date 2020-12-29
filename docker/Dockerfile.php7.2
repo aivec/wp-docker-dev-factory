@@ -18,12 +18,15 @@ RUN sudo sh -c 'echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini'
 # Install xdebug for PHP live debugging in vscode
 RUN yes | sudo pecl install xdebug \
     && sudo sh -c 'echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.remote_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.profiler_enable=1" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.profiler_output_name=cachegrind.out.%t" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.profiler_output_dir=/tmp" >> /usr/local/etc/php/conf.d/xdebug.ini'
+    && sudo sh -c 'echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sudo sh -c 'echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sudo sh -c 'echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sudo sh -c 'echo "xdebug.log=/app/xdebug_log" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    # until an option is added to suppress the `[Step Debug] Could not connect to debugging client.` error message,
+    # we set the log_level to 0
+    && sudo sh -c 'echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini'
+
+RUN touch /app/xdebug_log
 
 COPY docker/scripts /app/scripts
 
