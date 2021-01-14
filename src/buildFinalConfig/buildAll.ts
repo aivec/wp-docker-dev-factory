@@ -2,7 +2,6 @@ import buildFtpConfig from './buildFtpConfig';
 import buildEnvVars from './buildEnvVars';
 import buildVolumePaths from './buildVolumePaths';
 import buildPluginAutoInstallWhitelist from './buildPluginAutoInstallWhitelist';
-import { execSync } from 'child_process';
 import { _ } from 'lodash';
 import { InstanceConfig, FinalInstanceConfig } from '../types';
 import buildSSHConfig from './buildSSHConfig';
@@ -14,11 +13,7 @@ const buildFinalConfig = (
 ): FinalInstanceConfig => {
   const configCopy: InstanceConfig = _.cloneDeep(config);
   const phpVersion = configCopy.phpVersion ? configCopy.phpVersion : '7.3';
-  const dockerBridgeIP = execSync(
-    'docker network inspect bridge -f "{{ (index .IPAM.Config 0).Gateway }}"',
-  )
-    .toString()
-    .trim();
+  const dockerBridgeIP = 'host.docker.internal';
   let locale = configCopy.locale ? configCopy.locale : 'en_US';
   if (configCopy.wordpressVersion === 'nightly') {
     locale = 'en_US';

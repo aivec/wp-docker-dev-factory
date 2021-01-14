@@ -1,4 +1,5 @@
 import { FinalInstanceConfig } from '../types';
+import { platform } from 'os';
 import { execSync } from 'child_process';
 import makeContainers from './dbcontainers';
 import logger from '../logger';
@@ -31,16 +32,23 @@ const runContainer = function (config: FinalInstanceConfig): void {
     }
   }
 
+  let extras = '';
+  const p = platform();
+  if (p !== 'darwin' && p !== 'win32') {
+    // map host.docker.internal to docker0 bridge IP for linux
+    extras = '--add-host=host.docker.internal:host-gateway';
+  }
+
   try {
     execSync(
       `docker run -d --name=${containerName} -p ${containerPort}:80 \
         --cap-add=SYS_ADMIN \
         --device=/dev/fuse \
         --security-opt apparmor=unconfined \
+        ${extras} \
         ${volumes} \
         ${envvars} \
-        --env XDEBUG_CONFIG=remote_host="${dockerBridgeIP}" \
-        --env DOCKER_BRIDGE_IP="${dockerBridgeIP}" \
+        --env DOCKER_BRIDGE_IP=${dockerBridgeIP} \
         --env DOCKER_CONTAINER_PORT=${containerPort} \
         --env INSTANCE_NAME=${instanceName} \
         --env WP_LOCALE=${locale} \

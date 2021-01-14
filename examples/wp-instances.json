@@ -12,7 +12,9 @@
   },
   "env": {
     "ARBITRARY_ENVIRONMENT_VARIABLE_1": "value1",
-    "ARBITRARY_ENVIRONMENT_VARIABLE_2": "value2"
+    "ARBITRARY_ENVIRONMENT_VARIABLE_2": "value2",
+    "WP_DEBUG": 1,
+    "WP_DEBUG_DISPLAY": 1
   },
   "customInitScripts": [
     "/absolute/path/to/script",
