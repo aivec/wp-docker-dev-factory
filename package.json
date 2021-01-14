@@ -11,24 +11,24 @@
   "dependencies": {
     "archiver": "^3.1.1",
     "lodash": "^4.17.20",
-    "ngrok": "^3.3.0",
+    "ngrok": "^3.4.0",
     "prompts": "^2.4.0",
-    "yargs": "^16.1.0"
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "@types/node": "^13.13.30",
+    "@types/node": "^13.13.39",
     "@types/prompts": "^2.0.9",
-    "@types/yargs": "^15.0.9",
+    "@types/yargs": "^15.0.12",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-tsdoc": "^0.2.7",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-tsdoc": "^0.2.10",
     "mocha": "^7.2.0",
-    "prettier": "^2.1.2",
+    "prettier": "^2.2.1",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7"
   },
