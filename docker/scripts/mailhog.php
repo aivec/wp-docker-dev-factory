@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Mailhog for WordPress
  * Description: This plugin routes your emails to MailHog for development.
@@ -11,8 +12,8 @@
 /**
  * Modifies WordPress `PHPMailer` instance to send mail to our MailHog SMTP server Docker container
  */
-class WPMailHog {
-
+class WPMailHog
+{
     /**
      * Registers hooks
      *
@@ -67,6 +68,7 @@ class WPMailHog {
      */
     public function setPhpMailerToMailHog($phpmailer) {
         $phpmailer->From = WP_MAILHOG_FROM;
+        $phpmailer->Sender = WP_MAILHOG_FROM;
         $phpmailer->Host = WP_MAILHOG_HOST;
         $phpmailer->Port = WP_MAILHOG_PORT;
         $phpmailer->SMTPAuth = false;
