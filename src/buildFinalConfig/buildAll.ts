@@ -29,6 +29,7 @@ const buildFinalConfig = (
     wordpressVersion: configCopy.wordpressVersion ? configCopy.wordpressVersion : 'latest',
     locale,
     flushOnRestart,
+    database: configCopy.database,
     env: configCopy.env ? configCopy.env : null,
     localPlugins: configCopy.localPlugins ? configCopy.localPlugins : [],
     localThemes: configCopy.localThemes ? configCopy.localThemes : [],
