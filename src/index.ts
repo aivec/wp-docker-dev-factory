@@ -8,7 +8,6 @@ import { cwd } from 'process';
 import { InstanceConfig, FinalInstanceConfig } from './types';
 import { createNewDump, overwriteDumpfile } from './actions/dumpfiles';
 import { isContainerRunning } from './utils';
-import toggleDeploymentBundle from './actions/toggleDeploymentBundle';
 import validateConfig from './validation/validateAll';
 import buildFinalConfig from './buildFinalConfig/buildAll';
 import runContainer from './actions/instance';
@@ -112,14 +111,6 @@ const actionMap: {
       isRunning: true,
       requiresValidation: false,
       func: createNewDump,
-    },
-  },
-  {
-    title: 'Replace plugin volume with deployment ready bundle (Toggle)',
-    value: {
-      isRunning: true,
-      requiresValidation: false,
-      func: toggleDeploymentBundle,
     },
   },
 ];
