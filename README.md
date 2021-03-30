@@ -318,13 +318,17 @@ Reference for the `wp-instances.json` config file.
 ### -- downloadPlugins
 - *Optional*
 - *Type: `String[]`*
-- Description: May be any number of plugins that you want to be installed during environment creation. You must use the plugin `slug` (name of the plugins base folder), not the name. Also, the plugin must be available on `wordpress.org`.
+- Description: May be any number of plugins that you want to be installed during environment creation. The following forms are accepted:
+  - `plugin-slug`: Used when installing a plugin direct from WordPress.org.
+  - `[plugin-slug]http://pluginsite.com/plugin.zip`: Used when installing plugin from URL.
 <hr>
 
 ### -- downloadThemes
 - *Optional*
 - *Type: `String[]`*
-- Description: May be any number of themes that you want to be installed during environment creation. You must use the theme `slug` (name of the themes base folder), not the name. Also, the theme must be available on `wordpress.org`.
+- Description: May be any number of themes that you want to be installed during environment creation. The following forms are accepted:
+  - `theme-slug`: Used when installing a theme direct from WordPress.org.
+  - `[theme-slug]http://themesite.com/theme.zip`: Used when installing theme from URL.
 <hr>
 
 ### -- localPlugins

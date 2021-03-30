@@ -9,14 +9,10 @@ const runContainer = function (config: FinalInstanceConfig): void {
 
   const {
     phpVersion,
-    wordpressVersion,
-    locale,
     flushOnRestart,
-    instanceName,
     networkname,
     containerName,
     containerPort,
-    dockerBridgeIP,
     envvarsMap,
     envvars,
     volumes,
@@ -48,17 +44,6 @@ const runContainer = function (config: FinalInstanceConfig): void {
         ${extras} \
         ${volumes} \
         ${envvars} \
-        --env DOCKER_BRIDGE_IP=${dockerBridgeIP} \
-        --env DOCKER_CONTAINER_PORT=${containerPort} \
-        --env INSTANCE_NAME=${instanceName} \
-        --env WP_LOCALE=${locale} \
-        --env WP_DEBUG=1 \
-        --env WP_DEBUG_DISPLAY=1 \
-        --env DB_HOST=aivec_wp_mysql \
-        --env DB_USER=root \
-        --env DB_PASS=root \
-        --env WP_VERSION=${wordpressVersion} \
-        --env URL_REPLACE="http://localhost:${containerPort}" \
         --network=${networkname}_default \
         wordpress_devenv_visiblevc:latest-${phpVersion}`,
       { stdio: 'inherit' },

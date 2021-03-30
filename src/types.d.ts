@@ -57,6 +57,7 @@ export interface EnvVarsMap {
   APACHE_ENV_VARS?: string;
   FTP_CONFIGS?: string;
   SSH_CONFIGS?: string;
+  [key: string]: string | number | boolean;
 }
 
 export interface FinalInstanceConfig extends InstanceConfig {
