@@ -58,7 +58,7 @@ const runContainer = function (config: FinalInstanceConfig): void {
     execSync(`docker logs -f ${containerName}`, { stdio: 'inherit' });
   } catch (e) {
     logger.info(
-      `${logger.YELLOW}${containerName}${logger.WHITE} is still running in the background. You can view the log stream anytime with ${logger.GREEN}Log WordPress Container`,
+      `${logger.YELLOW}${containerName}${logger.WHITE} is still running in the background. You can view the log stream anytime with ${logger.GREEN}Show server logs`,
     );
   }
 };

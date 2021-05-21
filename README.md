@@ -1,22 +1,29 @@
-# WordPress Docker Local Environment CLI
-The purpose of this library is for easy creation and management of local WordPress development environments with Docker. Essentially, this library uses `visiblevc`'s excellent [Docker images](https://github.com/visiblevc/wordpress-starter) as the base and adds CLI options which make environment management considerably easier. With most other tools the user must manually create/edit/delete `docker-compose.yml` files. This library foregoes that option in favor of `JSON` files specifically made for managing WordPress environments. The user does not need to have any prior knowledge of Docker to use this tool.
+# Local WordPress with Docker (an interactive CLI)
+Create local WordPress sites with Docker, **the easy way**.
 
-Features of this library include:
-- Mounting plugins/themes as Docker volumes **regardless of their path on the host system**
-- Automatic database creation from an SQL dump file on start-up
-- Automatic URL replacement after an SQL dump on start-up
-- Downloading and installing plugins/themes **automatically** on start-up
-- Downloading and installing private plugins/themes via SSH/FTP **automatically** on start-up
-- XDebug built-in for easy debugging of local environments **using the same port number for every environment**
-- Easy exporting of an environments database as a `.sql` dump file
-- `ngrok` support for easy SSL testing on localhost
-- A single `phpMyAdmin` container for all of your environments
-- Configurable PHP environment variables
-- Ability to specify PHP version (`7.2`, `7.3`, or `7.4`)
-- Ability to specify WordPress version
-- Local SMTP mail server with [MailHog](https://github.com/mailhog/MailHog)
+## Why?
+The purpose of this library is for easy creation *and management* of local WordPress development environments with Docker. Under the hood, this library uses `visiblevc`'s excellent [Docker images](https://github.com/visiblevc/wordpress-starter) as the base and adds CLI options via a `nodejs` script to make environment management even easier.
+
+With most other tools, the user must manually create and manage `docker-compose.yml` files. This method has several drawbacks though. `docker-compose` files are not tailored to WordPress specifically and require at least basic knowledge of Docker. Docker is a fantastic tool but can eat up a lot of development time. Another big problem for development, in particular, is that `docker-compose` files are intended to be mostly unchanged. Their rigidity is not well suited for development environments. In terms of WordPress, this could be mounting/unmounting plugin/theme folders, changing the PHP version, importing SQL dump files, pulling third-party non-free plugins/themes from an SSH server, etc. 
+
+Instead, this tool uses `JSON` files structured specifically for managing WordPress environments. With this approach, you can easily manage environments without any prior knowledge of Docker.
 
 This library is **only for managing development environments** and is not intended for creating production ready containers.
+
+## Main features:
+- Mount local plugin/theme folders **from anywhere on your system**
+- Download and install plugins/themes **automatically** on start-up
+- Download and install private plugins/themes via SSH/FTP **automatically** on start-up
+- XDebug built-in for easy debugging
+- Local SMTP mail server with [MailHog](https://github.com/mailhog/MailHog)
+- `ngrok` support for easy SSL testing on localhost
+- Configurable WordPress version
+- Configurable PHP version (`7.2`, `7.3`, `7.4`, or `8.0`)
+- Configurable PHP environment variables
+- Import a database on environment start-up (with URL replacement)
+- Import and replace the database of a **running** environment (with URL replacement)
+- Export an environments database
+- A single `phpMyAdmin` container for all of your environments
 
 ## Table of Contents
 -   [Requirements](#requirements)
@@ -109,7 +116,7 @@ A select prompt will appear:
 
 <img src="media/action-select.png" alt="example action-select" />
 
-Press the enter key on `Run Containers` and wait for the containers to be created (if this is your first time it might take a while). After the containers are created, open your browser and navigate to [localhost:8000/wp-admin](localhost:8000/wp-admin).
+Press the enter key on `Start WordPress` and wait for the environment to be created (if this is your first time it might take a while). After the environment is created, open your browser and navigate to [localhost:8000/wp-admin](localhost:8000/wp-admin).
 
 You should see the WordPress login screen. Login with the default username and password `root`.
 That's it!
@@ -130,12 +137,13 @@ $ aivec-wpdocker configs
 The CLI has seven different operations:
 | Operation | Description |
 | ----- | ----------- |
-| `Run Containers` | This will create and run the `MySQL` and `phpMyAdmin` containers if they are not already created and running, as well as start the `WordPress` container. If the environment's `WordPress` container is already running the CLI will abort with an error. Note that exiting with Ctrl+c will only stop the log stream, not the containers |
-| `Stop WordPress Container` | This will stop the `WordPress` container for the selected environment. It **will not** stop the `MySQL` and `phpMyAdmin` containers. |
+| `Start WordPress` | This will start the `WordPress` container, as well as create and run the `MySQL` and `phpMyAdmin` containers if they are not already created and running. If the environment's `WordPress` container is already running the CLI will abort with an error. Note that exiting with Ctrl+c will only stop the log stream, not the containers |
+| `Stop WordPress` | This will stop the `WordPress` container for the selected environment. It **will not** stop the `MySQL` and `phpMyAdmin` containers. |
+| `Show server logs` | By default, when you start a `WordPress` container with `Start WordPress`, it will stream the `Apache` logs to standard output. You can use this command to pipe the log stream to your console again if you have exited the stream. |
 | `Launch NGROK (local SSL)` | This will start the `ngrok` client for local SSL. Ctrl+c to stop the client. If you use `ngrok`, we **highly recommend** creating a free account on [ngrok.com](https://ngrok.com) so that you get more connections per minute. |
-| `Log WordPress Container` | By default, when you start a `WordPress` container with `Run Containers`, it will stream the `Apache` logs to standard output. You can use this command to pipe the log stream to your console again if you have exited the stream. |
-| `Overwrite host dumpfile with DB of currently mounted volume` | This will only work if you specified [mysqlDumpfile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
-| `Create new dumpfile with DB of currently mounted volume` | This will create a dumpfile from the database of the selected environment and prompt the user to name the dumpfile. The resultant dumpfile will be placed in a folder called `dumpfiles` in the same folder as `wp-instances.json`. If a `dumpfiles` folder does not already exist, it will be created. |
+| `Update dumpfile` | This will only work if you specified [mysqlDumpfile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
+| `Create new dumpfile` | This will create a dumpfile from the database of the selected environment and prompt the user to name the dumpfile. The dumpfile will be placed in a folder called `dumpfiles` in the same folder as `wp-instances.json`. If a `dumpfiles` folder does not already exist, it will be created. |
+| `Import database` | This will prompt you to choose from a list of dump files in the `dumpfiles` directory adjacent to `wp-instances.json`. The selected dump file will then be used to **replace** the current database of the selected environment |
 
 ## Environments
 Config files can contain any number of environments. To do so, wrap your config objects in an array:
@@ -162,7 +170,7 @@ Every environment has exactly one `WordPress` container associated with it. Conv
 | ----- | ---- | ------ |
 | `MySQL` | aivec_wp_mysql | |
 | `phpMyAdmin` | aivec_wp_pma | |
-| `WordPress` | [instanceName](#---instancename) + -[phpVersion](#---phpversion)_dev_wp | test-wordpress-7.3_dev_wp |
+| `WordPress` | [instanceName](#---instancename)-[phpVersion](#---phpversion)_dev_wp | test-wordpress-7.3_dev_wp |
 ### Logging in
 You can access `phpMyAdmin` at [localhost:22222](localhost:22222) with the following login information:
 - Username: `root`
@@ -172,7 +180,7 @@ For `WordPress` environments that **do not** specify a [mysqlDumpfile](#---datab
 - Username: `root`
 - Password: `root`
 ### Lifecycle details
-The database for each WordPress environment will only be created **the first time that environment is started**, regardless of whether you set a [mysqlDumpfile](#---databasemysqldumpfile) or not. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [run the containers](#cli-usage), the database will already exist so it will not be created. If you want the database to be re-created every time you [run the containers](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
+The database for each WordPress environment will only be created **the first time that environment is started**, regardless of whether you set a [mysqlDumpfile](#---databasemysqldumpfile) or not. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [start WordPress](#cli-usage), the database will already exist so it will not be created. If you want the database to be re-created every time you [start WordPress](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
 
 ## MailHog
 Emails sent via WordPress' built-in `wp_mail` function are caught by [MailHog](#mailhog). All outgoing email can be viewed in a web UI at [localhost:8025](localhost:8025)

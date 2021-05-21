@@ -7,4 +7,4 @@ export const sshConfigsFilepath = `${serverConfigsDirpath}/${sshConfigsFilename}
 export const ftpConfigsFilename = 'ftp.json';
 export const ftpConfigsFilepath = `${serverConfigsDirpath}/${ftpConfigsFilename}`;
 export const instanceConfFilename = 'wp-instances.json';
-export const validPhpVersions = ['7.2', '7.3', '7.4'];
+export const validPhpVersions = ['7.2', '7.3', '7.4', '8.0'];

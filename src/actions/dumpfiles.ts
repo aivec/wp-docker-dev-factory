@@ -1,7 +1,76 @@
+import path from 'path';
+import fs from 'fs';
 import { FinalInstanceConfig } from '../types';
 import { exec } from 'child_process';
 import prompts from 'prompts';
 import logger from '../logger';
+
+export const redumpWithSelectedDumpfile = async ({
+  containerName,
+  workingdir,
+  containerPort,
+}: FinalInstanceConfig): Promise<void> => {
+  try {
+    const dumpfilesDir = path.resolve(workingdir, 'dumpfiles');
+    const dumpfiles = fs
+      .readdirSync(dumpfilesDir, { withFileTypes: true })
+      .filter((item) => !item.isDirectory())
+      .map((item) => ({
+        title: item.name,
+        value: `/app/dumpfiles/${item.name}`,
+      }));
+
+    const { selection } = await prompts(
+      {
+        type: 'select',
+        name: 'selection',
+        message: 'Select a dump file to overwrite the current database with',
+        choices: dumpfiles,
+        initial: 0,
+      },
+      {
+        onCancel: () => {
+          console.log('\nBye.');
+          process.exit();
+        },
+      },
+    );
+
+    const replacementUrl = `http://localhost:${containerPort}`;
+    const wpcmds = [
+      'wp db drop --yes',
+      'wp db create',
+      `wp db import ${selection}`,
+      // we have to check whether a search-replace is required because the command will fail if no hits were found
+      // in the search... Even though running the command directly from the command line will only output a
+      // warning message if no hits were found... super annoying
+      `siteurl=$(wp option get siteurl)`,
+      `if [ "$siteurl" != "${replacementUrl}" ]; then wp search-replace $siteurl ${replacementUrl}; fi`,
+    ];
+    exec(
+      `docker exec -i ${containerName} /bin/sh -c '${wpcmds.join(' && ')}'`,
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(error);
+          logger.error('command failed');
+          process.exit(1);
+        }
+        if (stderr) {
+          console.error(error);
+          logger.error('command failed');
+          process.exit(1);
+        }
+
+        if (stdout) {
+          console.log(stdout);
+        }
+      },
+    );
+  } catch (e) {
+    console.log(e);
+    logger.error('Is the container running?');
+  }
+};
 
 export const overwriteDumpfile = ({
   containerName,

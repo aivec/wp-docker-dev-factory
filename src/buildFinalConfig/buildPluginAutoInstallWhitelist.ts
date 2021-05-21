@@ -3,7 +3,10 @@ import { InstanceConfig } from '../types';
 import { homedir } from 'os';
 
 const buildPluginAutoInstallWhitelist = (config: InstanceConfig, workingdir: string): string[] => {
-  let alreadyInstalled = [...config.downloadPlugins];
+  let alreadyInstalled = [];
+  if (Array.isArray(config.downloadPlugins)) {
+    alreadyInstalled = [...config.downloadPlugins];
+  }
   if (config.localPlugins) {
     config.localPlugins.forEach((p) => {
       if (path.isAbsolute(p)) {

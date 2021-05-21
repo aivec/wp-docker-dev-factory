@@ -6,7 +6,7 @@ import path from 'path';
 import prompts from 'prompts';
 import { cwd } from 'process';
 import { InstanceConfig, FinalInstanceConfig } from './types';
-import { createNewDump, overwriteDumpfile } from './actions/dumpfiles';
+import { createNewDump, overwriteDumpfile, redumpWithSelectedDumpfile } from './actions/dumpfiles';
 import { isContainerRunning } from './utils';
 import validateConfig from './validation/validateAll';
 import buildFinalConfig from './buildFinalConfig/buildAll';
@@ -66,7 +66,7 @@ const actionMap: {
   };
 }[] = [
   {
-    title: 'Run Containers',
+    title: 'Start WordPress',
     value: {
       isRunning: false,
       requiresValidation: true,
@@ -74,7 +74,7 @@ const actionMap: {
     },
   },
   {
-    title: 'Stop WordPress Container',
+    title: 'Stop WordPress',
     value: {
       isRunning: true,
       requiresValidation: false,
@@ -90,7 +90,7 @@ const actionMap: {
     },
   },
   {
-    title: 'Log WordPress Container',
+    title: 'Show server logs',
     value: {
       isRunning: true,
       requiresValidation: false,
@@ -98,7 +98,7 @@ const actionMap: {
     },
   },
   {
-    title: 'Overwrite host dumpfile with DB of currently mounted volume',
+    title: 'Update dumpfile',
     value: {
       isRunning: true,
       requiresValidation: false,
@@ -106,11 +106,19 @@ const actionMap: {
     },
   },
   {
-    title: 'Create new dumpfile with DB of currently mounted volume',
+    title: 'Create new dumpfile',
     value: {
       isRunning: true,
       requiresValidation: false,
       func: createNewDump,
+    },
+  },
+  {
+    title: 'Import database',
+    value: {
+      isRunning: true,
+      requiresValidation: false,
+      func: redumpWithSelectedDumpfile,
     },
   },
 ];
