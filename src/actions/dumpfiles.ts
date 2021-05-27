@@ -3,6 +3,7 @@ import fs from 'fs';
 import { FinalInstanceConfig } from '../types';
 import { exec } from 'child_process';
 import prompts from 'prompts';
+import { dockerDumpfilesDirpath, dockerScriptsDirpath } from '../constants';
 import logger from '../logger';
 
 export const redumpWithSelectedDumpfile = async ({
@@ -17,7 +18,7 @@ export const redumpWithSelectedDumpfile = async ({
       .filter((item) => !item.isDirectory())
       .map((item) => ({
         title: item.name,
-        value: `/app/dumpfiles/${item.name}`,
+        value: `${dockerDumpfilesDirpath}/${item.name}`,
       }));
 
     const { selection } = await prompts(
@@ -46,6 +47,7 @@ export const redumpWithSelectedDumpfile = async ({
       // warning message if no hits were found... super annoying
       `siteurl=$(wp option get siteurl)`,
       `if [ "$siteurl" != "${replacementUrl}" ]; then wp search-replace $siteurl ${replacementUrl}; fi`,
+      'wp core update-db',
     ];
     exec(
       `docker exec -i ${containerName} /bin/sh -c '${wpcmds.join(' && ')}'`,
@@ -78,7 +80,7 @@ export const overwriteDumpfile = ({
 }: FinalInstanceConfig): void => {
   try {
     exec(
-      `docker exec -i ${containerName} /bin/sh -c "php scripts/redump.php root root ${DB_NAME} /data/db.sql"`,
+      `docker exec -i ${containerName} /bin/sh -c "php ${dockerScriptsDirpath}/redump.php root root ${DB_NAME} /data/db.sql"`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(error);
@@ -124,7 +126,7 @@ export const createNewDump = async ({
       throw new Error();
     }
     exec(
-      `docker exec -i ${containerName} /bin/sh -c "php scripts/redump.php root root ${DB_NAME} /app/dumpfiles/${response.filename}.sql"`,
+      `docker exec -i ${containerName} /bin/sh -c "php ${dockerScriptsDirpath}/redump.php root root ${DB_NAME} ${dockerDumpfilesDirpath}/${response.filename}.sql"`,
       (error, stdout, stderr) => {
         if (error) {
           console.error(error);

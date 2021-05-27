@@ -1,6 +1,12 @@
 import path from 'path';
 import _ from 'lodash';
 import { FinalInstanceConfig, InstanceConfig } from '../types';
+import {
+  dockerScriptsDirpath,
+  dockerDumpfilesDirpath,
+  dockerSshDirpath,
+  dockerUserScriptsDirpath,
+} from '../constants';
 import { homedir } from 'os';
 
 const buildVolumePaths = (
@@ -35,7 +41,7 @@ const buildVolumePaths = (
       }
       const abspath = path.resolve(workingdir, p);
       const script = path.basename(abspath);
-      volumes = [...volumes, `-v ${abspath}:/devenv-custom-scripts/${script}`];
+      volumes = [...volumes, `-v ${abspath}:${dockerUserScriptsDirpath}/${script}`];
     });
   }
 
@@ -47,6 +53,7 @@ const buildVolumePaths = (
         p = `${homedir()}${p}`;
       }
       const abspath = path.resolve(workingdir, p);
+      // visiblevc's run.sh script will import db.sql automatically on startup
       volumes = [...volumes, `-v ${abspath}:/data/db.sql`];
     }
   }
@@ -56,7 +63,7 @@ const buildVolumePaths = (
     const keyPathVolumes = sshCopy.map(({ privateKeyPath, privateKeyFilename }, index: number) => {
       // remove since Windows paths break JSON
       delete config.ssh[index].privateKeyPath;
-      return `-v ${privateKeyPath}:/app/ssh/${privateKeyFilename}`;
+      return `-v ${privateKeyPath}:${dockerSshDirpath}/${privateKeyFilename}`;
     });
 
     volumes = [...volumes, ...keyPathVolumes];
@@ -64,10 +71,11 @@ const buildVolumePaths = (
 
   volumes = [
     ...volumes,
-    `-v ${path.resolve(topdir, 'initwp.sh')}:/docker-entrypoint-initwp.d/initwp.sh`,
+    // mounting a script here tells the visiblevc run.sh script to run it before starting apache
+    `-v ${path.resolve(topdir, `src/scripts/initwp.sh`)}:/docker-entrypoint-initwp.d/initwp.sh`,
   ];
 
-  volumes = [...volumes, `-v ${path.resolve(workingdir, 'dumpfiles')}:/app/dumpfiles`];
+  volumes = [...volumes, `-v ${path.resolve(workingdir, 'dumpfiles')}:${dockerDumpfilesDirpath}`];
 
   if (process.platform === 'win32' && process.env.DOCKER_TOOLBOX_INSTALL_PATH) {
     volumes = volumes.map((vpath) => vpath.replace(/C:\\/gi, '/c/'));

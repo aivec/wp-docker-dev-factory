@@ -5,6 +5,7 @@ import makeContainers from './dbcontainers';
 import logger from '../logger';
 
 const runContainer = function (config: FinalInstanceConfig): void {
+  logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
   makeContainers(config);
 
   const {
@@ -12,27 +13,34 @@ const runContainer = function (config: FinalInstanceConfig): void {
     flushOnRestart,
     networkname,
     containerName,
+    runningFromCache,
+    snapshotImage,
     containerPort,
     envvarsMap,
     envvars,
     volumes,
   } = config;
 
-  if (flushOnRestart) {
-    try {
-      execSync(
-        `docker exec -i aivec_wp_mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS \`${envvarsMap.DB_NAME}\`;'`,
-      );
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
   let extras = '';
   const p = platform();
   if (p !== 'darwin' && p !== 'win32') {
     // map host.docker.internal to docker0 bridge IP for linux
     extras = '--add-host=host.docker.internal:host-gateway';
+  }
+
+  let image = `wordpress_devenv_visiblevc:latest-${phpVersion}`;
+  if (runningFromCache) {
+    image = snapshotImage;
+  } else {
+    if (flushOnRestart) {
+      try {
+        execSync(
+          `docker exec -i aivec_wp_mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS \`${envvarsMap.DB_NAME}\`;'`,
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 
   try {
@@ -45,7 +53,7 @@ const runContainer = function (config: FinalInstanceConfig): void {
         ${volumes} \
         ${envvars} \
         --network=${networkname}_default \
-        wordpress_devenv_visiblevc:latest-${phpVersion}`,
+        ${image}`,
       { stdio: 'inherit' },
     );
   } catch (e) {
@@ -58,7 +66,11 @@ const runContainer = function (config: FinalInstanceConfig): void {
     execSync(`docker logs -f ${containerName}`, { stdio: 'inherit' });
   } catch (e) {
     logger.info(
-      `${logger.YELLOW}${containerName}${logger.WHITE} is still running in the background. You can view the log stream anytime with ${logger.GREEN}Show server logs`,
+      `${logger.yellow(
+        containerName,
+      )} is still running in the background. You can view the log stream anytime with ${logger.green(
+        'Show server logs',
+      )}`,
     );
   }
 };

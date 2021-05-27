@@ -1,4 +1,13 @@
 import { FinalInstanceConfig, EnvVarsMap } from '../types';
+import {
+  dockerMetaDirpath,
+  dockerScriptsDirpath,
+  dockerDumpfilesDirpath,
+  dockerSshDirpath,
+  dockerUserScriptsDirpath,
+  dockerTempDirpath,
+  dockerCacheDirpath,
+} from '../constants';
 
 const visibleVcBooleans = ['WP_DEBUG', 'WP_DEBUG_DISPLAY', 'WP_DEBUG_LOG', 'MULTISITE'];
 
@@ -9,19 +18,32 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
     envvars = { ...envvars, ...userenvs };
   }
 
-  envvars['DB_HOST'] = 'aivec_wp_mysql';
-  envvars['DB_USER'] = 'root';
-  envvars['DB_PASS'] = 'root';
+  // pass meta paths
+  envvars['AVC_META_DIR'] = dockerMetaDirpath;
+  envvars['AVC_SCRIPTS_DIR'] = dockerScriptsDirpath;
+  envvars['AVC_DUMPFILES_DIR'] = dockerDumpfilesDirpath;
+  envvars['AVC_SSH_DIR'] = dockerSshDirpath;
+  envvars['AVC_USER_SCRIPTS_DIR'] = dockerUserScriptsDirpath;
+  envvars['AVC_TEMP_DIR'] = dockerTempDirpath;
+  envvars['AVC_CACHE_DIR'] = dockerCacheDirpath;
+
+  envvars['CONTAINER_NAME'] = config.containerName;
   envvars['INSTANCE_NAME'] = config.instanceName;
-  envvars['WP_LOCALE'] = config.locale;
-  envvars['WP_VERSION'] = config.wordpressVersion;
+  envvars['FLUSH_DB_ON_RESTART'] = Number(config.flushOnRestart);
+  envvars['RUNNING_FROM_CACHE'] = Number(config.runningFromCache);
   envvars['URL_REPLACE'] = `http://localhost:${config.containerPort}`;
   envvars['DOCKER_BRIDGE_IP'] = config.dockerBridgeIP;
   envvars['DOCKER_CONTAINER_PORT'] = config.containerPort;
   envvars['ALREADY_INSTALLED_PLUGINS'] = JSON.stringify(
     JSON.stringify(config.alreadyInstalled),
   ).trim();
-  envvars['PLUGINS'] = `"${[...config.downloadPlugins, 'relative-url'].join(' ')}"`;
+  const dplugins = [...config.downloadPlugins, 'relative-url'];
+  envvars['DOWNLOAD_PLUGINS'] = JSON.stringify(JSON.stringify(dplugins)).trim();
+  envvars['DOWNLOAD_THEMES'] = JSON.stringify(
+    JSON.stringify(config.downloadThemes ? config.downloadThemes : []),
+  ).trim();
+
+  envvars['PLUGINS'] = `"${dplugins.join(' ')}"`;
   if (config.downloadThemes) {
     envvars['THEMES'] = `"${config.downloadThemes.join(' ')}"`;
   }
@@ -35,9 +57,14 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   // set default values for various WP envvars
   envvars['DB_NAME'] = config.instanceName;
   envvars['DB_PREFIX'] = 'wp_';
+  envvars['DB_HOST'] = 'aivec_wp_mysql';
+  envvars['DB_USER'] = 'root';
+  envvars['DB_PASS'] = 'root';
   envvars['WP_DEBUG'] = 'true';
   envvars['WP_DEBUG_DISPLAY'] = 'true';
   envvars['WP_DEBUG_LOG'] = 'true';
+  envvars['WP_LOCALE'] = config.locale;
+  envvars['WP_VERSION'] = config.wordpressVersion;
 
   if (config.database) {
     const { dbName, dbPrefix } = config.database;

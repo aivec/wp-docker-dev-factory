@@ -61,6 +61,8 @@ export interface EnvVarsMap {
 }
 
 export interface FinalInstanceConfig extends InstanceConfig {
+  runningFromCache: boolean;
+  snapshotImage: string;
   containerName: string;
   topdir: string;
   workingdir: string;

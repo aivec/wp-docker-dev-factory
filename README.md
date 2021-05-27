@@ -17,6 +17,7 @@ This library is **only for managing development environments** and is not intend
 - XDebug built-in for easy debugging
 - Local SMTP mail server with [MailHog](https://github.com/mailhog/MailHog)
 - `ngrok` support for easy SSL testing on localhost
+- Take a snapshot of your environment and re-use for significantly reduced start-up time
 - Configurable WordPress version
 - Configurable PHP version (`7.2`, `7.3`, `7.4`, or `8.0`)
 - Configurable PHP environment variables
@@ -99,7 +100,7 @@ To spin-up a minimal environment, create a file named `wp-instances.json` with t
 }
 ```
 Where:
-- [`instanceName`](#---instancename) is the title of your website.
+- [`instanceName`](#---instancename) is the environment name and title of your website.
 - [`containerPort`](#---containerPort) is the port number the environment will expose. In this case the final URL will be `localhost:8000`.
 - [`locale`](#---locale) is the language you want for the WordPress install.
 - [`downloadPlugins`](#---downloadplugins) is a list of any number of publicly available WordPress plugins to be downloaded.
@@ -139,6 +140,7 @@ The CLI has seven different operations:
 | ----- | ----------- |
 | `Start WordPress` | This will start the `WordPress` container, as well as create and run the `MySQL` and `phpMyAdmin` containers if they are not already created and running. If the environment's `WordPress` container is already running the CLI will abort with an error. Note that exiting with Ctrl+c will only stop the log stream, not the containers |
 | `Stop WordPress` | This will stop the `WordPress` container for the selected environment. It **will not** stop the `MySQL` and `phpMyAdmin` containers. |
+| `Save snapshot` | This will take a snapshot of the `WordPress` container and use it when calling `Start WordPress` in the future to significantly reduce start-up time. |
 | `Show server logs` | By default, when you start a `WordPress` container with `Start WordPress`, it will stream the `Apache` logs to standard output. You can use this command to pipe the log stream to your console again if you have exited the stream. |
 | `Launch NGROK (local SSL)` | This will start the `ngrok` client for local SSL. Ctrl+c to stop the client. If you use `ngrok`, we **highly recommend** creating a free account on [ngrok.com](https://ngrok.com) so that you get more connections per minute. |
 | `Update dumpfile` | This will only work if you specified [mysqlDumpfile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
@@ -170,7 +172,7 @@ Every environment has exactly one `WordPress` container associated with it. Conv
 | ----- | ---- | ------ |
 | `MySQL` | aivec_wp_mysql | |
 | `phpMyAdmin` | aivec_wp_pma | |
-| `WordPress` | [instanceName](#---instancename)-[phpVersion](#---phpversion)_dev_wp | test-wordpress-7.3_dev_wp |
+| `WordPress` | [instanceName](#---instancename) | test-wordpress |
 ### Logging in
 You can access `phpMyAdmin` at [localhost:22222](localhost:22222) with the following login information:
 - Username: `root`
@@ -180,7 +182,7 @@ For `WordPress` environments that **do not** specify a [mysqlDumpfile](#---datab
 - Username: `root`
 - Password: `root`
 ### Lifecycle details
-The database for each WordPress environment will only be created **the first time that environment is started**, regardless of whether you set a [mysqlDumpfile](#---databasemysqldumpfile) or not. This is because even if you [stop the WordPress container](#cli-usage), the `MySQL` container will continue to run. The next time you [start WordPress](#cli-usage), the database will already exist so it will not be created. If you want the database to be re-created every time you [start WordPress](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
+The database for each WordPress environment will only be created **the first time that environment is started**, regardless of whether you set a [mysqlDumpfile](#---databasemysqldumpfile) or not. If you want the database to be re-created every time you [start WordPress](#cli-usage), set [flushOnRestart](#---databaseflushonrestart) to `true`.
 
 ## MailHog
 Emails sent via WordPress' built-in `wp_mail` function are caught by [MailHog](#mailhog). All outgoing email can be viewed in a web UI at [localhost:8025](localhost:8025)

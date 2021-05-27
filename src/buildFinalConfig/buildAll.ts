@@ -5,6 +5,7 @@ import buildPluginAutoInstallWhitelist from './buildPluginAutoInstallWhitelist';
 import { _ } from 'lodash';
 import { InstanceConfig, FinalInstanceConfig } from '../types';
 import buildSSHConfig from './buildSSHConfig';
+import { imageExists } from '../docker/image';
 
 const buildFinalConfig = (
   config: InstanceConfig,
@@ -13,6 +14,7 @@ const buildFinalConfig = (
 ): FinalInstanceConfig => {
   const configCopy: InstanceConfig = _.cloneDeep(config);
   const phpVersion = configCopy.phpVersion ? configCopy.phpVersion : '7.3';
+  const snapshotImage = `${configCopy.instanceName}-${phpVersion}`;
   const dockerBridgeIP = 'host.docker.internal';
   let locale = configCopy.locale ? configCopy.locale : 'en_US';
   if (configCopy.wordpressVersion === 'nightly') {
@@ -22,6 +24,7 @@ const buildFinalConfig = (
   if (config.database) {
     flushOnRestart = !!config.database.flushOnRestart;
   }
+
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
     containerPort: configCopy.containerPort,
@@ -36,7 +39,9 @@ const buildFinalConfig = (
     downloadPlugins: configCopy.downloadPlugins ? configCopy.downloadPlugins : [],
     downloadThemes: configCopy.downloadThemes ? configCopy.downloadThemes : [],
     networkname: 'wpdevinstances',
-    containerName: `${configCopy.instanceName}-${phpVersion}_dev_wp`,
+    containerName: configCopy.instanceName,
+    snapshotImage,
+    runningFromCache: imageExists(snapshotImage),
     dockerBridgeIP,
     alreadyInstalled: buildPluginAutoInstallWhitelist(configCopy, workingdir),
     topdir,

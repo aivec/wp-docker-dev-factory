@@ -1,9 +1,7 @@
-import logger from '../logger';
 import { execSync } from 'child_process';
 import { FinalInstanceConfig } from '../types';
 
 const makeContainers = ({ topdir, networkname, phpVersion }: FinalInstanceConfig): void => {
-  logger.info(`${logger.WHITE}Running Container(s)...${logger.NC}`);
   execSync(
     `docker build -t wordpress_devenv_visiblevc:latest-${phpVersion} -f ${topdir}/docker/Dockerfile.php${phpVersion} ${topdir}`,
     {

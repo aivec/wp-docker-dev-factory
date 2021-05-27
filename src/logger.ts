@@ -1,56 +1,78 @@
-const logger: any = {};
-
-logger.RED = '\x1b[31m';
-logger.GREEN = '\x1b[32m';
-logger.CYAN = '\x1b[36m';
-logger.WHITE = '\x1b[37m';
-logger.YELLOW = '\x1b[33m';
-logger.NC = '\x1b[0m';
-
-logger.yellow = (message: string): string => `${logger.YELLOW}${message}${logger.NC}`;
+const RED = '\x1b[31m';
+const GREEN = '\x1b[32m';
+const CYAN = '\x1b[36m';
+const WHITE = '\x1b[37m';
+const YELLOW = '\x1b[33m';
+const NC = '\x1b[0m';
 
 const headers: {
   info: string;
   warn: string;
   error: string;
 } = {
-  info: `${logger.CYAN}[INFO]${logger.NC}`,
-  warn: `${logger.YELLOW}[WARNING]${logger.NC}`,
-  error: `${logger.RED}[FATAL]${logger.NC}`,
+  info: `${CYAN}[INFO]${NC}`,
+  warn: `${YELLOW}[WARNING]${NC}`,
+  error: `${RED}[FATAL]${NC}`,
 };
 
-logger.log = function (level: string, message: string | object): void {
-  const levels = ['info', 'warn', 'error'];
-  if (typeof message !== 'string') {
-    message = JSON.stringify(message);
-  }
+const logger = {
+  RED,
+  GREEN,
+  CYAN,
+  WHITE,
+  YELLOW,
+  NC,
 
-  if (levels.includes(level)) {
-    console.log(`\n${headers[level]} ${message}`);
-  } else {
-    console.log(`\n[${level}] ${message}`);
-  }
-};
+  getMessage: (output: any): string => {
+    if (isNaN(output) === false) {
+      return output;
+    }
+    if (typeof output !== 'string') {
+      if (output.toString) {
+        return output.toString();
+      }
+      return JSON.stringify(output);
+    }
 
-logger.info = function (message: string): void {
-  logger.log('info', message);
-};
+    return output;
+  },
 
-logger.warn = function (message: string): void {
-  logger.log('warn', message);
-};
+  yellow: (message: any): string => `${logger.YELLOW}${logger.getMessage(message)}${logger.NC}`,
+  green: (message: any): string => `${logger.GREEN}${logger.getMessage(message)}${logger.NC}`,
+  red: (message: any): string => `${logger.RED}${logger.getMessage(message)}${logger.NC}`,
+  cyan: (message: any): string => `${logger.CYAN}${logger.getMessage(message)}${logger.NC}`,
+  white: (message: any): string => `${logger.WHITE}${logger.getMessage(message)}${logger.NC}`,
 
-logger.error = function (message: string): void {
-  logger.log('error', message);
-};
+  log: (level: string, message: any): void => {
+    const levels = ['info', 'warn', 'error'];
+    const strmes = logger.getMessage(message);
+    if (levels.includes(level)) {
+      console.log(`\n${headers[level]} ${strmes}`);
+    } else {
+      console.log(`\n[${level}] ${strmes}`);
+    }
+  },
 
-logger.logContext = function (value: any): void {
-  console.log('\nvalue:', value);
-};
+  info: (message: any): void => {
+    logger.log('info', logger.getMessage(message));
+  },
 
-logger.syntaxError = function (message: string, fileName: string): void {
-  console.log(`\n${headers['error']}  ${fileName} SYNTAX ERROR`);
-  console.log(`${logger.CYAN}details:${logger.NC} ${message}`);
+  warn: (message: any): void => {
+    logger.log('warn', logger.getMessage(message));
+  },
+
+  error: (message: any): void => {
+    logger.log('error', logger.getMessage(message));
+  },
+
+  logContext: (value: any): void => {
+    console.log('\nvalue:', logger.getMessage(value));
+  },
+
+  syntaxError: (message: string, fileName: string): void => {
+    console.log(`\n${headers['error']}  ${fileName} SYNTAX ERROR`);
+    console.log(`${logger.CYAN}details:${logger.NC} ${message}`);
+  },
 };
 
 export default logger;
