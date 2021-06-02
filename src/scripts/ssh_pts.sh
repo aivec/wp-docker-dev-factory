@@ -71,31 +71,30 @@ download_and_install_ssh_pts() {
 
 if [[ ! -z ${SSH_CONFIGS} ]]; then
     configcount=$(echo $SSH_CONFIGS | jq -r '. | length')
-    if [ $configcount -lt 1 ]; then
-        return
+    if [ $configcount -gt 0 ]; then
+
+        setup_ssh_config
+
+        mkdir -p ${AVC_TEMP_DIR}
+        configi=0
+        while [ $configi -lt $configcount ]; do
+            config=$(echo $SSH_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
+            confname=$(echo $config | jq -r '.["confname"]')
+
+            append_host_to_ssh_config "$config"
+
+            # download and install plugins
+            plugins=$(echo $config | jq -r '.["plugins"]')
+            temppdir=${AVC_TEMP_DIR}/plugins
+            download_and_install_ssh_pts "plugin" "$temppdir" "$plugins" "$confname"
+
+            # download and install themes
+            themes=$(echo $config | jq -r '.["themes"]')
+            temptdir=${AVC_TEMP_DIR}/themes
+            download_and_install_ssh_pts "theme" "$temptdir" "$themes" "$confname"
+
+            configi=$(($configi + 1))
+        done
+        rm -rf ${AVC_TEMP_DIR}
     fi
-
-    setup_ssh_config
-
-    mkdir -p ${AVC_TEMP_DIR}
-    configi=0
-    while [ $configi -lt $configcount ]; do
-        config=$(echo $SSH_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
-        confname=$(echo $config | jq -r '.["confname"]')
-
-        append_host_to_ssh_config "$config"
-
-        # download and install plugins
-        plugins=$(echo $config | jq -r '.["plugins"]')
-        temppdir=${AVC_TEMP_DIR}/plugins
-        download_and_install_ssh_pts "plugin" "$temppdir" "$plugins" "$confname"
-
-        # download and install themes
-        themes=$(echo $config | jq -r '.["themes"]')
-        temptdir=${AVC_TEMP_DIR}/themes
-        download_and_install_ssh_pts "theme" "$temptdir" "$themes" "$confname"
-
-        configi=$(($configi + 1))
-    done
-    rm -rf ${AVC_TEMP_DIR}
 fi

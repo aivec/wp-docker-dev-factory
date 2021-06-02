@@ -46,26 +46,24 @@ download_and_install_ftp_pts() {
 
 if [[ ! -z ${FTP_CONFIGS} ]]; then
     configcount=$(echo $FTP_CONFIGS | jq -r '. | length')
-    if [ $configcount -lt 1 ]; then
-        return
+    if [ $configcount -gt 0 ]; then
+        mkdir -p ${AVC_TEMP_DIR}
+        configi=0
+        while [ $configi -lt $configcount ]; do
+            config=$(echo $FTP_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
+
+            # download and install plugins
+            plugins=$(echo $config | jq -r '.["plugins"]')
+            temppdir=${AVC_TEMP_DIR}/plugins
+            download_and_install_ftp_pts "plugin" "$temppdir" "$plugins" "$config"
+
+            # download and install themes
+            themes=$(echo $config | jq -r '.["themes"]')
+            temptdir=${AVC_TEMP_DIR}/themes
+            download_and_install_ftp_pts "theme" "$temptdir" "$themes" "$config"
+
+            configi=$(($configi + 1))
+        done
+        rm -rf ${AVC_TEMP_DIR}
     fi
-
-    mkdir -p ${AVC_TEMP_DIR}
-    configi=0
-    while [ $configi -lt $configcount ]; do
-        config=$(echo $FTP_CONFIGS | jq -r --arg index "$configi" '.[$index | tonumber]')
-
-        # download and install plugins
-        plugins=$(echo $config | jq -r '.["plugins"]')
-        temppdir=${AVC_TEMP_DIR}/plugins
-        download_and_install_ftp_pts "plugin" "$temppdir" "$plugins" "$config"
-
-        # download and install themes
-        themes=$(echo $config | jq -r '.["themes"]')
-        temptdir=${AVC_TEMP_DIR}/themes
-        download_and_install_ftp_pts "theme" "$temptdir" "$themes" "$config"
-
-        configi=$(($configi + 1))
-    done
-    rm -rf ${AVC_TEMP_DIR}
 fi

@@ -22,19 +22,12 @@ const validatePrivateRemoteFilesConfig = function (
       process.exit(1);
     }
 
-    if (!prfconfig.plugins && !prfconfig.themes) {
-      logger.logContext(prfconfig);
-      logger.error(
-        `At least one of ${logger.yellow('plugins')} or ${logger.yellow('themes')} must be defined`,
-      );
-      process.exit(1);
-    }
-    if (!Array.isArray(prfconfig.plugins)) {
+    if (prfconfig.plugins && !Array.isArray(prfconfig.plugins)) {
       logger.logContext(prfconfig);
       logger.error(`${logger.yellow('plugins')} is not an array`);
       process.exit(1);
     }
-    if (!Array.isArray(prfconfig.themes)) {
+    if (prfconfig.themes && !Array.isArray(prfconfig.themes)) {
       logger.logContext(prfconfig);
       logger.error(`${logger.yellow('themes')} is not an array`);
       process.exit(1);

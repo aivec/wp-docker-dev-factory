@@ -14,6 +14,15 @@ fi
 
 declare -i num_imported=0
 
+h2 'Waiting for MySQL to initialize...'
+while ! mysqladmin ping \
+    --host="${DB_HOST:-db}" \
+    --user="${DB_USER:-root}" \
+    --password="${DB_PASS:-root}" \
+    --silent >/dev/null; do
+    sleep 1
+done
+
 if [[ -f "/data/db.sql" ]]; then
     if [ $FLUSH_DB_ON_RESTART -eq 1 ] && [ $RUNNING_FROM_CACHE -eq 1 ]; then
         h2 "Importing /data/db.sql (this might take a while)..."

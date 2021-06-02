@@ -1,12 +1,7 @@
 import path from 'path';
 import _ from 'lodash';
 import { FinalInstanceConfig, InstanceConfig } from '../types';
-import {
-  dockerScriptsDirpath,
-  dockerDumpfilesDirpath,
-  dockerSshDirpath,
-  dockerUserScriptsDirpath,
-} from '../constants';
+import { dockerDumpfilesDirpath, dockerSshDirpath, dockerUserScriptsDirpath } from '../constants';
 import { homedir } from 'os';
 
 const buildVolumePaths = (

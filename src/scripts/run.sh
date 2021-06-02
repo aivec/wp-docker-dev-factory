@@ -29,7 +29,11 @@ fi
 
 h1 'Restarting From Cache (Using Snapshot)'
 
-sudo chown -R admin:admin /app
+# If a previously mounted plugin/theme volume is changed to a download plugin/theme, Docker will
+# create an empty directory as root:root where the volume used to be. This causes download installs
+# in those directories to fail, so we preemptively change user:group for all plugins and themes
+sudo chown -R admin:admin /app/wp-content/plugins
+sudo chown -R admin:admin /app/wp-content/themes
 
 ${AVC_SCRIPTS_DIR}/initwp.sh
 
