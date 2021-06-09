@@ -4,6 +4,7 @@ export interface InstanceConfig {
   phpVersion?: string;
   wordpressVersion?: string;
   locale?: string;
+  image?: string;
   customInitScripts?: string[];
   database?: {
     mysqlDumpfile?: string;
@@ -20,6 +21,8 @@ export interface InstanceConfig {
   localThemes?: string[];
   ftp?: PrivateRemoteFilesConfig[];
   ssh?: PrivateRemoteFilesConfig[];
+  workingdir: string;
+  topdir: string;
 }
 
 export interface PrivateRemoteFilesConfig {
@@ -64,8 +67,6 @@ export interface FinalInstanceConfig extends InstanceConfig {
   runningFromCache: boolean;
   snapshotImage: string;
   containerName: string;
-  topdir: string;
-  workingdir: string;
   networkname: string;
   flushOnRestart: boolean;
   dockerBridgeIP: string;

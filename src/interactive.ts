@@ -141,6 +141,8 @@ export const showPrompts = async (): Promise<void> => {
 
   try {
     const chosenConfig = await environmentSelect(config);
+    chosenConfig.workingdir = workingdir;
+    chosenConfig.topdir = topdir;
 
     const {
       action: { func, shouldBeRunning, requiresValidation },
@@ -148,7 +150,7 @@ export const showPrompts = async (): Promise<void> => {
 
     if (requiresValidation) {
       try {
-        validateConfig(chosenConfig, workingdir);
+        validateConfig(chosenConfig);
       } catch (error) {
         process.exit(1);
       }

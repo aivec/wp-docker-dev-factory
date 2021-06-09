@@ -4,6 +4,7 @@
   "phpVersion": "7.3",
   "wordpressVersion": "latest",
   "locale": "en_US",
+  "image": "my/wordpress/container/image.tar",
   "database": {
     "mysqlDumpfile": "dumpfiles/testdatabase.sql",
     "flushOnRestart": false,

@@ -8,7 +8,7 @@ import validateSSHConfig from './validateSSHConfig';
 import validatePhpVersion from './validatePhpVersion';
 import vaidateCustomScriptsMode from './validateCustomScriptsMode';
 
-const validateConfig = (config: InstanceConfig, workingdir: string): void => {
+const validateConfig = (config: InstanceConfig): void => {
   jsonKeySetCheck(config, 'containerPort');
   jsonKeySetCheck(config, 'instanceName');
 
@@ -32,15 +32,19 @@ const validateConfig = (config: InstanceConfig, workingdir: string): void => {
   });
 
   if (config.localPlugins) {
-    localPathsExistOrExit('plugin', config.localPlugins, workingdir);
+    localPathsExistOrExit('plugin', config.localPlugins, config.workingdir);
   }
 
   if (config.localThemes) {
-    localPathsExistOrExit('theme', config.localThemes, workingdir);
+    localPathsExistOrExit('theme', config.localThemes, config.workingdir);
+  }
+
+  if (config.image) {
+    localPathsExistOrExit('image file', [config.image], config.workingdir);
   }
 
   if (config.customInitScripts) {
-    localPathsExistOrExit('script', config.customInitScripts, workingdir);
+    localPathsExistOrExit('script', config.customInitScripts, config.workingdir);
     // vaidateCustomScriptsMode(config.customInitScripts, workingdir);
   }
 
@@ -56,13 +60,13 @@ const validateConfig = (config: InstanceConfig, workingdir: string): void => {
   }
 
   if (config.ssh) {
-    validateSSHConfig(config.ssh, workingdir);
+    validateSSHConfig(config.ssh, config.workingdir);
   }
 
   if (config.database) {
     const { mysqlDumpfile } = config.database;
     if (mysqlDumpfile) {
-      localPathsExistOrExit('MySQL dump file', [mysqlDumpfile], workingdir);
+      localPathsExistOrExit('MySQL dump file', [mysqlDumpfile], config.workingdir);
     }
   }
 };

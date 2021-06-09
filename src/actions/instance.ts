@@ -2,9 +2,10 @@ import { FinalInstanceConfig } from '../types';
 import { platform } from 'os';
 import { execSync } from 'child_process';
 import makeContainers from './dbcontainers';
+import { load } from '../docker/load';
 import logger from '../logger';
 
-const runContainer = function (config: FinalInstanceConfig): void {
+const runContainer = async function (config: FinalInstanceConfig): Promise<void> {
   logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
   makeContainers(config);
 
@@ -14,6 +15,8 @@ const runContainer = function (config: FinalInstanceConfig): void {
     networkname,
     containerName,
     runningFromCache,
+    image,
+    workingdir,
     snapshotImage,
     containerPort,
     envvarsMap,
@@ -28,9 +31,21 @@ const runContainer = function (config: FinalInstanceConfig): void {
     extras = '--add-host=host.docker.internal:host-gateway';
   }
 
-  let image = `wordpress_devenv_visiblevc:latest-${phpVersion}`;
+  let imagename = `wordpress_devenv_visiblevc:latest-${phpVersion}`;
   if (runningFromCache) {
-    image = snapshotImage;
+    try {
+      logger.info(`Loading ${logger.green(image)} (this might take a while)...`);
+      const { stderr: loaderr } = await load(image);
+      if (loaderr) {
+        console.log(loaderr.toString());
+        logger.error('Failed loading image file.');
+        process.exit(1);
+      }
+      imagename = snapshotImage;
+    } catch (error) {
+      console.log(error);
+      logger.error('Failed loading image file.');
+    }
   } else {
     if (flushOnRestart) {
       try {
@@ -53,7 +68,7 @@ const runContainer = function (config: FinalInstanceConfig): void {
         ${volumes} \
         ${envvars} \
         --network=${networkname}_default \
-        ${image}`,
+        ${imagename}`,
       { stdio: 'inherit' },
     );
   } catch (e) {

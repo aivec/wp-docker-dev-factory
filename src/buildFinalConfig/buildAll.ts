@@ -1,3 +1,5 @@
+import path from 'path';
+import { homedir } from 'os';
 import buildFtpConfig from './buildFtpConfig';
 import buildEnvVars from './buildEnvVars';
 import buildVolumePaths from './buildVolumePaths';
@@ -5,7 +7,6 @@ import buildPluginAutoInstallWhitelist from './buildPluginAutoInstallWhitelist';
 import { _ } from 'lodash';
 import { InstanceConfig, FinalInstanceConfig } from '../types';
 import buildSSHConfig from './buildSSHConfig';
-import { imageExists } from '../docker/image';
 
 const buildFinalConfig = (
   config: InstanceConfig,
@@ -24,6 +25,13 @@ const buildFinalConfig = (
   if (config.database) {
     flushOnRestart = !!config.database.flushOnRestart;
   }
+  let image = configCopy.image;
+  if (image) {
+    if (path.isAbsolute(image)) {
+      image = `${homedir()}${image}`;
+    }
+    image = path.resolve(workingdir, image);
+  }
 
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
@@ -41,11 +49,12 @@ const buildFinalConfig = (
     networkname: 'wpdevinstances',
     containerName: configCopy.instanceName,
     snapshotImage,
-    runningFromCache: imageExists(snapshotImage),
+    runningFromCache: !!image,
     dockerBridgeIP,
     alreadyInstalled: buildPluginAutoInstallWhitelist(configCopy, workingdir),
     topdir,
     workingdir,
+    image,
   };
 
   if (configCopy.ftp) {
