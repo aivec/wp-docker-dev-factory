@@ -44,6 +44,7 @@ This library is **only for managing development environments** and is not intend
     -   [`wordpressVersion`](#---wordpressVersion)
     -   [`locale`](#---locale)
     -   [`customInitScripts`](#---customInitScripts)
+    -   [`image`](#---image)
     -   [`database`](#---database)
         -   [`mysqlDumpfile`](#---databasemysqldumpfile)
         -   [`flushOnRestart`](#---databaseflushonrestart)
@@ -140,7 +141,7 @@ The CLI has seven different operations:
 | ----- | ----------- |
 | `Start WordPress` | This will start the `WordPress` container, as well as create and run the `MySQL` and `phpMyAdmin` containers if they are not already created and running. If the environment's `WordPress` container is already running the CLI will abort with an error. Note that exiting with Ctrl+c will only stop the log stream, not the containers |
 | `Stop WordPress` | This will stop the `WordPress` container for the selected environment. It **will not** stop the `MySQL` and `phpMyAdmin` containers. |
-| `Save snapshot` | This will take a snapshot of the `WordPress` container and use it when calling `Start WordPress` in the future to significantly reduce start-up time. |
+| `Save snapshot` | This will take a snapshot of the `WordPress` container's **filesystem** and save it as a `.tar` file. You can reference snapshot files with the [image](#---image) key in `wp-instances.json` to significantly reduce start-up time. |
 | `Show server logs` | By default, when you start a `WordPress` container with `Start WordPress`, it will stream the `Apache` logs to standard output. You can use this command to pipe the log stream to your console again if you have exited the stream. |
 | `Launch NGROK (local SSL)` | This will start the `ngrok` client for local SSL. Ctrl+c to stop the client. If you use `ngrok`, we **highly recommend** creating a free account on [ngrok.com](https://ngrok.com) so that you get more connections per minute. |
 | `Update dumpfile` | This will only work if you specified [mysqlDumpfile](#---databasemysqldumpfile) in your config. By invoking this command, the dumpfile, which is mounted as a volume in the container, will be overwritten with a dump of the database of the selected environment |
@@ -283,6 +284,12 @@ Reference for the `wp-instances.json` config file.
 - *Optional*
 - *Type: `String[]`*
 - Description: May be any number of absolute or relative paths to `sh` or `bash` scripts to be executed at the end of environment creation. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
+<hr>
+
+### -- image
+- *Optional*
+- *Type: `String`*
+- Description: Absolute or relative path to a `.tar` snapshot file created with the [`Save snapshot`](#cli-usage) command. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
 <hr>
 
 ### -- database
