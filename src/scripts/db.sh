@@ -35,6 +35,15 @@ if [[ -f "/data/db.sql" ]]; then
     fi
 fi
 
+# make sure the database exists and create it if it doesnt
+wp db check &> /dev/null
+exists=$?
+if [ $exists -gt 0 ]; then
+    wp db drop --yes &> /dev/null
+    wp db create
+    wp core install
+fi
+
 siteurl=$(wp option get siteurl)
 if [ "$siteurl" != "${URL_REPLACE}" ]; then
     h2 'Replacing URLs in database (this might take a while)...'
