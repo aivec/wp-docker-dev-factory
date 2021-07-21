@@ -1,11 +1,13 @@
 import logger from '../logger';
 import prompts from 'prompts';
+import { existsSync, mkdirSync } from 'fs';
 import { FinalInstanceConfig } from '../types';
 import { commit } from '../docker/commit';
 import { save } from '../docker/image';
 
 const saveSnapshot = async (config: FinalInstanceConfig): Promise<void> => {
-  logger.info(`Image will be placed in ${logger.yellow(`${config.workingdir}/images`)}`);
+  const imagesdir = `${config.workingdir}/images`;
+  logger.info(`Image will be placed in ${logger.yellow(imagesdir)}`);
   const response = await prompts({
     type: 'text',
     name: 'filename',
@@ -15,7 +17,10 @@ const saveSnapshot = async (config: FinalInstanceConfig): Promise<void> => {
     console.log('\nAborted.');
     process.exit(0);
   }
-  const tarpath = `${config.workingdir}/images/${response.filename}.tar`;
+  if (!existsSync(imagesdir)) {
+    mkdirSync(imagesdir);
+  }
+  const tarpath = `${imagesdir}/${response.filename}.tar`;
   logger.info(`${logger.WHITE}Saving Snapshot (this might take a while)...${logger.NC}`);
   try {
     const { stderr: commiterr } = await commit(config);
