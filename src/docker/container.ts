@@ -4,7 +4,8 @@ export const isRunning = (container: string): boolean => {
   try {
     const res = execSync(`docker inspect -f '{{.State.Status}}' ${container}`, { stdio: 'pipe' })
       .toString()
-      .trim();
+      .trim()
+      .replace(/^\'|\'$/g, '');
     if (res === 'running') {
       return true;
     }
