@@ -46,6 +46,7 @@ const buildFinalConfig = (
     localThemes: configCopy.localThemes ? configCopy.localThemes : [],
     downloadPlugins: configCopy.downloadPlugins ? configCopy.downloadPlugins : [],
     downloadThemes: configCopy.downloadThemes ? configCopy.downloadThemes : [],
+    uploads: configCopy.uploads ? configCopy.uploads : null,
     networkname: 'wpdevinstances',
     containerName: configCopy.instanceName,
     snapshotImage,

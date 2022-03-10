@@ -43,6 +43,10 @@ const validateConfig = (config: InstanceConfig): void => {
     localPathsExistOrExit('image file', [config.image], config.workingdir);
   }
 
+  if (config.uploads) {
+    localPathsExistOrExit('uploads folder', [config.uploads], config.workingdir);
+  }
+
   if (config.customInitScripts) {
     localPathsExistOrExit('script', config.customInitScripts, config.workingdir);
     // vaidateCustomScriptsMode(config.customInitScripts, workingdir);

@@ -5,6 +5,7 @@ export interface InstanceConfig {
   wordpressVersion?: string;
   locale?: string;
   image?: string;
+  uploads?: string;
   customInitScripts?: string[];
   database?: {
     mysqlDumpfile?: string;

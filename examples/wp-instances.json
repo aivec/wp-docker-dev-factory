@@ -5,6 +5,7 @@
   "wordpressVersion": "latest",
   "locale": "en_US",
   "image": "my/wordpress/container/image.tar",
+  "uploads": "my/uploads/folder",
   "database": {
     "mysqlDumpfile": "dumpfiles/testdatabase.sql",
     "flushOnRestart": false,

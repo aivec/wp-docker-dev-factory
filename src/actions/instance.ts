@@ -16,7 +16,6 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     containerName,
     runningFromCache,
     image,
-    workingdir,
     snapshotImage,
     containerPort,
     envvarsMap,

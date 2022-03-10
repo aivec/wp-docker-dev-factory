@@ -1,8 +1,8 @@
 import path from 'path';
 import _ from 'lodash';
+import { resolvePathToAbsolute } from '../utils';
 import { FinalInstanceConfig, InstanceConfig } from '../types';
 import { dockerDumpfilesDirpath, dockerSshDirpath, dockerUserScriptsDirpath } from '../constants';
-import { homedir } from 'os';
 
 const buildVolumePaths = (
   config: FinalInstanceConfig,
@@ -19,22 +19,23 @@ const buildVolumePaths = (
   localPathKeys.forEach(({ key, wpfolder }) => {
     if (config[key]) {
       config[key].forEach((p) => {
-        if (path.isAbsolute(p)) {
-          p = `${homedir()}${p}`;
-        }
-        const abspath = path.resolve(workingdir, p);
+        const abspath = resolvePathToAbsolute(workingdir, p);
         const folder = path.basename(abspath);
         volumes = [...volumes, `-v ${abspath}:/app/wp-content/${wpfolder}/${folder}`];
       });
     }
   });
 
+  if (rawconfig.uploads) {
+    volumes = [
+      ...volumes,
+      `-v ${resolvePathToAbsolute(workingdir, rawconfig.uploads)}:/app/wp-content/uploads`,
+    ];
+  }
+
   if (rawconfig.customInitScripts) {
     rawconfig.customInitScripts.forEach((p) => {
-      if (path.isAbsolute(p)) {
-        p = `${homedir()}${p}`;
-      }
-      const abspath = path.resolve(workingdir, p);
+      const abspath = resolvePathToAbsolute(workingdir, p);
       const script = path.basename(abspath);
       volumes = [...volumes, `-v ${abspath}:${dockerUserScriptsDirpath}/${script}`];
     });
@@ -43,11 +44,7 @@ const buildVolumePaths = (
   if (rawconfig.database) {
     const { mysqlDumpfile } = rawconfig.database;
     if (mysqlDumpfile) {
-      let p = mysqlDumpfile;
-      if (path.isAbsolute(p)) {
-        p = `${homedir()}${p}`;
-      }
-      const abspath = path.resolve(workingdir, p);
+      const abspath = resolvePathToAbsolute(workingdir, mysqlDumpfile);
       // visiblevc's run.sh script will import db.sql automatically on startup
       volumes = [...volumes, `-v ${abspath}:/data/db.sql`];
     }

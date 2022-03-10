@@ -25,6 +25,7 @@ This library is **only for managing development environments** and is not intend
 - Import and replace the database of a **running** environment (with URL replacement)
 - Export an environments database
 - A single `phpMyAdmin` container for all of your environments
+- Mount local `uploads` folder
 
 ## Table of Contents
 -   [Requirements](#requirements)
@@ -45,6 +46,7 @@ This library is **only for managing development environments** and is not intend
     -   [`locale`](#---locale)
     -   [`customInitScripts`](#---customInitScripts)
     -   [`image`](#---image)
+    -   [`uploads`](#---uploads)
     -   [`database`](#---database)
         -   [`mysqlDumpfile`](#---databasemysqldumpfile)
         -   [`flushOnRestart`](#---databaseflushonrestart)
@@ -290,6 +292,12 @@ Reference for the `wp-instances.json` config file.
 - *Optional*
 - *Type: `String`*
 - Description: Absolute or relative path to a `.tar` snapshot file created with the [`Save snapshot`](#cli-usage) command. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
+<hr>
+
+### -- uploads
+- *Optional*
+- *Type: `String`*
+- Description: Absolute or relative path to an `uploads` folder. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
 <hr>
 
 ### -- database
