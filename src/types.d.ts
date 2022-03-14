@@ -6,6 +6,7 @@ export interface InstanceConfig {
   locale?: string;
   image?: string;
   uploads?: string;
+  uploadsUrl?: string;
   customInitScripts?: string[];
   database?: {
     mysqlDumpfile?: string;

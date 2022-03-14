@@ -14,5 +14,6 @@ ${AVC_SCRIPTS_DIR}/ftp_pts.sh
 # ${AVC_SCRIPTS_DIR}/active_plugins.sh
 ${AVC_SCRIPTS_DIR}/startup_state.sh
 ${AVC_SCRIPTS_DIR}/mailhog.sh
+${AVC_SCRIPTS_DIR}/uploads-proxy.sh
 ${AVC_SCRIPTS_DIR}/cache-save-pt-lists.php
 ${AVC_SCRIPTS_DIR}/user_scripts.sh

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Mailhog for WordPress
+ * Plugin Name: Aivec Mailhog for WordPress
  * Description: This plugin routes your emails to MailHog for development.
  * Author: Evan D Shaw
  * Version: 1.0.0

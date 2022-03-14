@@ -53,6 +53,9 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   if (config.ssh) {
     envvars['SSH_CONFIGS'] = JSON.stringify(JSON.stringify(config.ssh)).trim();
   }
+  if (config.uploadsUrl) {
+    envvars['AVC_UPLOADS_BASE_URL'] = config.uploadsUrl;
+  }
 
   // set default values for various WP envvars
   envvars['DB_NAME'] = config.instanceName;

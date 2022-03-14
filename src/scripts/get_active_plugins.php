@@ -1,4 +1,5 @@
 <?php
+
 $host = 'db'; // mysql container
 $user = $argv[1];
 $password = $argv[2];

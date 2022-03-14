@@ -7,6 +7,7 @@ import validatePrivateRemoteFilesConfig from './validatePrivateRemoteFilesConfig
 import validateSSHConfig from './validateSSHConfig';
 import validatePhpVersion from './validatePhpVersion';
 import vaidateCustomScriptsMode from './validateCustomScriptsMode';
+import isStringOrExit from './checkIsString';
 
 const validateConfig = (config: InstanceConfig): void => {
   jsonKeySetCheck(config, 'containerPort');
@@ -50,6 +51,10 @@ const validateConfig = (config: InstanceConfig): void => {
   if (config.customInitScripts) {
     localPathsExistOrExit('script', config.customInitScripts, config.workingdir);
     // vaidateCustomScriptsMode(config.customInitScripts, workingdir);
+  }
+
+  if (config.uploadsUrl) {
+    isStringOrExit(config, 'uploadsUrl');
   }
 
   const prfConfigKeys = ['ssh', 'ftp'];

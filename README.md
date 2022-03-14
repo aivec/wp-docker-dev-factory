@@ -25,6 +25,7 @@ This library is **only for managing development environments** and is not intend
 - Import and replace the database of a **running** environment (with URL replacement)
 - Export an environments database
 - A single `phpMyAdmin` container for all of your environments
+- Use proxy URL for media files
 - Mount local `uploads` folder
 
 ## Table of Contents
@@ -47,6 +48,7 @@ This library is **only for managing development environments** and is not intend
     -   [`customInitScripts`](#---customInitScripts)
     -   [`image`](#---image)
     -   [`uploads`](#---uploads)
+    -   [`uploadsUrl`](#---uploadsUrl)
     -   [`database`](#---database)
         -   [`mysqlDumpfile`](#---databasemysqldumpfile)
         -   [`flushOnRestart`](#---databaseflushonrestart)
@@ -298,6 +300,12 @@ Reference for the `wp-instances.json` config file.
 - *Optional*
 - *Type: `String`*
 - Description: Absolute or relative path to an `uploads` folder. Note that absolute paths are resolved **starting from your home directory** and relative paths are resolved **starting from the folder of the `wp-instances.json` config file**
+<hr>
+
+### -- uploadsUrl
+- *Optional*
+- *Type: `String`*
+- Description: Specify a base URL for the `uploads` folder. If specified, any time a WordPress core function such as `wp_get_attachment_url` is called and the file doesn't exist locally, it will be fetched from the URL. Note that the URL should point to the `ABSPATH` of the WordPress install (eg: `https://www.my-site.com/cms` for a site where `uploads` exists at `cms/wp-content/uploads`).
 <hr>
 
 ### -- database
