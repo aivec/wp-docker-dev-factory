@@ -1,4 +1,4 @@
-import logger from '../logger';
+import logger, { debug } from '../logger';
 import prompts from 'prompts';
 import { existsSync, mkdirSync } from 'fs';
 import { FinalInstanceConfig } from '../types';
@@ -18,6 +18,7 @@ const saveSnapshot = async (config: FinalInstanceConfig): Promise<void> => {
     process.exit(0);
   }
   if (!existsSync(imagesdir)) {
+    debug(`${imagesdir} doesn't exist. Creating now...`);
     mkdirSync(imagesdir);
   }
   const tarpath = `${imagesdir}/${response.filename}.tar`;

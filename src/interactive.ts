@@ -13,6 +13,7 @@ import saveSnapshot from './actions/savesnapshot';
 import logContainer from './actions/logContainer';
 import runNgrok from './actions/ngrok';
 import logger from './logger';
+import { CommandArgs } from './cli';
 
 const environmentSelect = async function (
   config: InstanceConfig | InstanceConfig[],
@@ -119,9 +120,8 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
   });
 };
 
-export const showPrompts = async (): Promise<void> => {
-  const args = process.argv.slice(2);
-  const configfolder = args[0] ? args[0] : null;
+export const showPrompts = async (argv: CommandArgs): Promise<void> => {
+  const configfolder = argv._[0] ? String(argv._[0]) : null;
   let configfile = './wp-instances.json';
   const topdir = path.resolve(path.join(__dirname, '..'));
   let workingdir = cwd();

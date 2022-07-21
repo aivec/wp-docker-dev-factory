@@ -75,4 +75,13 @@ const logger = {
   },
 };
 
+export const debug = (message: any, data?: any): void => {
+  if (process.env.DEBUG) {
+    console.log(`${logger.CYAN}[DEBUG]${logger.NC} ${message}`);
+    if (data) {
+      console.log(data);
+    }
+  }
+};
+
 export default logger;
