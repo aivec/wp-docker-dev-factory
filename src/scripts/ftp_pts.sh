@@ -18,7 +18,7 @@ download_and_install_ftp_pts() {
         pathcount=$(echo $dpaths | jq -r '. | length')
         if [ $pathcount -gt 0 ]; then
             mkdir -p $tempdir
-            pushd $temppdir
+            pushd $tempdir
             pathi=0
             while [ $pathi -lt $pathcount ]; do
                 path=$(echo $dpaths | jq -r --arg index "$pathi" '.[$index | tonumber]')
