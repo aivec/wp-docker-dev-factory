@@ -8,7 +8,7 @@ const makeContainers = ({ topdir, networkname, phpVersion }: FinalInstanceConfig
       stdio: 'inherit',
     },
   );
-  execSync(`docker-compose -p ${networkname} -f ${topdir}/docker/docker-compose.db.yml up -d`, {
+  execSync(`docker compose -p ${networkname} -f ${topdir}/docker/docker-compose.db.yml up -d`, {
     stdio: 'inherit',
   });
 };
