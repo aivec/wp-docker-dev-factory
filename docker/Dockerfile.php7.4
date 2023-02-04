@@ -16,7 +16,7 @@ SHELL ["/bin/sh", "-c"]
 RUN sudo sh -c 'echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini'
 
 # Install xdebug for PHP live debugging in vscode
-RUN yes | sudo pecl install xdebug \
+RUN yes | sudo pecl install xdebug-3.1.6 \
     && sudo sh -c 'echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini' \
     && sudo sh -c 'echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini' \
     && sudo sh -c 'echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini' \
