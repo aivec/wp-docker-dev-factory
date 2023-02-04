@@ -12,8 +12,10 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   const {
     phpVersion,
     flushOnRestart,
+    instanceName,
     networkname,
     containerName,
+    hostName,
     runningFromCache,
     image,
     snapshotImage,
@@ -23,11 +25,22 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     volumes,
   } = config;
 
-  let extras = '';
+  let extras = [];
   const p = platform();
   if (p !== 'darwin' && p !== 'win32') {
     // map host.docker.internal to docker0 bridge IP for linux
-    extras = '--add-host=host.docker.internal:host-gateway';
+    extras = ['--add-host=host.docker.internal:host-gateway'];
+  }
+
+  if (hostName) {
+    extras = [
+      ...extras,
+      `--label='traefik.http.routers.${instanceName}.rule=Host(\`${hostName}\`)'`,
+    ];
+  }
+
+  if (containerPort) {
+    extras = [...extras, `-p ${containerPort}:80`];
   }
 
   let imagename = `wordpress_devenv_visiblevc:latest-${phpVersion}`;
@@ -59,11 +72,11 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
 
   try {
     execSync(
-      `docker run -d --name=${containerName} -p ${containerPort}:80 \
+      `docker run -d --name=${containerName} \
         --cap-add=SYS_ADMIN \
         --device=/dev/fuse \
         --security-opt apparmor=unconfined \
-        ${extras} \
+        ${extras.join(' ')} \
         ${volumes} \
         ${envvars} \
         --network=${networkname}_default \

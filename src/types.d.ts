@@ -1,6 +1,7 @@
 export interface InstanceConfig {
   instanceName: string;
-  containerPort: number;
+  containerPort?: number;
+  hostName?: string;
   phpVersion?: string;
   wordpressVersion?: string;
   locale?: string;
@@ -66,6 +67,7 @@ export interface EnvVarsMap {
 }
 
 export interface FinalInstanceConfig extends InstanceConfig {
+  fullUrl: string;
   runningFromCache: boolean;
   snapshotImage: string;
   containerName: string;

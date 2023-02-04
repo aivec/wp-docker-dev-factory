@@ -32,10 +32,19 @@ const buildFinalConfig = (
     }
     image = path.resolve(workingdir, image);
   }
+  let fullUrl = 'http://localhost';
+  if (config.hostName && config.hostName.length > 0) {
+    fullUrl = `http://${config.hostName}`;
+  }
+  if (config.containerPort) {
+    fullUrl = `${fullUrl}:${config.containerPort}`;
+  }
 
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
     containerPort: configCopy.containerPort,
+    hostName: configCopy.hostName ? configCopy.hostName : null,
+    fullUrl,
     phpVersion,
     wordpressVersion: configCopy.wordpressVersion ? configCopy.wordpressVersion : 'latest',
     locale,

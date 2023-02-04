@@ -8,9 +8,9 @@ import validateSSHConfig from './validateSSHConfig';
 import validatePhpVersion from './validatePhpVersion';
 import vaidateCustomScriptsMode from './validateCustomScriptsMode';
 import isStringOrExit from './checkIsString';
+import validateFullUrl from './validateFullUrl';
 
 const validateConfig = (config: InstanceConfig): void => {
-  jsonKeySetCheck(config, 'containerPort');
   jsonKeySetCheck(config, 'instanceName');
 
   if (config.phpVersion) {
@@ -56,6 +56,12 @@ const validateConfig = (config: InstanceConfig): void => {
   if (config.uploadsUrl) {
     isStringOrExit(config, 'uploadsUrl');
   }
+
+  if (config.hostName) {
+    isStringOrExit(config, 'hostName');
+  }
+
+  validateFullUrl(config);
 
   const prfConfigKeys = ['ssh', 'ftp'];
   prfConfigKeys.forEach((key) => {

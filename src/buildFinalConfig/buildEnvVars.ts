@@ -31,9 +31,8 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   envvars['INSTANCE_NAME'] = config.instanceName;
   envvars['FLUSH_DB_ON_RESTART'] = Number(config.flushOnRestart);
   envvars['RUNNING_FROM_CACHE'] = Number(config.runningFromCache);
-  envvars['URL_REPLACE'] = `http://localhost:${config.containerPort}`;
+  envvars['URL_REPLACE'] = config.fullUrl;
   envvars['DOCKER_BRIDGE_IP'] = config.dockerBridgeIP;
-  envvars['DOCKER_CONTAINER_PORT'] = config.containerPort;
   envvars['ALREADY_INSTALLED_PLUGINS'] = JSON.stringify(
     JSON.stringify(config.alreadyInstalled),
   ).trim();
@@ -55,6 +54,9 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   }
   if (config.uploadsUrl) {
     envvars['AVC_UPLOADS_BASE_URL'] = config.uploadsUrl;
+  }
+  if (config.containerPort) {
+    envvars['DOCKER_CONTAINER_PORT'] = config.containerPort;
   }
 
   // set default values for various WP envvars

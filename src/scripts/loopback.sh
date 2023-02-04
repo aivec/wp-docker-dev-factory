@@ -6,8 +6,12 @@
 # will fail. The failure occurs because the default implementation of things like wp-cron use wp_remote_post to send a request
 # to the server FROM WITHIN THE CONTAINER. Sending any request FROM WITHIN THE CONTAINER to site_url or home_url fails because
 # these URLs contain the port number used BY THE HOST (eg. localhost:9200). From within the container, the WordPress
-# install can only be accessed via localhost:80. The following two lines tell Apache to ALSO LISTEN ON THE HOST PORT for requests
+# install can only be accessed via localhost:80. The following lines tell Apache to ALSO LISTEN ON THE HOST PORT for requests
 # sent from within the container.
+
+if [ -z "${DOCKER_CONTAINER_PORT}" ]; then
+    exit 0
+fi
 
 sudo sed -i '/^#container-port/,+1d' /etc/apache2/ports.conf
 sudo sh -c "echo \"#container-port:\" >> /etc/apache2/ports.conf"
