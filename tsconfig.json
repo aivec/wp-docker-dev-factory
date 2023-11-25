@@ -16,6 +16,6 @@
       "src/*": ["src/*"]
     }
   },
-  "exclude": ["node_modules", "dist", "test"],
+  "exclude": ["webpack.*.js", "node_modules", "dist", "test", "ui"],
   "include": ["src/**/*.ts"]
 }

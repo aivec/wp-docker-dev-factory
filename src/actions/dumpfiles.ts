@@ -7,9 +7,9 @@ import { dockerDumpfilesDirpath, dockerScriptsDirpath } from '../constants';
 import logger from '../logger';
 
 export const redumpWithSelectedDumpfile = async ({
+  fullUrl,
   containerName,
   workingdir,
-  containerPort,
 }: FinalInstanceConfig): Promise<void> => {
   try {
     const dumpfilesDir = path.resolve(workingdir, 'dumpfiles');
@@ -37,7 +37,6 @@ export const redumpWithSelectedDumpfile = async ({
       },
     );
 
-    const replacementUrl = `http://localhost:${containerPort}`;
     const wpcmds = [
       'wp db drop --yes',
       'wp db create',
@@ -46,7 +45,7 @@ export const redumpWithSelectedDumpfile = async ({
       // in the search... Even though running the command directly from the command line will only output a
       // warning message if no hits were found... super annoying
       `siteurl=$(wp option get siteurl)`,
-      `if [ "$siteurl" != "${replacementUrl}" ]; then wp search-replace $siteurl ${replacementUrl}; fi`,
+      `if [ "$siteurl" != "${fullUrl}" ]; then wp search-replace $siteurl ${fullUrl}; fi`,
       'wp core update-db',
     ];
     exec(
