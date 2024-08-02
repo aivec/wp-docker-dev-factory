@@ -1,5 +1,6 @@
 FROM visiblevc/wordpress:latest-php7.3
 
+RUN sudo sed -i s/ftp\.debian/archive\.debian/ /etc/apt/sources.list
 RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp \
         libfreetype6-dev \
         libmcrypt-dev \
