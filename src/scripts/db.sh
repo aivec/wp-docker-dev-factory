@@ -3,8 +3,8 @@
 source ${AVC_SCRIPTS_DIR}/logging.sh
 
 dbname=$(wp config get DB_NAME)
-if [ "$dbname" != "$DB_NAME" ]; then
-    wp config set DB_NAME $DB_NAME
+if [ "$dbname" != "$WORDPRESS_DB_NAME" ]; then
+    wp config set DB_NAME $WORDPRESS_DB_NAME
 fi
 
 table_prefix=$(wp config get table_prefix)

@@ -53,7 +53,7 @@ export interface FtpMeta {
 
 export interface FtpConfig extends PrivateRemoteFilesConfig, FtpMeta {}
 export interface EnvVarsMap {
-  DB_NAME: string;
+  WORDPRESS_DB_NAME: string;
   DB_PREFIX: string;
   DOCKER_BRIDGE_IP: string;
   DOCKER_CONTAINER_PORT: string;

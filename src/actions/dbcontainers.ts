@@ -5,6 +5,7 @@ const makeContainers = ({
   topdir,
   networkname,
   phpVersion,
+  envvarsMap,
   hostName,
 }: FinalInstanceConfig): void => {
   execSync(
@@ -17,8 +18,9 @@ const makeContainers = ({
   if (hostName) {
     services = [...services, 'reverse-proxy'];
   }
+  const setenv = `export WORDPRESS_DB_NAME=${envvarsMap.WORDPRESS_DB_NAME} &&`;
   execSync(
-    `docker compose -p ${networkname} -f ${topdir}/docker/docker-compose.db.yml up -d ${services.join(
+    `${setenv} docker compose -p ${networkname} -f ${topdir}/docker/docker-compose.db.yml up -d ${services.join(
       ' ',
     )}`,
     {

@@ -60,12 +60,12 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   }
 
   // set default values for various WP envvars
-  envvars['DB_NAME'] = config.instanceName;
-  envvars['DB_PREFIX'] = 'wp_';
-  envvars['DB_HOST'] = 'aivec_wp_mysql';
-  envvars['DB_USER'] = 'root';
-  envvars['DB_PASS'] = 'root';
-  envvars['WP_DEBUG'] = 'true';
+  envvars['WORDPRESS_DB_NAME'] = config.instanceName;
+  envvars['WORDPRESS_TABLE_PREFIX'] = 'wp_';
+  envvars['WORDPRESS_DB_HOST'] = 'aivec_wp_mysql';
+  envvars['WORDPRESS_DB_USER'] = 'root';
+  envvars['WORDPRESS_DB_PASSWORD'] = 'root';
+  envvars['WORDPRESS_DEBUG'] = 'true';
   envvars['WP_DEBUG_DISPLAY'] = 'true';
   envvars['WP_DEBUG_LOG'] = 'true';
   envvars['WP_LOCALE'] = config.locale;
@@ -74,10 +74,10 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   if (config.database) {
     const { dbName, dbPrefix } = config.database;
     if (dbName) {
-      envvars['DB_NAME'] = dbName;
+      envvars['WORDPRESS_DB_NAME'] = dbName;
     }
     if (dbPrefix) {
-      envvars['DB_PREFIX'] = dbPrefix;
+      envvars['WORDPRESS_TABLE_PREFIX'] = dbPrefix;
     }
   }
 

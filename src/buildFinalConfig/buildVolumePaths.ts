@@ -61,11 +61,11 @@ const buildVolumePaths = (
     volumes = [...volumes, ...keyPathVolumes];
   }
 
-  volumes = [
+  /* volumes = [
     ...volumes,
     // mounting a script here tells the visiblevc run.sh script to run it before starting apache
-    `-v ${path.resolve(topdir, `src/scripts/initwp.sh`)}:/docker-entrypoint-initwp.d/initwp.sh`,
-  ];
+    `-v ${path.resolve(topdir, `src/scripts/initwp.sh`)}:/docker-entrypoint-initwp.d/run.sh`,
+  ]; */
 
   volumes = [...volumes, `-v ${path.resolve(workingdir, 'dumpfiles')}:${dockerDumpfilesDirpath}`];
 

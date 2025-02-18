@@ -62,7 +62,7 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     if (flushOnRestart) {
       try {
         execSync(
-          `docker exec -i aivec_wp_mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS \`${envvarsMap.DB_NAME}\`;'`,
+          `docker exec -i aivec_wp_mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS \`${envvarsMap.WORDPRESS_DB_NAME}\`;'`,
         );
       } catch (e) {
         console.log(e);
@@ -73,9 +73,6 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   try {
     execSync(
       `docker run -d --name=${containerName} \
-        --cap-add=SYS_ADMIN \
-        --device=/dev/fuse \
-        --security-opt apparmor=unconfined \
         ${extras.join(' ')} \
         ${volumes} \
         ${envvars} \
