@@ -17,11 +17,11 @@ const runNgrok = async (config: FinalInstanceConfig): Promise<void> => {
 
   try {
     execSync(
-      `docker exec -i ${config.containerName} sed -i '/all, stop editing!/ a define("WP_SITEURL", "http://" . $_SERVER["HTTP_HOST"]);' /app/wp-config.php`,
+      `docker exec -i ${config.containerName} sed -i '/all, stop editing!/ a define("WP_SITEURL", "http://" . $_SERVER["HTTP_HOST"]);' /var/www/html/wp-config.php`,
       { stdio: 'inherit' },
     );
     execSync(
-      `docker exec -i ${config.containerName} sed -i '/all, stop editing!/ a define("WP_HOME", "http://" . $_SERVER["HTTP_HOST"]);' /app/wp-config.php`,
+      `docker exec -i ${config.containerName} sed -i '/all, stop editing!/ a define("WP_HOME", "http://" . $_SERVER["HTTP_HOST"]);' /var/www/html/wp-config.php`,
       { stdio: 'inherit' },
     );
   } catch (e) {

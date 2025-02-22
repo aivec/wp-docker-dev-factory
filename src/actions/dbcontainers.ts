@@ -14,7 +14,7 @@ const makeContainers = ({
       stdio: 'inherit',
     },
   );
-  let services = ['db', 'phpmyadmin', 'mailhog'];
+  /* let services = ['db', 'phpmyadmin', 'mailhog'];
   if (hostName) {
     services = [...services, 'reverse-proxy'];
   }
@@ -26,7 +26,7 @@ const makeContainers = ({
     {
       stdio: 'inherit',
     },
-  );
+  ); */
 };
 
 export default makeContainers;

@@ -1,38 +1,24 @@
 services:
-  reverse-proxy:
-    # The official v2 Traefik docker image
-    image: traefik:v2.9
-    container_name: aivec_wp_reverse_proxy
-    # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
-    ports:
-      # The HTTP port
-      - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8888:8080"
-    volumes:
-      # So that Traefik can listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock
   db:
     image: mariadb:10 # or mysql:5.7
-    container_name: aivec_wp_mysql
     restart: always
-    ports:
-      - "9911:3306"
+    container_name: ${WORDPRESS_DB_HOST}
+    networks:
+      - local-wp-net
     volumes:
       - data:/var/lib/mysql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME:-wordpress}
-  mailhog:
-    image: mailhog/mailhog
-    container_name: mailhog
-    ports:
-      - 8025:8025
-    labels:
-      - "traefik.http.routers.mailhog.rule=Host(`wp.email.localhost`)"
-      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
+    # labels:
+    #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.entrypoints=mysql"
+    #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.rule=HostSNI(`${DB_HOSTNAME:?error}.localhost`)"
+    #   # - "traefik.tcp.services.${DB_HOSTNAME:?error}.loadbalancer.server.port=3306"
 volumes: 
   data:
+networks:
+  local-wp-net:
+    name: local-wp-net

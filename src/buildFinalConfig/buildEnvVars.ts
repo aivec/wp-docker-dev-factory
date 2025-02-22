@@ -62,7 +62,7 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   // set default values for various WP envvars
   envvars['WORDPRESS_DB_NAME'] = config.instanceName;
   envvars['WORDPRESS_TABLE_PREFIX'] = 'wp_';
-  envvars['WORDPRESS_DB_HOST'] = 'aivec_wp_mysql';
+  envvars['WORDPRESS_DB_HOST'] = `wpdb-${config.instanceName}`;
   envvars['WORDPRESS_DB_USER'] = 'root';
   envvars['WORDPRESS_DB_PASSWORD'] = 'root';
   envvars['WORDPRESS_DEBUG'] = 'true';

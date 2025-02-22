@@ -21,7 +21,7 @@ const buildVolumePaths = (
       config[key].forEach((p) => {
         const abspath = resolvePathToAbsolute(workingdir, p);
         const folder = path.basename(abspath);
-        volumes = [...volumes, `-v ${abspath}:/app/wp-content/${wpfolder}/${folder}`];
+        volumes = [...volumes, `-v ${abspath}:/var/www/html/wp-content/${wpfolder}/${folder}`];
       });
     }
   });
@@ -29,7 +29,7 @@ const buildVolumePaths = (
   if (rawconfig.uploads) {
     volumes = [
       ...volumes,
-      `-v ${resolvePathToAbsolute(workingdir, rawconfig.uploads)}:/app/wp-content/uploads`,
+      `-v ${resolvePathToAbsolute(workingdir, rawconfig.uploads)}:/var/www/html/wp-content/uploads`,
     ];
   }
 

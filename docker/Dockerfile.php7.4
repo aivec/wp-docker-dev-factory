@@ -1,34 +1,23 @@
-FROM visiblevc/wordpress:latest-php7.4
-
-RUN sudo sed -i s/ftp\.debian/archive\.debian/ /etc/apt/sources.list
-RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends lftp \
-        libfreetype6-dev \
-        libmcrypt-dev \
-        libjpeg-dev \
-        libpng-dev \
-        ssh \
-        jq
-RUN sudo -E docker-php-ext-configure gd --with-freetype=/usr/freetype2 --with-jpeg=/usr
-RUN sudo -E docker-php-ext-install pdo_mysql gd
+FROM wordpress:php7.4-apache
 
 SHELL ["/bin/sh", "-c"]
 
 # Strict error/notice reporting
-RUN sudo sh -c 'echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini'
+RUN sh -c 'echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini'
 
 # Install xdebug for PHP live debugging in vscode
-RUN yes | sudo pecl install xdebug-3.1.6 \
-    && sudo sh -c 'echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sudo sh -c 'echo "xdebug.log=/app/xdebug_log" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+RUN yes | pecl install xdebug-3.1.6 \
+    && sh -c 'echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sh -c 'echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sh -c 'echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sh -c 'echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && sh -c 'echo "xdebug.log=/var/www/html/xdebug_log" >> /usr/local/etc/php/conf.d/xdebug.ini' \
     # until an option is added to suppress the `[Step Debug] Could not connect to debugging client.` error message,
     # we set the log_level to 0
-    && sudo sh -c 'echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini'
+    && sh -c 'echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini'
 
-RUN touch /app/xdebug_log
+RUN touch /var/www/html/xdebug_log
 
-COPY src/scripts /avc-wpdocker-meta/scripts
-
-CMD ["/run.sh"]
+# COPY src/scripts /avc-wpdocker-meta/scripts
+# 
+# CMD ["/run.sh"]

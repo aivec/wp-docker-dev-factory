@@ -23,6 +23,7 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     envvarsMap,
     envvars,
     volumes,
+    topdir,
   } = config;
 
   let extras = [];
@@ -43,6 +44,23 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     extras = [...extras, `-p ${containerPort}:80`];
   }
 
+  // start common containers
+  try {
+    execSync(`docker compose -f ${topdir}/docker/docker-compose.common.yml up -d`);
+  } catch (e) {
+    console.log(e);
+  }
+
+  // start db container
+  try {
+    const setenv = `export WORDPRESS_DB_NAME=${envvarsMap.WORDPRESS_DB_NAME} && export WORDPRESS_DB_HOST=${envvarsMap.WORDPRESS_DB_HOST} &&`;
+    execSync(
+      `${setenv} docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.db.yml up -d`,
+    );
+  } catch (e) {
+    console.log(e);
+  }
+
   let imagename = `wordpress_devenv_visiblevc:latest-${phpVersion}`;
   if (runningFromCache) {
     try {
@@ -58,25 +76,16 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
       console.log(error);
       logger.error('Failed loading image file.');
     }
-  } else {
-    if (flushOnRestart) {
-      try {
-        execSync(
-          `docker exec -i aivec_wp_mysql mysql -uroot -proot -e 'DROP DATABASE IF EXISTS \`${envvarsMap.WORDPRESS_DB_NAME}\`;'`,
-        );
-      } catch (e) {
-        console.log(e);
-      }
-    }
   }
 
   try {
+    console.log(volumes);
     execSync(
       `docker run -d --name=${containerName} \
         ${extras.join(' ')} \
         ${volumes} \
         ${envvars} \
-        --network=${networkname}_default \
+        --network=local-wp-net \
         ${imagename}`,
       { stdio: 'inherit' },
     );
