@@ -3,3 +3,4 @@ dumpfiles
 /projects
 /dist
 node_modules
+tmp

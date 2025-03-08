@@ -17,6 +17,20 @@ services:
     #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.entrypoints=mysql"
     #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.rule=HostSNI(`${DB_HOSTNAME:?error}.localhost`)"
     #   # - "traefik.tcp.services.${DB_HOSTNAME:?error}.loadbalancer.server.port=3306"
+  app:
+    profiles:
+      - website
+    image: ${WORDPRESS_APP_IMAGE_NAME}
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.${PHP_VERSION}
+    env_file:
+      - tmp/.env
+    container_name: ${WORDPRESS_APP_CONTAINER_NAME}
+    networks:
+      - local-wp-net
+    labels:
+      - "traefik.http.routers.${WORDPRESS_APP_CONTAINER_NAME:?error}.rule=Host(`${WORDPRESS_APP_HOST_NAME}`)"
 volumes: 
   data:
 networks:

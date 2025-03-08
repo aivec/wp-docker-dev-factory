@@ -1,22 +1,34 @@
 FROM wordpress:6.6.1-php8.3-apache
 
-SHELL ["/bin/sh", "-c"]
-
 # Strict error/notice reporting
-RUN sh -c 'echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini'
+RUN echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini
 
 # Install xdebug for PHP live debugging in vscode
 RUN yes | pecl install xdebug \
-    && sh -c 'echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sh -c 'echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sh -c 'echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sh -c 'echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini' \
-    && sh -c 'echo "xdebug.log=/var/www/html/xdebug_log" >> /usr/local/etc/php/conf.d/xdebug.ini' \
+    && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.log=/var/www/html/xdebug_log" >> /usr/local/etc/php/conf.d/xdebug.ini \
     # until an option is added to suppress the `[Step Debug] Could not connect to debugging client.` error message,
     # we set the log_level to 0
-    && sh -c 'echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini'
+    && echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini
 
 RUN touch /var/www/html/xdebug_log
+
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
+
+# COPY tmp/.env .env
+RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
+# RUN sed -i '1a . `pwd`/.env' /usr/local/bin/docker-entrypoint.sh
+# RUN docker-entrypoint.sh apache2-foreground
+# RUN echo "#!/usr/bin/env bash" > /usr/local/bin/docker-entrypoint.sh
+RUN echo 'wp --allow-root plugin install usc-e-shop' >> /usr/local/bin/docker-entrypoint.sh
+RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
+# RUN php -d memory_limit=512M "$(which wp)" --allow-root core download
+
 
 # COPY src/scripts /avc-wpdocker-meta/scripts
 

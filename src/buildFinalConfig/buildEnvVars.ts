@@ -70,6 +70,10 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   envvars['WP_DEBUG_LOG'] = 'true';
   envvars['WP_LOCALE'] = config.locale;
   envvars['WP_VERSION'] = config.wordpressVersion;
+  envvars['PHP_VERSION'] = config.phpVersion;
+  envvars['WORDPRESS_APP_IMAGE_NAME'] = `wp-local:latest-${config.phpVersion}`;
+  envvars['WORDPRESS_APP_CONTAINER_NAME'] = config.instanceName;
+  envvars['WORDPRESS_APP_HOST_NAME'] = config.hostName;
 
   if (config.database) {
     const { dbName, dbPrefix } = config.database;

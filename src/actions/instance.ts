@@ -1,5 +1,6 @@
 import { FinalInstanceConfig } from '../types';
 import { platform } from 'os';
+import fs from 'fs';
 import { execSync } from 'child_process';
 import makeContainers from './dbcontainers';
 import { load } from '../docker/load';
@@ -7,7 +8,6 @@ import logger from '../logger';
 
 const runContainer = async function (config: FinalInstanceConfig): Promise<void> {
   logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
-  makeContainers(config);
 
   const {
     phpVersion,
@@ -61,32 +61,17 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     console.log(e);
   }
 
-  let imagename = `wordpress_devenv_visiblevc:latest-${phpVersion}`;
-  if (runningFromCache) {
-    try {
-      logger.info(`Loading ${logger.green(image)} (this might take a while)...`);
-      const { stderr: loaderr } = await load(image);
-      if (loaderr) {
-        console.log(loaderr.toString());
-        logger.error('Failed loading image file.');
-        process.exit(1);
-      }
-      imagename = snapshotImage;
-    } catch (error) {
-      console.log(error);
-      logger.error('Failed loading image file.');
-    }
-  }
-
+  const imagename = `wp-local:latest-${phpVersion}`;
   try {
-    console.log(volumes);
+    // Convert object to .env format
+    const envContent = Object.entries(envvarsMap)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n');
+
+    // Write to .env file
+    fs.writeFileSync(`${topdir}/tmp/.env`, envContent);
     execSync(
-      `docker run -d --name=${containerName} \
-        ${extras.join(' ')} \
-        ${volumes} \
-        ${envvars} \
-        --network=local-wp-net \
-        ${imagename}`,
+      `. ${topdir}/tmp/.env && docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.db.yml up -d app`,
       { stdio: 'inherit' },
     );
   } catch (e) {

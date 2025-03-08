@@ -1,6 +1,7 @@
 import logger from '../logger';
 import { execSync } from 'child_process';
 import { FinalInstanceConfig } from '../types';
+import fs from 'fs';
 
 const stopContainers = async (config: FinalInstanceConfig): Promise<void> => {
   logger.info(`${logger.WHITE}Stopping WordPress...${logger.NC}`);
@@ -9,16 +10,22 @@ const stopContainers = async (config: FinalInstanceConfig): Promise<void> => {
   } catch (error) {
     // doesnt matter if container isn't running....
   }
-  try {
+  /* try {
     execSync(`docker rm ${config.containerName}`, { stdio: 'pipe' });
   } catch (error) {
     console.log(error.stderr.toString());
-  }
+  } */
   logger.info(`${logger.WHITE}Stopping database...${logger.NC}`);
   try {
-    const setenv = `export WORDPRESS_DB_NAME=${config.envvarsMap.WORDPRESS_DB_NAME} && export WORDPRESS_DB_HOST=${config.envvarsMap.WORDPRESS_DB_HOST} &&`;
+    // Convert object to .env format
+    const envContent = Object.entries(config.envvarsMap)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n');
+
+    // Write to .env file
+    fs.writeFileSync(`${config.topdir}/tmp/.env`, envContent);
     execSync(
-      `${setenv} docker compose -p ${config.instanceName} -f ${config.topdir}/docker/docker-compose.db.yml down`,
+      `. ${config.topdir}/tmp/.env && docker compose -p ${config.instanceName} -f ${config.topdir}/docker/docker-compose.db.yml down`,
       {
         stdio: 'pipe',
       },
