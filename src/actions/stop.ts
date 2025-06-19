@@ -23,9 +23,9 @@ const stopContainers = async (config: FinalInstanceConfig): Promise<void> => {
       .join('\n');
 
     // Write to .env file
-    fs.writeFileSync(`${config.topdir}/tmp/.env`, envContent);
+    fs.writeFileSync(`${config.topdir}/docker/.env`, envContent);
     execSync(
-      `. ${config.topdir}/tmp/.env && docker compose -p ${config.instanceName} -f ${config.topdir}/docker/docker-compose.db.yml down`,
+      `docker compose -p ${config.instanceName} -f ${config.topdir}/docker/docker-compose.wp.yml down`,
       {
         stdio: 'pipe',
       },

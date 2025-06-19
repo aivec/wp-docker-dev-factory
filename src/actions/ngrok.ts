@@ -8,9 +8,12 @@ const runNgrok = async (config: FinalInstanceConfig): Promise<void> => {
   process.env.containerName = config.containerName;
 
   try {
-    execSync(`docker exec -i ${config.containerName} wp plugin activate relative-url`, {
-      stdio: 'inherit',
-    });
+    execSync(
+      `docker exec -i ${config.containerName} wp --allow-root plugin activate relative-url`,
+      {
+        stdio: 'inherit',
+      },
+    );
   } catch (e) {
     console.log(e);
   }
@@ -45,9 +48,12 @@ process.on('SIGINT', () => {
   }
 
   try {
-    execSync(`docker exec -i ${process.env.containerName} wp plugin deactivate relative-url`, {
-      stdio: 'inherit',
-    });
+    execSync(
+      `docker exec -i ${process.env.containerName} wp --allow-root plugin deactivate relative-url`,
+      {
+        stdio: 'inherit',
+      },
+    );
   } catch (e) {
     console.log(e);
   }

@@ -1,4 +1,5 @@
 import { FinalInstanceConfig, EnvVarsMap } from '../types';
+import { userInfo } from 'os';
 import {
   dockerMetaDirpath,
   dockerScriptsDirpath,
@@ -17,6 +18,11 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   if (userenvs) {
     envvars = { ...envvars, ...userenvs };
   }
+
+  // user and group to run wordpress container as
+  const user = userInfo();
+  envvars['USER_ID'] = user.uid;
+  envvars['GROUP_ID'] = user.gid;
 
   // pass meta paths
   envvars['AVC_META_DIR'] = dockerMetaDirpath;
@@ -60,9 +66,10 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   }
 
   // set default values for various WP envvars
-  envvars['WORDPRESS_DB_NAME'] = config.instanceName;
+  // envvars['WORDPRESS_DB_NAME'] = config.instanceName;
   envvars['WORDPRESS_TABLE_PREFIX'] = 'wp_';
-  envvars['WORDPRESS_DB_HOST'] = `wpdb-${config.instanceName}`;
+  // envvars['WORDPRESS_DB_HOST'] = `wpdb-${config.instanceName}`;
+  envvars['WORDPRESS_DB_HOST'] = `db:3306`;
   envvars['WORDPRESS_DB_USER'] = 'root';
   envvars['WORDPRESS_DB_PASSWORD'] = 'root';
   envvars['WORDPRESS_DEBUG'] = 'true';
@@ -71,7 +78,7 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   envvars['WP_LOCALE'] = config.locale;
   envvars['WP_VERSION'] = config.wordpressVersion;
   envvars['PHP_VERSION'] = config.phpVersion;
-  envvars['WORDPRESS_APP_IMAGE_NAME'] = `wp-local:latest-${config.phpVersion}`;
+  envvars['WORDPRESS_APP_IMAGE_NAME'] = config.instanceName;
   envvars['WORDPRESS_APP_CONTAINER_NAME'] = config.instanceName;
   envvars['WORDPRESS_APP_HOST_NAME'] = config.hostName;
 

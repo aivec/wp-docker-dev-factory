@@ -8,7 +8,7 @@
 # ${AVC_SCRIPTS_DIR}/db.sh
 # ${AVC_SCRIPTS_DIR}/loopback.sh
 # ${AVC_SCRIPTS_DIR}/language.sh
-# ${AVC_SCRIPTS_DIR}/download_pts.sh
+${AVC_SCRIPTS_DIR}/download_pts.sh
 # ${AVC_SCRIPTS_DIR}/ssh_pts.sh
 # ${AVC_SCRIPTS_DIR}/ftp_pts.sh
 # # ${AVC_SCRIPTS_DIR}/active_plugins.sh

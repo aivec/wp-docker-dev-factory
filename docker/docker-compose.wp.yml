@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mariadb:10 # or mysql:5.7
+    restart: always
+    # container_name: ${WORDPRESS_DB_HOST}
+    networks:
+      - local-wp-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - data:/var/lib/mysql
+      # - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - 5001:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: wordpress
+    # labels:
+    #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.entrypoints=mysql"
+    #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.rule=HostSNI(`${DB_HOSTNAME:?error}.localhost`)"
+    #   # - "traefik.tcp.services.${DB_HOSTNAME:?error}.loadbalancer.server.port=3306"
+  app:
+    profiles:
+      - website
+    image: ${WORDPRESS_APP_IMAGE_NAME}
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.php${PHP_VERSION}
+    # user: "${USER_ID}:${GROUP_ID}"
+    env_file:
+      - .env
+    container_name: ${WORDPRESS_APP_CONTAINER_NAME}
+    networks:
+      - local-wp-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      - "traefik.http.routers.${WORDPRESS_APP_CONTAINER_NAME:?error}.rule=Host(\
+        `${WORDPRESS_APP_HOST_NAME}`)"
+    volumes:
+      - /home/evan/aivec-devenv-configs/dumpfiles:/avc-wpdocker-meta/dumpfiles
+      - /home/evan/workspace/aivec/wordpress/plugins/wcex-amazonpay:/var/www/html/wp-content/plugins/wcex-amazonpay
+    ports:
+      - 3232:80
+volumes:
+  data:
+networks:
+  local-wp-net:
+    name: local-wp-net

@@ -12,6 +12,7 @@ export const redumpWithSelectedDumpfile = async ({
   workingdir,
 }: FinalInstanceConfig): Promise<void> => {
   try {
+    console.log(containerName);
     const dumpfilesDir = path.resolve(workingdir, 'dumpfiles');
     const dumpfiles = fs
       .readdirSync(dumpfilesDir, { withFileTypes: true })
@@ -38,15 +39,15 @@ export const redumpWithSelectedDumpfile = async ({
     );
 
     const wpcmds = [
-      'wp db drop --yes',
-      'wp db create',
-      `wp db import ${selection}`,
+      'wp --allow-root db drop --yes',
+      'wp --allow-root db create',
+      `wp --allow-root db import ${selection}`,
       // we have to check whether a search-replace is required because the command will fail if no hits were found
       // in the search... Even though running the command directly from the command line will only output a
       // warning message if no hits were found... super annoying
-      `siteurl=$(wp option get siteurl)`,
-      `if [ "$siteurl" != "${fullUrl}" ]; then wp search-replace $siteurl ${fullUrl}; fi`,
-      'wp core update-db',
+      `siteurl=$(wp --allow-root option get siteurl)`,
+      `if [ "$siteurl" != "${fullUrl}" ]; then wp --allow-root search-replace $siteurl ${fullUrl}; fi`,
+      'wp --allow-root core update-db',
     ];
     exec(
       `docker exec -i ${containerName} /bin/sh -c '${wpcmds.join(' && ')}'`,

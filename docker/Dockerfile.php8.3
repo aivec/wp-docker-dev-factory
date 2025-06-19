@@ -1,35 +1,56 @@
-FROM wordpress:6.6.1-php8.3-apache
+FROM wordpress:6.7-php8.3-apache
+
+RUN apt update && apt install -y \
+    # for wp cli
+    default-mysql-client
 
 # Strict error/notice reporting
 RUN echo "error_reporting=E_ALL" >> /usr/local/etc/php/php.ini
 
 # Install xdebug for PHP live debugging in vscode
-RUN yes | pecl install xdebug \
-    && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
+RUN yes | pecl install xdebug
+RUN touch /var/www/html/xdebug_log
+RUN echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.client_port=9900" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.log=/var/www/html/xdebug_log" >> /usr/local/etc/php/conf.d/xdebug.ini \
     # until an option is added to suppress the `[Step Debug] Could not connect to debugging client.` error message,
     # we set the log_level to 0
-    && echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini
-
-RUN touch /var/www/html/xdebug_log
+    && echo "xdebug.log_level=1" >> /usr/local/etc/php/conf.d/xdebug.ini
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-# COPY tmp/.env .env
-RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
+# RUN apt update && apt install less
+# COPY docker/.env .env
+# RUN cp /usr/src/wordpress/wp-config-docker.php /usr/src/wordpress/wp-config.php
+# RUN chown www-data:www-data /usr/src/wordpress/wp-config.php
+# COPY --chown=www-data:www-data docker/wp-config-docker.php /usr/src/wordpress/wp-config.php
+# ENV WORDPRESS_DB_HOST=localhost:5001
+# ENV WORDPRESS_DB_USER=admin
+# ENV WORDPRESS_DB_PASSWORD=admin
+# ENV WORDPRESS_DB_NAME=wordpress
+# COPY docker/test_connection.php test_connection.php
+# RUN php test_connection.php
+# RUN wp --allow-root core install --debug --path=/usr/src/wordpress --title=test --admin_user=admin --admin_password=admin --admin_email=admin@example.com
+
+# RUN ls -la /usr/src/wordpress && exit 1
+# RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
 # RUN sed -i '1a . `pwd`/.env' /usr/local/bin/docker-entrypoint.sh
 # RUN docker-entrypoint.sh apache2-foreground
 # RUN echo "#!/usr/bin/env bash" > /usr/local/bin/docker-entrypoint.sh
-RUN echo 'wp --allow-root plugin install usc-e-shop' >> /usr/local/bin/docker-entrypoint.sh
-RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
+# RUN echo 'wp --allow-root plugin install usc-e-shop' >> /usr/local/bin/docker-entrypoint.sh
+# RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
 # RUN php -d memory_limit=512M "$(which wp)" --allow-root core download
 
-
+# RUN apt update && apt install -y jq
+# RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
+# RUN echo '${AVC_SCRIPTS_DIR}/download_pts.sh' >> /usr/local/bin/docker-entrypoint.sh
+# RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
+# 
 # COPY src/scripts /avc-wpdocker-meta/scripts
 
 # CMD ["/run.sh"]

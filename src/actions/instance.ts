@@ -1,6 +1,8 @@
 import { FinalInstanceConfig } from '../types';
 import { platform } from 'os';
 import fs from 'fs';
+import path from 'path';
+import YAML from 'yaml';
 import { execSync } from 'child_process';
 import makeContainers from './dbcontainers';
 import { load } from '../docker/load';
@@ -51,27 +53,47 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     console.log(e);
   }
 
+  // Convert object to .env format
+  const envContent = Object.entries(envvarsMap)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n');
+  // Write to .env file
+  const envfpath = `${topdir}/docker/.env`;
+  fs.writeFileSync(envfpath, envContent);
+
   // start db container
   try {
-    const setenv = `export WORDPRESS_DB_NAME=${envvarsMap.WORDPRESS_DB_NAME} && export WORDPRESS_DB_HOST=${envvarsMap.WORDPRESS_DB_HOST} &&`;
-    execSync(
-      `${setenv} docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.db.yml up -d`,
-    );
+    execSync(`docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d`);
   } catch (e) {
     console.log(e);
   }
 
-  const imagename = `wp-local:latest-${phpVersion}`;
-  try {
-    // Convert object to .env format
-    const envContent = Object.entries(envvarsMap)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('\n');
+  // Read and parse the template
+  const file = fs.readFileSync(`${topdir}/docker/docker-compose.template.yml`, 'utf8');
+  const doc = YAML.parseDocument(file);
 
-    // Write to .env file
-    fs.writeFileSync(`${topdir}/tmp/.env`, envContent);
+  // Inject markup
+  if (config.containerPort) {
+    doc.setIn(['services', 'app', 'ports'], [`${config.containerPort}:80`]);
+  }
+
+  // Write to new file
+  fs.writeFileSync(`${topdir}/docker/docker-compose.wp.yml`, doc.toString(), 'utf8');
+  try {
+    /* execSync(
+      `docker buildx create --name container-network-builder --driver docker-container --driver-opt network=local-wp-net --use`,
+    );
     execSync(
-      `. ${topdir}/tmp/.env && docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.db.yml up -d app`,
+      `docker buildx build --network=local-wp-net -t ${envvarsMap.WORDPRESS_APP_IMAGE_NAME} -f ${topdir}/docker/Dockerfile.php${envvarsMap.PHP_VERSION} --load ${topdir}`,
+    ); */
+    execSync(
+      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml build app`,
+      {
+        stdio: 'inherit',
+      },
+    );
+    execSync(
+      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d app`,
       { stdio: 'inherit' },
     );
   } catch (e) {

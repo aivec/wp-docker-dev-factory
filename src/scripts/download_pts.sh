@@ -22,15 +22,13 @@ download_and_install_pts() {
     fi
 }
 
-if [ $RUNNING_FROM_CACHE -eq 1 ]; then
-    if [[ ! -z ${DOWNLOAD_THEMES} ]]; then
-        # download and install themes
-        h2 "Checking themes..."
-        download_and_install_pts "theme" "$DOWNLOAD_THEMES"
-    fi
-    if [[ ! -z ${DOWNLOAD_PLUGINS} ]]; then
-        # download and install plugins
-        h2 "Checking plugins..."
-        download_and_install_pts "plugin" "$DOWNLOAD_PLUGINS"
-    fi
+if [[ ! -z ${DOWNLOAD_THEMES} ]]; then
+    # download and install themes
+    h2 "Checking themes..."
+    download_and_install_pts "theme" "$DOWNLOAD_THEMES"
+fi
+if [[ ! -z ${DOWNLOAD_PLUGINS} ]]; then
+    # download and install plugins
+    h2 "Checking plugins..."
+    download_and_install_pts "plugin" "$DOWNLOAD_PLUGINS"
 fi

@@ -20,7 +20,7 @@ const makeContainers = ({
   }
   const setenv = `export WORDPRESS_DB_NAME=${envvarsMap.WORDPRESS_DB_NAME} &&`;
   execSync(
-    `${setenv} docker compose -p ${networkname} -f ${topdir}/docker/docker-compose.db.yml up -d ${services.join(
+    `${setenv} docker compose -p ${networkname} -f ${topdir}/docker/docker-compose.wp.yml up -d ${services.join(
       ' ',
     )}`,
     {
