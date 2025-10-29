@@ -19,7 +19,7 @@ This library is **only for managing development environments** and is not intend
 - `ngrok` support for easy SSL testing on localhost
 - Take a snapshot of your environment and re-use for significantly reduced start-up time
 - Configurable WordPress version
-- Configurable PHP version (`7.2`, `7.3`, `7.4`, or `8.0`)
+- Configurable PHP version (`7.2`, `7.3`, `7.4`, `8.1`, or `8.3`)
 - Configurable PHP environment variables
 - Import a database on environment start-up (with URL replacement)
 - Import and replace the database of a **running** environment (with URL replacement)
