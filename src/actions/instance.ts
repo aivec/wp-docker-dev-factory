@@ -8,6 +8,16 @@ import makeContainers from './dbcontainers';
 import { load } from '../docker/load';
 import logger from '../logger';
 
+const LOCAL_NETWORK_NAME = 'local-wp-net';
+
+const ensureLocalNetworkExists = (): void => {
+  try {
+    execSync(`docker network inspect ${LOCAL_NETWORK_NAME}`, { stdio: 'ignore' });
+  } catch {
+    execSync(`docker network create ${LOCAL_NETWORK_NAME}`, { stdio: 'inherit' });
+  }
+};
+
 const runContainer = async function (config: FinalInstanceConfig): Promise<void> {
   logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
 
@@ -46,6 +56,12 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     extras = [...extras, `-p ${containerPort}:80`];
   }
 
+  try {
+    ensureLocalNetworkExists();
+  } catch (error) {
+    console.log(error);
+  }
+
   // start common containers
   try {
     execSync(`docker compose -f ${topdir}/docker/docker-compose.common.yml up -d`);
@@ -68,6 +84,12 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     );
   } catch (e) {
     console.log(e);
+  }
+
+  try {
+    execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+  } catch (error) {
+    // ignore if the container doesn't exist
   }
 
   // Read and parse the template
