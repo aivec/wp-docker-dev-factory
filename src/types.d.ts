@@ -77,7 +77,7 @@ export interface FinalInstanceConfig extends InstanceConfig {
   dockerBridgeIP: string;
   alreadyInstalled: string[];
   envvarsMap?: EnvVarsMap;
-  volumes?: string;
+  volumes?: string[];
   envvars?: string;
   ftp?: FtpConfig[];
   ssh?: SSHConfig[];

@@ -39,9 +39,7 @@ services:
     labels:
       - "traefik.http.routers.${WORDPRESS_APP_CONTAINER_NAME:?error}.rule=Host(\
         `${WORDPRESS_APP_HOST_NAME}`)"
-    volumes:
-      - /home/evan/aivec-devenv-configs/dumpfiles:/avc-wpdocker-meta/dumpfiles
-      - /home/evan/workspace/aivec/wordpress/plugins/wcex-amazonpay:/var/www/html/wp-content/plugins/wcex-amazonpay
+    volumes: []
     ports:
       - 3232:80
 volumes:

@@ -100,6 +100,12 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   if (config.containerPort) {
     doc.setIn(['services', 'app', 'ports'], [`${config.containerPort}:80`]);
   }
+  const appVolumes = volumes ?? [];
+  if (appVolumes.length > 0) {
+    doc.setIn(['services', 'app', 'volumes'], appVolumes);
+  } else {
+    doc.deleteIn(['services', 'app', 'volumes']);
+  }
 
   // Write to new file
   fs.writeFileSync(`${topdir}/docker/docker-compose.wp.yml`, doc.toString(), 'utf8');
