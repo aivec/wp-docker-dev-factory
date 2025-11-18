@@ -63,7 +63,9 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
 
   // start db container
   try {
-    execSync(`docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d`);
+    execSync(
+      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d --remove-orphans db`,
+    );
   } catch (e) {
     console.log(e);
   }
@@ -93,7 +95,7 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
       },
     );
     execSync(
-      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d app`,
+      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d --remove-orphans app`,
       { stdio: 'inherit' },
     );
   } catch (e) {

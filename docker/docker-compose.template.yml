@@ -46,3 +46,4 @@ volumes:
 networks:
   local-wp-net:
     name: local-wp-net
+    external: true
