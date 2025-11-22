@@ -26,6 +26,7 @@ export interface InstanceConfig {
   ssh?: PrivateRemoteFilesConfig[];
   workingdir: string;
   topdir: string;
+  phpIniSettings: { [key: string]: string | number | boolean };
 }
 
 export interface PrivateRemoteFilesConfig {
@@ -66,8 +67,13 @@ export interface EnvVarsMap {
   SSH_CONFIGS?: string;
   [key: string]: string | number | boolean;
 }
-
 export interface FinalInstanceConfig extends InstanceConfig {
+  instanceDir: string;
+  instanceComposeFile: string;
+  instanceEnvFilePath: string;
+  instanceComposeFileTemplatePath: string;
+  commonDockerFilesDir: string;
+  commonServicesComposeFilePath: string;
   fullUrl: string;
   runningFromCache: boolean;
   snapshotImage: string;
@@ -77,7 +83,7 @@ export interface FinalInstanceConfig extends InstanceConfig {
   dockerBridgeIP: string;
   alreadyInstalled: string[];
   envvarsMap?: EnvVarsMap;
-  volumes?: string;
+  volumes?: string[];
   envvars?: string;
   ftp?: FtpConfig[];
   ssh?: SSHConfig[];

@@ -8,7 +8,7 @@
 # ${AVC_SCRIPTS_DIR}/db.sh
 # ${AVC_SCRIPTS_DIR}/loopback.sh
 # ${AVC_SCRIPTS_DIR}/language.sh
-${AVC_SCRIPTS_DIR}/download_pts.sh
+# ${AVC_SCRIPTS_DIR}/download_pts.sh
 # ${AVC_SCRIPTS_DIR}/ssh_pts.sh
 # ${AVC_SCRIPTS_DIR}/ftp_pts.sh
 # # ${AVC_SCRIPTS_DIR}/active_plugins.sh
@@ -17,3 +17,6 @@ ${AVC_SCRIPTS_DIR}/download_pts.sh
 # ${AVC_SCRIPTS_DIR}/uploads-proxy.sh
 # ${AVC_SCRIPTS_DIR}/cache-save-pt-lists.php
 # ${AVC_SCRIPTS_DIR}/user_scripts.sh
+
+bash -c 'echo "post_max_size=60M" >> /usr/local/etc/php/php.ini'
+bash -c 'echo "upload_max_filesize=60M" >> /usr/local/etc/php/php.ini'

@@ -40,6 +40,13 @@ const buildFinalConfig = (
     fullUrl = `${fullUrl}:${config.containerPort}`;
   }
 
+  const instanceDir = `${config.workingdir}/instances/${configCopy.instanceName}`;
+  const instanceEnvFilePath = `${instanceDir}/.env`;
+  const instanceComposeFile = `${instanceDir}/docker-compose.wp.yml`;
+  const commonDockerFilesDir = `${topdir}/docker`;
+  const commonServicesComposeFilePath = `${commonDockerFilesDir}/docker-compose.common.yml`;
+  const instanceComposeFileTemplatePath = `${commonDockerFilesDir}/docker-compose.template.yml`;
+
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
     containerPort: configCopy.containerPort,
@@ -66,6 +73,12 @@ const buildFinalConfig = (
     topdir,
     workingdir,
     image,
+    instanceDir,
+    instanceEnvFilePath,
+    instanceComposeFile,
+    commonDockerFilesDir,
+    commonServicesComposeFilePath,
+    instanceComposeFileTemplatePath,
   };
 
   if (configCopy.ftp) {

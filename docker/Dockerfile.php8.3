@@ -24,6 +24,8 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
+COPY src/scripts /wp-docker/scripts
+
 # RUN apt update && apt install less
 # COPY docker/.env .env
 # RUN cp /usr/src/wordpress/wp-config-docker.php /usr/src/wordpress/wp-config.php
@@ -38,12 +40,12 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 # RUN wp --allow-root core install --debug --path=/usr/src/wordpress --title=test --admin_user=admin --admin_password=admin --admin_email=admin@example.com
 
 # RUN ls -la /usr/src/wordpress && exit 1
-# RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
+RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
 # RUN sed -i '1a . `pwd`/.env' /usr/local/bin/docker-entrypoint.sh
 # RUN docker-entrypoint.sh apache2-foreground
 # RUN echo "#!/usr/bin/env bash" > /usr/local/bin/docker-entrypoint.sh
-# RUN echo 'wp --allow-root plugin install usc-e-shop' >> /usr/local/bin/docker-entrypoint.sh
-# RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
+RUN echo '/wp-docker/scripts/initwp.sh' >> /usr/local/bin/docker-entrypoint.sh
+RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
 # RUN php -d memory_limit=512M "$(which wp)" --allow-root core download
 
 # RUN apt update && apt install -y jq

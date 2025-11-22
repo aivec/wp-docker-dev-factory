@@ -6,7 +6,7 @@ services:
     networks:
       - local-wp-net
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     volumes:
       - data:/var/lib/mysql
       # - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
@@ -22,11 +22,8 @@ services:
     #   - "traefik.tcp.routers.${DB_HOSTNAME:?error}.rule=HostSNI(`${DB_HOSTNAME:?error}.localhost`)"
     #   # - "traefik.tcp.services.${DB_HOSTNAME:?error}.loadbalancer.server.port=3306"
   app:
-    profiles:
-      - website
     image: ${WORDPRESS_APP_IMAGE_NAME}
     build:
-      context: ../
       dockerfile: docker/Dockerfile.php${PHP_VERSION}
     # user: "${USER_ID}:${GROUP_ID}"
     env_file:
@@ -35,13 +32,10 @@ services:
     networks:
       - local-wp-net
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - 'host.docker.internal:host-gateway'
     labels:
-      - "traefik.http.routers.${WORDPRESS_APP_CONTAINER_NAME:?error}.rule=Host(`${WORDPRESS_APP_HOST_NAME}`)"
-    volumes:
-      - /home/evan/aivec-devenv-configs/dumpfiles:/avc-wpdocker-meta/dumpfiles
-      - /home/evan/workspace/aivec/wordpress/plugins/wcex-amazonpay:/var/www/html/wp-content/plugins/wcex-amazonpay
-volumes: 
+      - 'traefik.http.routers.${WORDPRESS_APP_CONTAINER_NAME:?error}.rule=Host(`${WORDPRESS_APP_HOST_NAME}`)'
+volumes:
   data:
 networks:
   local-wp-net:
