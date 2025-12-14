@@ -1,6 +1,6 @@
 import { homedir } from 'os';
 
-export const dockerMetaDirpath = '/avc-wpdocker-meta';
+export const dockerMetaDirpath = '/wp-docker';
 export const dockerScriptsDirpath = `${dockerMetaDirpath}/scripts`;
 export const dockerDumpfilesDirpath = `${dockerMetaDirpath}/dumpfiles`;
 export const dockerSshDirpath = `${dockerMetaDirpath}/ssh`;
@@ -15,3 +15,6 @@ export const ftpConfigsFilename = 'ftp.json';
 export const ftpConfigsFilepath = `${serverConfigsDirpath}/${ftpConfigsFilename}`;
 export const instanceConfFilename = 'wp-instances.json';
 export const validPhpVersions = ['7.2', '7.3', '7.4', '8.0', '8.1', '8.3'];
+export const DOCKER_CONTAINER_DB_DUMPFILE_PATH = '/data/db.sql';
+export const INSTANCE_CONFIG_FILENAME = 'instance-config.json';
+export const DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH = `${dockerMetaDirpath}/${INSTANCE_CONFIG_FILENAME}`;

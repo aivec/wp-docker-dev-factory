@@ -29,6 +29,6 @@ RUN yes | sudo pecl install xdebug-3.2.0 \
 
 RUN touch /var/www/html/xdebug_log
 
-COPY src/scripts /avc-wpdocker-meta/scripts
+COPY src/scripts /wp-docker/scripts
 
 CMD ["/run.sh"]

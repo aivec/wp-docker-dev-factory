@@ -11,12 +11,13 @@
 # ${AVC_SCRIPTS_DIR}/download_pts.sh
 # ${AVC_SCRIPTS_DIR}/ssh_pts.sh
 # ${AVC_SCRIPTS_DIR}/ftp_pts.sh
-# # ${AVC_SCRIPTS_DIR}/active_plugins.sh
+# ${AVC_SCRIPTS_DIR}/active_plugins.sh
 # ${AVC_SCRIPTS_DIR}/startup_state.sh
 # ${AVC_SCRIPTS_DIR}/mailhog.sh
 # ${AVC_SCRIPTS_DIR}/uploads-proxy.sh
 # ${AVC_SCRIPTS_DIR}/cache-save-pt-lists.php
 # ${AVC_SCRIPTS_DIR}/user_scripts.sh
+php ${AVC_SCRIPTS_DIR}/init.php
 
 bash -c 'echo "post_max_size=60M" >> /usr/local/etc/php/php.ini'
 bash -c 'echo "upload_max_filesize=60M" >> /usr/local/etc/php/php.ini'

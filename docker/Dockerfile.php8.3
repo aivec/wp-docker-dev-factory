@@ -24,7 +24,17 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-COPY src/scripts /wp-docker/scripts
+ARG DOCKER_CONTAINER_CONFIG_FOLDER
+ARG DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH
+ARG HOST_INSTANCE_CONFIG_FILEPATH
+
+# copy own wp-config-docker.php to override the default one
+COPY docker/wp-config-docker.php /usr/src/wordpress/wp-config-docker.php
+COPY src/scripts ${DOCKER_CONTAINER_CONFIG_FOLDER}/scripts
+COPY ${HOST_INSTANCE_CONFIG_FILEPATH} ${DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH}
+
+# RUN cp ${DOCKER_CONTAINER_CONFIG_FOLDER}/scripts/logging/logger /usr/local/bin/logger
+# RUN chmod +x /usr/local/bin/logger
 
 # RUN apt update && apt install less
 # COPY docker/.env .env
@@ -44,7 +54,7 @@ RUN sed -i '/^exec "\$\@"/d' /usr/local/bin/docker-entrypoint.sh
 # RUN sed -i '1a . `pwd`/.env' /usr/local/bin/docker-entrypoint.sh
 # RUN docker-entrypoint.sh apache2-foreground
 # RUN echo "#!/usr/bin/env bash" > /usr/local/bin/docker-entrypoint.sh
-RUN echo '/wp-docker/scripts/initwp.sh' >> /usr/local/bin/docker-entrypoint.sh
+RUN echo 'php /wp-docker/scripts/init.php' >> /usr/local/bin/docker-entrypoint.sh
 RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
 # RUN php -d memory_limit=512M "$(which wp)" --allow-root core download
 
@@ -53,6 +63,5 @@ RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
 # RUN echo '${AVC_SCRIPTS_DIR}/download_pts.sh' >> /usr/local/bin/docker-entrypoint.sh
 # RUN echo 'exec "$@"' >> /usr/local/bin/docker-entrypoint.sh
 # 
-# COPY src/scripts /avc-wpdocker-meta/scripts
 
 # CMD ["/run.sh"]

@@ -7,6 +7,7 @@ import { execSync } from 'child_process';
 import makeContainers from './dbcontainers';
 import { load } from '../docker/load';
 import logger from '../logger';
+import { buildDockerBuildArgs } from '../buildFinalConfig/buildDockerBuildArgs';
 
 const runContainer = async function (config: FinalInstanceConfig): Promise<void> {
   logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
@@ -64,6 +65,9 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   // Write to .env file
   fs.writeFileSync(config.instanceEnvFilePath, envContent);
 
+  // Create JSON config file specific to this instance
+  fs.writeFileSync(config.instanceConfigFilePath, JSON.stringify(config, null, 2));
+
   // Read and parse the template
   const file = fs.readFileSync(config.instanceComposeFileTemplatePath, 'utf8');
   const doc = YAML.parseDocument(file);
@@ -78,10 +82,16 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   // Write to new file
   fs.writeFileSync(config.instanceComposeFile, doc.toString(), 'utf8');
 
+  // docker image build args
+  const buildArgs = buildDockerBuildArgs(config);
+
   try {
-    execSync(`docker compose -p ${instanceName} -f ${config.instanceComposeFile} build app`, {
-      stdio: 'inherit',
-    });
+    execSync(
+      `docker compose -p ${instanceName} -f ${config.instanceComposeFile} build ${buildArgs} app`,
+      {
+        stdio: 'inherit',
+      },
+    );
     execSync(`docker compose -p ${instanceName} -f ${config.instanceComposeFile} up -d`, {
       stdio: 'inherit',
     });

@@ -67,10 +67,26 @@ export interface EnvVarsMap {
   SSH_CONFIGS?: string;
   [key: string]: string | number | boolean;
 }
+
+type ConfigVariableApplicationType = 'env' | 'build';
+export interface ConfigVariable<T> {
+  applicationTypes: ConfigVariableApplicationType[];
+  value: T;
+}
+export interface ConfigVariables {
+  DOCKER_CONTAINER_CONFIG_FOLDER: ConfigVariable<string>;
+  DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH: ConfigVariable<string>;
+  DOCKER_CONTAINER_SCRIPTS_DIR: ConfigVariable<string>;
+  DOCKER_CONTAINER_DB_DUMPFILE_PATH: ConfigVariable<string>;
+  DOCKER_CONTAINER_STATUS: ConfigVariable<'fresh' | 'restart'>;
+  INSTANCE_CONFIG_FILENAME: ConfigVariable<string>;
+  HOST_INSTANCE_CONFIG_FILEPATH: ConfigVariable<string>;
+}
 export interface FinalInstanceConfig extends InstanceConfig {
   instanceDir: string;
   instanceComposeFile: string;
   instanceEnvFilePath: string;
+  instanceConfigFilePath: string;
   instanceComposeFileTemplatePath: string;
   commonDockerFilesDir: string;
   commonServicesComposeFilePath: string;
@@ -87,4 +103,5 @@ export interface FinalInstanceConfig extends InstanceConfig {
   envvars?: string;
   ftp?: FtpConfig[];
   ssh?: SSHConfig[];
+  configVariables: ConfigVariables;
 }
