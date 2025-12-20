@@ -1,21 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es6", "es2015", "dom"],
-    "declaration": true,
-    "outDir": "dist",
-    "rootDir": "src",
-    "strict": false,
-    "types": ["node"],
-    "esModuleInterop": true,
+    "target": "esnext",
+    "lib": ["es2023"],
+    "moduleDetection": "force",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "allowJs": true,
-    "paths": {
-      "src/*": ["src/*"]
-    }
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
   },
-  "exclude": ["webpack.*.js", "node_modules", "dist", "test", "ui"],
-  "include": ["src/**/*.ts"]
+  "include": ["src"]
 }

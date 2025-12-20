@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import yargs from 'yargs/yargs';
+import yargs from 'yargs';
 import { canUseDockerOrExit } from './docker/daemon';
 import { CommandArgs } from './cli';
 import { showPrompts } from './interactive';

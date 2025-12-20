@@ -73,11 +73,27 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   const doc = YAML.parseDocument(file);
 
   // Inject markup
+  const dbPort = config.configVariables.DB_PORT.value;
+  const appServiceName = config.configVariables.WORDPRESS_APP_SERVICE_NAME.value;
+  const dbServiceName = config.configVariables.WORDPRESS_DB_SERVICE_NAME.value;
+  const appTemplateService = doc.getIn(['services', 'app']);
+  const dbTemplateService = doc.getIn(['services', 'db']);
+  doc.setIn(['services', appServiceName], appTemplateService);
+  doc.setIn(['services', dbServiceName], dbTemplateService);
+  doc.deleteIn(['services', 'app']);
+  doc.deleteIn(['services', 'db']);
   if (config.containerPort) {
-    doc.setIn(['services', 'app', 'ports'], [`${config.containerPort}:80`]);
+    doc.setIn(['services', appServiceName, 'ports'], [`${config.containerPort}:80`]);
   }
-  doc.setIn(['services', 'app', 'build', 'context'], config.topdir);
-  doc.setIn(['services', 'app', 'volumes'], config.volumes);
+  doc.setIn(['services', appServiceName, 'build', 'context'], config.topdir);
+  doc.setIn(['services', appServiceName, 'volumes'], config.volumes);
+  doc.deleteIn(['services', appServiceName, 'depends_on']);
+  doc.setIn(
+    ['services', appServiceName, 'depends_on', dbServiceName, 'condition'],
+    'service_healthy',
+  );
+  doc.setIn(['services', dbServiceName, 'ports'], [`${dbPort}:${dbPort}`]);
+  doc.setIn(['services', dbServiceName, 'command'], `--port=${dbPort}`);
 
   // Write to new file
   fs.writeFileSync(config.instanceComposeFile, doc.toString(), 'utf8');
@@ -87,7 +103,7 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
 
   try {
     execSync(
-      `docker compose -p ${instanceName} -f ${config.instanceComposeFile} build ${buildArgs} app`,
+      `docker compose -p ${instanceName} -f ${config.instanceComposeFile} build ${buildArgs} ${appServiceName}`,
       {
         stdio: 'inherit',
       },

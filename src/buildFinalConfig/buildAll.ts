@@ -1,10 +1,11 @@
 import path from 'path';
 import { homedir } from 'os';
+import getPort, { portNumbers } from 'get-port';
 import buildFtpConfig from './buildFtpConfig';
 import buildEnvVars from './buildEnvVars';
 import buildVolumePaths from './buildVolumePaths';
 import buildPluginAutoInstallWhitelist from './buildPluginAutoInstallWhitelist';
-import { _ } from 'lodash';
+import { cloneDeep } from 'lodash-es';
 import { InstanceConfig, FinalInstanceConfig, ConfigVariables } from '../types';
 import buildSSHConfig from './buildSSHConfig';
 import { containerStatus } from '../docker/container';
@@ -16,12 +17,12 @@ import {
   DOCKER_CONTAINER_DB_DUMPFILE_PATH,
 } from '../constants';
 
-const buildFinalConfig = (
+const buildFinalConfig = async (
   config: InstanceConfig,
   workingdir: string,
   topdir: string,
-): FinalInstanceConfig => {
-  const configCopy: InstanceConfig = _.cloneDeep(config);
+): Promise<FinalInstanceConfig> => {
+  const configCopy: InstanceConfig = cloneDeep(config);
   const phpVersion = configCopy.phpVersion ? configCopy.phpVersion : '7.3';
   const snapshotImage = `${configCopy.instanceName}-${phpVersion}`;
   const dockerBridgeIP = 'host.docker.internal';
@@ -44,8 +45,14 @@ const buildFinalConfig = (
   if (config.hostName && config.hostName.length > 0) {
     fullUrl = `http://${config.hostName}`;
   }
+
+  let dbHostPort = await getPort({ port: portNumbers(3000, 5000) });
   if (config.containerPort) {
     fullUrl = `${fullUrl}:${config.containerPort}`;
+
+    while (dbHostPort === config.containerPort) {
+      dbHostPort = await getPort({ port: portNumbers(3000, 5000) });
+    }
   }
 
   const instanceDir = `${config.workingdir}/instances/${configCopy.instanceName}`;
@@ -77,6 +84,22 @@ const buildFinalConfig = (
       applicationTypes: [],
       value: containerStatus(configCopy.instanceName) === null ? 'fresh' : 'restart',
     },
+    WORDPRESS_APP_SERVICE_NAME: {
+      applicationTypes: [],
+      value: configCopy.instanceName,
+    },
+    WORDPRESS_APP_CONTAINER_NAME: {
+      applicationTypes: [],
+      value: configCopy.instanceName,
+    },
+    WORDPRESS_DB_SERVICE_NAME: {
+      applicationTypes: [],
+      value: `${configCopy.instanceName}-db`,
+    },
+    WORDPRESS_DB_CONTAINER_NAME: {
+      applicationTypes: [],
+      value: `${configCopy.instanceName}-db`,
+    },
     INSTANCE_CONFIG_FILENAME: {
       applicationTypes: [],
       value: INSTANCE_CONFIG_FILENAME,
@@ -85,12 +108,20 @@ const buildFinalConfig = (
       applicationTypes: ['build'],
       value: instanceConfigFilePath,
     },
+    SITE_URL: {
+      applicationTypes: [],
+      value: fullUrl,
+    },
+    DB_PORT: {
+      applicationTypes: [],
+      value: dbHostPort,
+    },
   };
 
   const finalConfig: FinalInstanceConfig = {
     instanceName: configCopy.instanceName,
     containerPort: configCopy.containerPort,
-    hostName: configCopy.hostName ? configCopy.hostName : null,
+    hostName: configCopy.hostName ?? configCopy.hostName,
     fullUrl,
     phpVersion,
     wordpressVersion: configCopy.wordpressVersion ? configCopy.wordpressVersion : 'latest',

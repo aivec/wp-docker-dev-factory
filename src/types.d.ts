@@ -81,6 +81,12 @@ export interface ConfigVariables {
   DOCKER_CONTAINER_STATUS: ConfigVariable<'fresh' | 'restart'>;
   INSTANCE_CONFIG_FILENAME: ConfigVariable<string>;
   HOST_INSTANCE_CONFIG_FILEPATH: ConfigVariable<string>;
+  WORDPRESS_APP_SERVICE_NAME: ConfigVariable<string>;
+  WORDPRESS_APP_CONTAINER_NAME: ConfigVariable<string>;
+  WORDPRESS_DB_SERVICE_NAME: ConfigVariable<string>;
+  WORDPRESS_DB_CONTAINER_NAME: ConfigVariable<string>;
+  SITE_URL: ConfigVariable<string>;
+  DB_PORT: ConfigVariable<number>;
 }
 export interface FinalInstanceConfig extends InstanceConfig {
   instanceDir: string;

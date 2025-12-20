@@ -69,7 +69,9 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   // envvars['WORDPRESS_DB_NAME'] = config.instanceName;
   envvars['WORDPRESS_TABLE_PREFIX'] = 'wp_';
   // envvars['WORDPRESS_DB_HOST'] = `wpdb-${config.instanceName}`;
-  envvars['WORDPRESS_DB_HOST'] = `db:3306`;
+  envvars[
+    'WORDPRESS_DB_HOST'
+  ] = `${config.configVariables.WORDPRESS_DB_SERVICE_NAME.value}:${config.configVariables.DB_PORT.value}`;
   envvars['WORDPRESS_DB_USER'] = 'root';
   envvars['WORDPRESS_DB_PASSWORD'] = 'root';
   envvars['WORDPRESS_DEBUG'] = 'true';
@@ -79,7 +81,11 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
   envvars['WP_VERSION'] = config.wordpressVersion;
   envvars['PHP_VERSION'] = config.phpVersion;
   envvars['WORDPRESS_APP_IMAGE_NAME'] = config.instanceName;
-  envvars['WORDPRESS_APP_CONTAINER_NAME'] = config.instanceName;
+  envvars['WORDPRESS_APP_SERVICE_NAME'] = config.configVariables.WORDPRESS_APP_SERVICE_NAME.value;
+  envvars['WORDPRESS_APP_CONTAINER_NAME'] =
+    config.configVariables.WORDPRESS_APP_CONTAINER_NAME.value;
+  envvars['WORDPRESS_DB_SERVICE_NAME'] = config.configVariables.WORDPRESS_DB_SERVICE_NAME.value;
+  envvars['WORDPRESS_DB_CONTAINER_NAME'] = config.configVariables.WORDPRESS_DB_CONTAINER_NAME.value;
   envvars['WORDPRESS_APP_HOST_NAME'] = config.hostName;
 
   if (config.database) {
