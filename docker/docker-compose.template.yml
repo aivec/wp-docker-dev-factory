@@ -9,6 +9,8 @@ services:
     volumes:
       - data:/var/lib/mysql
       # - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+      - ${DB_PORT}:3306
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_USER: ${WORDPRESS_DB_USER}

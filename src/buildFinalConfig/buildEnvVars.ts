@@ -65,15 +65,19 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
     envvars['DOCKER_CONTAINER_PORT'] = config.containerPort;
   }
 
+  for (const [key, data] of Object.entries(config.configVariables)) {
+    if (data.applicationTypes.includes('env')) {
+      envvars[key] = data.value;
+    }
+  }
+
   // set default values for various WP envvars
   // envvars['WORDPRESS_DB_NAME'] = config.instanceName;
   envvars['WORDPRESS_TABLE_PREFIX'] = 'wp_';
   // envvars['WORDPRESS_DB_HOST'] = `wpdb-${config.instanceName}`;
-  envvars[
-    'WORDPRESS_DB_HOST'
-  ] = `${config.configVariables.WORDPRESS_DB_SERVICE_NAME.value}:${config.configVariables.DB_PORT.value}`;
-  envvars['WORDPRESS_DB_USER'] = 'root';
-  envvars['WORDPRESS_DB_PASSWORD'] = 'root';
+  envvars['WORDPRESS_DB_HOST'] = `${config.configVariables.WORDPRESS_DB_SERVICE_NAME.value}:3306`;
+  envvars['WORDPRESS_DB_USER'] = 'admin';
+  envvars['WORDPRESS_DB_PASSWORD'] = 'admin';
   envvars['WORDPRESS_DEBUG'] = 'true';
   envvars['WP_DEBUG_DISPLAY'] = 'true';
   envvars['WP_DEBUG_LOG'] = 'true';

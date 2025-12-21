@@ -6,16 +6,17 @@ import buildEnvVars from './buildEnvVars';
 import buildVolumePaths from './buildVolumePaths';
 import buildPluginAutoInstallWhitelist from './buildPluginAutoInstallWhitelist';
 import { cloneDeep } from 'lodash-es';
-import { InstanceConfig, FinalInstanceConfig, ConfigVariables } from '../types';
+import { type InstanceConfig, type FinalInstanceConfig, type ConfigVariables } from 'src/types';
 import buildSSHConfig from './buildSSHConfig';
-import { containerStatus } from '../docker/container';
+import { containerStatus } from 'src/docker/container';
 import {
   dockerMetaDirpath,
   dockerScriptsDirpath,
   INSTANCE_CONFIG_FILENAME,
   DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH,
   DOCKER_CONTAINER_DB_DUMPFILE_PATH,
-} from '../constants';
+} from 'src/constants';
+import { getPortsInUse } from 'src/docker/utils';
 
 const buildFinalConfig = async (
   config: InstanceConfig,
@@ -26,10 +27,6 @@ const buildFinalConfig = async (
   const phpVersion = configCopy.phpVersion ? configCopy.phpVersion : '7.3';
   const snapshotImage = `${configCopy.instanceName}-${phpVersion}`;
   const dockerBridgeIP = 'host.docker.internal';
-  let locale = configCopy.locale ? configCopy.locale : 'en_US';
-  if (configCopy.wordpressVersion === 'nightly') {
-    locale = 'en_US';
-  }
   let flushOnRestart = false;
   if (config.database) {
     flushOnRestart = !!config.database.flushOnRestart;
@@ -46,13 +43,14 @@ const buildFinalConfig = async (
     fullUrl = `http://${config.hostName}`;
   }
 
-  let dbHostPort = await getPort({ port: portNumbers(3000, 5000) });
+  let portsInUse = getPortsInUse();
   if (config.containerPort) {
     fullUrl = `${fullUrl}:${config.containerPort}`;
-
-    while (dbHostPort === config.containerPort) {
-      dbHostPort = await getPort({ port: portNumbers(3000, 5000) });
-    }
+    portsInUse = [...portsInUse, config.containerPort];
+  }
+  let dbHostPort = null;
+  while (dbHostPort === null || portsInUse.includes(dbHostPort)) {
+    dbHostPort = await getPort({ port: portNumbers(3000, 5000) });
   }
 
   const instanceDir = `${config.workingdir}/instances/${configCopy.instanceName}`;
@@ -62,6 +60,7 @@ const buildFinalConfig = async (
   const commonDockerFilesDir = `${topdir}/docker`;
   const commonServicesComposeFilePath = `${commonDockerFilesDir}/docker-compose.common.yml`;
   const instanceComposeFileTemplatePath = `${commonDockerFilesDir}/docker-compose.template.yml`;
+  const wordpressDbContainerName = `${configCopy.instanceName}-db`;
 
   const configVariables: ConfigVariables = {
     DOCKER_CONTAINER_CONFIG_FOLDER: {
@@ -80,9 +79,9 @@ const buildFinalConfig = async (
       applicationTypes: [],
       value: DOCKER_CONTAINER_DB_DUMPFILE_PATH,
     },
-    DOCKER_CONTAINER_STATUS: {
+    DOCKER_DB_CONTAINER_STATUS: {
       applicationTypes: [],
-      value: containerStatus(configCopy.instanceName) === null ? 'fresh' : 'restart',
+      value: containerStatus(wordpressDbContainerName) === null ? 'fresh' : 'restart',
     },
     WORDPRESS_APP_SERVICE_NAME: {
       applicationTypes: [],
@@ -94,11 +93,29 @@ const buildFinalConfig = async (
     },
     WORDPRESS_DB_SERVICE_NAME: {
       applicationTypes: [],
-      value: `${configCopy.instanceName}-db`,
+      value: wordpressDbContainerName,
     },
     WORDPRESS_DB_CONTAINER_NAME: {
       applicationTypes: [],
-      value: `${configCopy.instanceName}-db`,
+      value: wordpressDbContainerName,
+    },
+    WORDPRESS_TITLE: {
+      applicationTypes: [],
+      value: configCopy.wordpress?.title ? configCopy.wordpress.title : configCopy.instanceName,
+    },
+    WORDPRESS_ADMIN_USER: {
+      applicationTypes: [],
+      value: configCopy.wordpress?.adminUser ? configCopy.wordpress.adminUser : 'admin',
+    },
+    WORDPRESS_ADMIN_PASSWORD: {
+      applicationTypes: [],
+      value: configCopy.wordpress?.adminPassword ? configCopy.wordpress.adminPassword : 'admin',
+    },
+    WORDPRESS_ADMIN_EMAIL: {
+      applicationTypes: [],
+      value: configCopy.wordpress?.adminEmail
+        ? configCopy.wordpress.adminEmail
+        : `admin@${configCopy.instanceName}.localhost`,
     },
     INSTANCE_CONFIG_FILENAME: {
       applicationTypes: [],
@@ -113,9 +130,12 @@ const buildFinalConfig = async (
       value: fullUrl,
     },
     DB_PORT: {
-      applicationTypes: [],
+      applicationTypes: ['env'],
       value: dbHostPort,
     },
+    ...(configCopy.containerPort
+      ? { APP_PORT: { applicationTypes: ['env'], value: configCopy.containerPort } }
+      : {}),
   };
 
   const finalConfig: FinalInstanceConfig = {
@@ -125,16 +145,22 @@ const buildFinalConfig = async (
     fullUrl,
     phpVersion,
     wordpressVersion: configCopy.wordpressVersion ? configCopy.wordpressVersion : 'latest',
-    locale,
+    wordpress: {
+      title: configVariables.WORDPRESS_TITLE.value,
+      adminUser: configVariables.WORDPRESS_ADMIN_USER.value,
+      adminPassword: configVariables.WORDPRESS_ADMIN_PASSWORD.value,
+      adminEmail: configVariables.WORDPRESS_ADMIN_EMAIL.value,
+      locale: configCopy.wordpress?.locale ? configCopy.wordpress.locale : 'en_US',
+    },
     flushOnRestart,
     database: configCopy.database,
-    env: configCopy.env ? configCopy.env : null,
+    env: configCopy.env ?? configCopy.env,
     localPlugins: configCopy.localPlugins ? configCopy.localPlugins : [],
     localThemes: configCopy.localThemes ? configCopy.localThemes : [],
     downloadPlugins: configCopy.downloadPlugins ? configCopy.downloadPlugins : [],
     downloadThemes: configCopy.downloadThemes ? configCopy.downloadThemes : [],
-    uploads: configCopy.uploads ? configCopy.uploads : null,
-    uploadsUrl: configCopy.uploadsUrl ? configCopy.uploadsUrl : null,
+    uploads: configCopy.uploads ?? configCopy.uploads,
+    uploadsUrl: configCopy.uploadsUrl ?? configCopy.uploadsUrl,
     networkname: 'wpdevinstances',
     containerName: configCopy.instanceName,
     snapshotImage,
@@ -151,7 +177,7 @@ const buildFinalConfig = async (
     commonDockerFilesDir,
     commonServicesComposeFilePath,
     instanceComposeFileTemplatePath,
-    phpIniSettings: configCopy.phpIniSettings ? configCopy.phpIniSettings : null,
+    phpIniSettings: configCopy.phpIniSettings ?? configCopy.phpIniSettings,
     configVariables,
   };
 

@@ -1,4 +1,4 @@
-import { FinalInstanceConfig } from '../types';
+import { type FinalInstanceConfig } from 'src/types';
 import { platform } from 'os';
 import fs from 'fs';
 import path from 'path';
@@ -73,17 +73,19 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   const doc = YAML.parseDocument(file);
 
   // Inject markup
-  const dbPort = config.configVariables.DB_PORT.value;
-  const appServiceName = config.configVariables.WORDPRESS_APP_SERVICE_NAME.value;
   const dbServiceName = config.configVariables.WORDPRESS_DB_SERVICE_NAME.value;
-  const appTemplateService = doc.getIn(['services', 'app']);
+  const appServiceName = config.configVariables.WORDPRESS_APP_SERVICE_NAME.value;
   const dbTemplateService = doc.getIn(['services', 'db']);
-  doc.setIn(['services', appServiceName], appTemplateService);
+  const appTemplateService = doc.getIn(['services', 'app']);
   doc.setIn(['services', dbServiceName], dbTemplateService);
-  doc.deleteIn(['services', 'app']);
+  doc.setIn(['services', appServiceName], appTemplateService);
   doc.deleteIn(['services', 'db']);
-  if (config.containerPort) {
-    doc.setIn(['services', appServiceName, 'ports'], [`${config.containerPort}:80`]);
+  doc.deleteIn(['services', 'app']);
+  if (config.configVariables.APP_PORT?.value) {
+    doc.setIn(
+      ['services', appServiceName, 'ports'],
+      [`${config.configVariables.APP_PORT.value}:80`],
+    );
   }
   doc.setIn(['services', appServiceName, 'build', 'context'], config.topdir);
   doc.setIn(['services', appServiceName, 'volumes'], config.volumes);
@@ -92,8 +94,6 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     ['services', appServiceName, 'depends_on', dbServiceName, 'condition'],
     'service_healthy',
   );
-  doc.setIn(['services', dbServiceName, 'ports'], [`${dbPort}:${dbPort}`]);
-  doc.setIn(['services', dbServiceName, 'command'], `--port=${dbPort}`);
 
   // Write to new file
   fs.writeFileSync(config.instanceComposeFile, doc.toString(), 'utf8');
