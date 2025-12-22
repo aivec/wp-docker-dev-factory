@@ -86,9 +86,41 @@ function download_plugins($config): void {
     }
 
     h1('Downloading plugins...');
+    
+    // Get list of existing plugins before installation
+    $pluginsDir = '/var/www/html/wp-content/plugins';
+    $existingPlugins = [];
+    if (is_dir($pluginsDir)) {
+        $dirs = scandir($pluginsDir);
+        foreach ($dirs as $dir) {
+            if ($dir !== '.' && $dir !== '..' && is_dir($pluginsDir . '/' . $dir)) {
+                $existingPlugins[] = $dir;
+            }
+        }
+    }
+    
+    // Install plugins
     foreach ($config['downloadPlugins'] as $plugin) {
         h2('Downloading plugin: ' . $plugin);
         run_bash_command("wp --allow-root plugin install {$plugin} --activate");
+    }
+    
+    // Get list of plugins after installation and only chown new ones
+    $newPlugins = [];
+    if (is_dir($pluginsDir)) {
+        $dirs = scandir($pluginsDir);
+        foreach ($dirs as $dir) {
+            if ($dir !== '.' && $dir !== '..' && is_dir($pluginsDir . '/' . $dir)) {
+                if (!in_array($dir, $existingPlugins)) {
+                    $newPlugins[] = $dir;
+                }
+            }
+        }
+    }
+    
+    // Only change permissions on newly installed plugins
+    foreach ($newPlugins as $plugin) {
+        passthru('chown -R www-data:www-data ' . escapeshellarg($pluginsDir . '/' . $plugin));
     }
 }
 
