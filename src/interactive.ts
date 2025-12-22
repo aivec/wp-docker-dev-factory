@@ -9,7 +9,6 @@ import validateConfig from './validation/validateAll';
 import buildFinalConfig from './buildFinalConfig/buildAll';
 import runContainer from './actions/instance';
 import stopContainers from './actions/stop';
-import saveSnapshot from './actions/savesnapshot';
 import logContainer from './actions/logContainer';
 import runNgrok from './actions/ngrok';
 import logger from './logger';
@@ -51,7 +50,7 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
     };
   }[] = [
     {
-      title: 'Start WordPress',
+      title: 'Start Containers',
       value: {
         shouldBeRunning: false,
         requiresValidation: true,
@@ -59,18 +58,17 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
       },
     },
     {
-      title: 'Stop WordPress',
+      title: 'Stop Containers',
       value: {
         requiresValidation: false,
         func: stopContainers,
       },
     },
     {
-      title: 'Save snapshot',
+      title: 'Stop & Remove Containers',
       value: {
-        shouldBeRunning: true,
         requiresValidation: false,
-        func: saveSnapshot,
+        func: stopContainers,
       },
     },
     {
