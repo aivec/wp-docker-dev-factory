@@ -92,6 +92,7 @@ export interface ConfigVariables {
   WORDPRESS_APP_CONTAINER_NAME: ConfigVariable<string>;
   WORDPRESS_DB_SERVICE_NAME: ConfigVariable<string>;
   WORDPRESS_DB_CONTAINER_NAME: ConfigVariable<string>;
+  WORDPRESS_VERSION: ConfigVariable<string | undefined>;
   WORDPRESS_TITLE: ConfigVariable<string>;
   WORDPRESS_ADMIN_USER: ConfigVariable<string>;
   WORDPRESS_ADMIN_PASSWORD: ConfigVariable<string>;

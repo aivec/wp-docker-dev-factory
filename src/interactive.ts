@@ -9,6 +9,7 @@ import validateConfig from './validation/validateAll';
 import buildFinalConfig from './buildFinalConfig/buildAll';
 import runContainer from './actions/instance';
 import stopContainers from './actions/stop';
+import { down } from './docker/utils';
 import logContainer from './actions/logContainer';
 import runNgrok from './actions/ngrok';
 import logger from './logger';
@@ -68,7 +69,7 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
       title: 'Stop & Remove Containers',
       value: {
         requiresValidation: false,
-        func: stopContainers,
+        func: down,
       },
     },
     {

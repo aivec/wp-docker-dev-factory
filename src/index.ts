@@ -2,7 +2,7 @@
 
 import yargs from 'yargs';
 import { canUseDockerOrExit } from './docker/daemon';
-import { CommandArgs } from './cli';
+import { type CommandArgs } from './cli';
 import { showPrompts } from './interactive';
 import { debug } from './logger';
 

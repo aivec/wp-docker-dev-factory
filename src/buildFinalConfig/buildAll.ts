@@ -99,6 +99,10 @@ const buildFinalConfig = async (
       applicationTypes: [],
       value: wordpressDbContainerName,
     },
+    WORDPRESS_VERSION: {
+      applicationTypes: ['build'],
+      value: configCopy.wordpress?.version,
+    },
     WORDPRESS_TITLE: {
       applicationTypes: [],
       value: configCopy.wordpress?.title ? configCopy.wordpress.title : configCopy.instanceName,

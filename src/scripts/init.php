@@ -89,7 +89,6 @@ function download_plugins($config): void {
     foreach ($config['downloadPlugins'] as $plugin) {
         h2('Downloading plugin: ' . $plugin);
         run_bash_command("wp --allow-root plugin install {$plugin} --activate");
-        passthru('chown -R www-data:www-data /var/www/html/wp-content/plugins/downloaded');
     }
 }
 
@@ -138,9 +137,6 @@ function download_themes($config): void {
 }
 
 function init($config) {
-    // create downloaded plugins directory
-    passthru('mkdir -p /var/www/html/wp-content/plugins/downloaded');
-
     // import database from dumpfile if applicable
     configure_database($config);
 

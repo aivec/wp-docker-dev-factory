@@ -1,4 +1,6 @@
 import { execSync } from 'child_process';
+import logger from 'src/logger';
+import type { FinalInstanceConfig } from 'src/types';
 
 /**
  * Returns a list of host ports currently being used by existing docker containers,
@@ -51,5 +53,17 @@ export const getPortsInUse = (): number[] => {
   } catch (error) {
     // If docker command fails, return empty array
     return [];
+  }
+};
+
+export const down = (config: FinalInstanceConfig): void => {
+  try {
+    execSync(`docker compose -p ${config.instanceName} -f ${config.instanceComposeFile} down -v`, {
+      stdio: 'inherit',
+    });
+  } catch (e) {
+    console.log(e);
+    logger.error('Something went wrong :(');
+    process.exit(1);
   }
 };

@@ -19,11 +19,13 @@ export const buildDockerBuildArgs = function (config: FinalInstanceConfig): stri
   for (const key in config.configVariables) {
     const variable = config.configVariables[key];
     if (variable.applicationTypes.includes('build')) {
-      let value = variable.value;
-      if (isPath(variable.value)) {
-        value = variable.value.replace(`${config.topdir}/`, '');
+      if (variable.value) {
+        let value = variable.value;
+        if (isPath(variable.value)) {
+          value = variable.value.replace(`${config.topdir}/`, '');
+        }
+        args.push(`--build-arg ${key}=${value}`);
       }
-      args.push(`--build-arg ${key}=${value}`);
     }
   }
   return args.join(' ');
