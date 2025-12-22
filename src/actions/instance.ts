@@ -1,51 +1,14 @@
 import { type FinalInstanceConfig } from 'src/types';
-import { platform } from 'os';
 import fs from 'fs';
-import path from 'path';
 import YAML from 'yaml';
 import { execSync } from 'child_process';
-import makeContainers from './dbcontainers';
-import { load } from '../docker/load';
-import logger from '../logger';
-import { buildDockerBuildArgs } from '../buildFinalConfig/buildDockerBuildArgs';
+import logger from 'src/logger';
+import { buildDockerBuildArgs } from 'src/buildFinalConfig/buildDockerBuildArgs';
 
 const runContainer = async function (config: FinalInstanceConfig): Promise<void> {
   logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
 
-  const {
-    phpVersion,
-    flushOnRestart,
-    instanceName,
-    networkname,
-    containerName,
-    hostName,
-    runningFromCache,
-    image,
-    snapshotImage,
-    containerPort,
-    envvarsMap,
-    envvars,
-    volumes,
-    topdir,
-  } = config;
-
-  let extras = [];
-  const p = platform();
-  if (p !== 'darwin' && p !== 'win32') {
-    // map host.docker.internal to docker0 bridge IP for linux
-    extras = ['--add-host=host.docker.internal:host-gateway'];
-  }
-
-  if (hostName) {
-    extras = [
-      ...extras,
-      `--label='traefik.http.routers.${instanceName}.rule=Host(\`${hostName}\`)'`,
-    ];
-  }
-
-  if (containerPort) {
-    extras = [...extras, `-p ${containerPort}:80`];
-  }
+  const { instanceName, containerName, envvarsMap } = config;
 
   // start common containers
   try {
@@ -73,6 +36,8 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   const doc = YAML.parseDocument(file);
 
   // Inject markup
+  const hostName = config.configVariables.WORDPRESS_APP_HOST_NAME.value;
+  const appContainerName = config.configVariables.WORDPRESS_APP_CONTAINER_NAME.value;
   const dbServiceName = config.configVariables.WORDPRESS_DB_SERVICE_NAME.value;
   const appServiceName = config.configVariables.WORDPRESS_APP_SERVICE_NAME.value;
   const dbTemplateService = doc.getIn(['services', 'db']);
@@ -94,6 +59,21 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
     ['services', appServiceName, 'depends_on', dbServiceName, 'condition'],
     'service_healthy',
   );
+  if (hostName) {
+    /* let extras = [];
+    const p = platform();
+    if (p !== 'darwin' && p !== 'win32') {
+      // map host.docker.internal to docker0 bridge IP for linux
+      extras = ['--add-host=host.docker.internal:host-gateway'];
+    } */
+    doc.setIn(
+      ['services', appServiceName, 'labels'],
+      [
+        `traefik.http.routers.${appContainerName}.rule=Host(\`${hostName}\`)`,
+        `traefik.http.services.${appContainerName}.loadbalancer.server.port=80`,
+      ],
+    );
+  }
 
   // Write to new file
   fs.writeFileSync(config.instanceComposeFile, doc.toString(), 'utf8');

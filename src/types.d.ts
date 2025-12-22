@@ -88,6 +88,7 @@ export interface ConfigVariables {
   DOCKER_DB_CONTAINER_STATUS: ConfigVariable<'fresh' | 'restart'>;
   INSTANCE_CONFIG_FILENAME: ConfigVariable<string>;
   HOST_INSTANCE_CONFIG_FILEPATH: ConfigVariable<string>;
+  WORDPRESS_APP_HOST_NAME: ConfigVariable<string | undefined>;
   WORDPRESS_APP_SERVICE_NAME: ConfigVariable<string>;
   WORDPRESS_APP_CONTAINER_NAME: ConfigVariable<string>;
   WORDPRESS_DB_SERVICE_NAME: ConfigVariable<string>;

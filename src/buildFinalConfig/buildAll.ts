@@ -83,6 +83,10 @@ const buildFinalConfig = async (
       applicationTypes: [],
       value: containerStatus(wordpressDbContainerName) === null ? 'fresh' : 'restart',
     },
+    WORDPRESS_APP_HOST_NAME: {
+      applicationTypes: [],
+      value: configCopy.hostName,
+    },
     WORDPRESS_APP_SERVICE_NAME: {
       applicationTypes: [],
       value: configCopy.instanceName,

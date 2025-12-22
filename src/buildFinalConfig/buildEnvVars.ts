@@ -90,7 +90,6 @@ const buildEnvVars = (config: FinalInstanceConfig): EnvVarsMap => {
     config.configVariables.WORDPRESS_APP_CONTAINER_NAME.value;
   envvars['WORDPRESS_DB_SERVICE_NAME'] = config.configVariables.WORDPRESS_DB_SERVICE_NAME.value;
   envvars['WORDPRESS_DB_CONTAINER_NAME'] = config.configVariables.WORDPRESS_DB_CONTAINER_NAME.value;
-  envvars['WORDPRESS_APP_HOST_NAME'] = config.hostName;
 
   if (config.database) {
     const { dbName, dbPrefix } = config.database;

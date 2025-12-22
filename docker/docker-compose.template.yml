@@ -31,7 +31,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # user: "${USER_ID}:${GROUP_ID}"
     env_file:
       - .env
     container_name: ${WORDPRESS_APP_CONTAINER_NAME}
@@ -39,8 +38,6 @@ services:
       - local-wp-net
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    labels:
-      - 'traefik.http.routers.${WORDPRESS_APP_CONTAINER_NAME:?error}.rule=Host(`${WORDPRESS_APP_HOST_NAME}`)'
 volumes:
   data:
 networks:
