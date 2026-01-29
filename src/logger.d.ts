@@ -1,0 +1,22 @@
+declare const logger: {
+    RED: string;
+    GREEN: string;
+    CYAN: string;
+    WHITE: string;
+    YELLOW: string;
+    NC: string;
+    getMessage: (output: any) => string;
+    yellow: (message: any) => string;
+    green: (message: any) => string;
+    red: (message: any) => string;
+    cyan: (message: any) => string;
+    white: (message: any) => string;
+    log: (level: string, message: any) => void;
+    info: (message: any) => void;
+    warn: (message: any) => void;
+    error: (message: any) => void;
+    logContext: (value: any) => void;
+    syntaxError: (message: string, fileName: string) => void;
+};
+export declare const debug: (message: any, data?: any) => void;
+export default logger;
