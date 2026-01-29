@@ -1,35 +1,11 @@
 import logger from '../logger';
 import { execSync } from 'child_process';
 import { FinalInstanceConfig } from '../types';
-import fs from 'fs';
 
 const stopContainers = async (config: FinalInstanceConfig): Promise<void> => {
-  logger.info(`${logger.WHITE}Stopping WordPress...${logger.NC}`);
+  logger.info(`${logger.WHITE}Stopping Environment...${logger.NC}`);
   try {
-    execSync(`docker stop ${config.containerName}`, { stdio: 'pipe' });
-  } catch (error) {
-    // doesnt matter if container isn't running....
-  }
-  /* try {
-    execSync(`docker rm ${config.containerName}`, { stdio: 'pipe' });
-  } catch (error) {
-    console.log(error.stderr.toString());
-  } */
-  logger.info(`${logger.WHITE}Stopping database...${logger.NC}`);
-  try {
-    // Convert object to .env format
-    const envContent = Object.entries(config.envvarsMap)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('\n');
-
-    // Write to .env file
-    fs.writeFileSync(`${config.topdir}/docker/.env`, envContent);
-    execSync(
-      `docker compose -p ${config.instanceName} -f ${config.topdir}/docker/docker-compose.wp.yml down`,
-      {
-        stdio: 'pipe',
-      },
-    );
+    execSync(`docker compose -f ${config.instanceComposeFile} stop`, { stdio: 'inherit' });
   } catch (error) {
     console.log(error.stderr.toString());
   }

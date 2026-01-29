@@ -1,0 +1,18 @@
+export declare const dockerMetaDirpath = "/wp-docker";
+export declare const dockerScriptsDirpath = "/wp-docker/scripts";
+export declare const dockerDumpfilesDirpath = "/wp-docker/dumpfiles";
+export declare const dockerSshDirpath = "/wp-docker/ssh";
+export declare const dockerUserScriptsDirpath = "/wp-docker/user-scripts";
+export declare const dockerTempDirpath = "/wp-docker/temp";
+export declare const dockerCacheDirpath = "/wp-docker/cache";
+export declare const serverConfigsDirname = "aivec-devenv-configs";
+export declare const serverConfigsDirpath: string;
+export declare const sshConfigsFilename = "ssh.json";
+export declare const sshConfigsFilepath: string;
+export declare const ftpConfigsFilename = "ftp.json";
+export declare const ftpConfigsFilepath: string;
+export declare const instanceConfFilename = "wp-instances.json";
+export declare const validPhpVersions: string[];
+export declare const DOCKER_CONTAINER_DB_DUMPFILE_PATH = "/data/db.sql";
+export declare const INSTANCE_CONFIG_FILENAME = "instance-config.json";
+export declare const DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH = "/wp-docker/instance-config.json";

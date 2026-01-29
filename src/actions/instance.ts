@@ -1,12 +1,9 @@
-import { FinalInstanceConfig } from '../types';
-import { platform } from 'os';
+import { type FinalInstanceConfig } from 'src/types';
 import fs from 'fs';
-import path from 'path';
 import YAML from 'yaml';
 import { execSync } from 'child_process';
-import makeContainers from './dbcontainers';
-import { load } from '../docker/load';
-import logger from '../logger';
+import logger from 'src/logger';
+import { buildDockerBuildArgs } from 'src/buildFinalConfig/buildDockerBuildArgs';
 
 const LOCAL_NETWORK_NAME = 'local-wp-net';
 
@@ -21,40 +18,7 @@ const ensureLocalNetworkExists = (): void => {
 const runContainer = async function (config: FinalInstanceConfig): Promise<void> {
   logger.info(`${logger.WHITE}Starting Container(s)...${logger.NC}`);
 
-  const {
-    phpVersion,
-    flushOnRestart,
-    instanceName,
-    networkname,
-    containerName,
-    hostName,
-    runningFromCache,
-    image,
-    snapshotImage,
-    containerPort,
-    envvarsMap,
-    envvars,
-    volumes,
-    topdir,
-  } = config;
-
-  let extras = [];
-  const p = platform();
-  if (p !== 'darwin' && p !== 'win32') {
-    // map host.docker.internal to docker0 bridge IP for linux
-    extras = ['--add-host=host.docker.internal:host-gateway'];
-  }
-
-  if (hostName) {
-    extras = [
-      ...extras,
-      `--label='traefik.http.routers.${instanceName}.rule=Host(\`${hostName}\`)'`,
-    ];
-  }
-
-  if (containerPort) {
-    extras = [...extras, `-p ${containerPort}:80`];
-  }
+  const { instanceName, containerName, envvarsMap } = config;
 
   try {
     ensureLocalNetworkExists();
@@ -64,27 +28,24 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
 
   // start common containers
   try {
-    execSync(`docker compose -f ${topdir}/docker/docker-compose.common.yml up -d`);
+    execSync(`docker compose -f ${config.commonServicesComposeFilePath} up -d`);
   } catch (e) {
     console.log(e);
   }
+
+  // Create instance directory if it doesn't exist
+  fs.mkdirSync(config.instanceDir, { recursive: true });
 
   // Convert object to .env format
   const envContent = Object.entries(envvarsMap)
     .map(([key, value]) => `${key}=${value}`)
     .join('\n');
-  // Write to .env file
-  const envfpath = `${topdir}/docker/.env`;
-  fs.writeFileSync(envfpath, envContent);
 
-  // start db container
-  try {
-    execSync(
-      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d --remove-orphans db`,
-    );
-  } catch (e) {
-    console.log(e);
-  }
+  // Write to .env file
+  fs.writeFileSync(config.instanceEnvFilePath, envContent);
+
+  // Create JSON config file specific to this instance
+  fs.writeFileSync(config.instanceConfigFilePath, JSON.stringify(config, null, 2));
 
   try {
     execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
@@ -93,12 +54,47 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   }
 
   // Read and parse the template
-  const file = fs.readFileSync(`${topdir}/docker/docker-compose.template.yml`, 'utf8');
+  const file = fs.readFileSync(config.instanceComposeFileTemplatePath, 'utf8');
   const doc = YAML.parseDocument(file);
 
   // Inject markup
-  if (config.containerPort) {
-    doc.setIn(['services', 'app', 'ports'], [`${config.containerPort}:80`]);
+  const hostName = config.configVariables.WORDPRESS_APP_HOST_NAME.value;
+  const appContainerName = config.configVariables.WORDPRESS_APP_CONTAINER_NAME.value;
+  const dbServiceName = config.configVariables.WORDPRESS_DB_SERVICE_NAME.value;
+  const appServiceName = config.configVariables.WORDPRESS_APP_SERVICE_NAME.value;
+  const dbTemplateService = doc.getIn(['services', 'db']);
+  const appTemplateService = doc.getIn(['services', 'app']);
+  doc.setIn(['services', dbServiceName], dbTemplateService);
+  doc.setIn(['services', appServiceName], appTemplateService);
+  doc.deleteIn(['services', 'db']);
+  doc.deleteIn(['services', 'app']);
+  if (config.configVariables.APP_PORT?.value) {
+    doc.setIn(
+      ['services', appServiceName, 'ports'],
+      [`${config.configVariables.APP_PORT.value}:80`],
+    );
+  }
+  doc.setIn(['services', appServiceName, 'build', 'context'], config.topdir);
+  doc.setIn(['services', appServiceName, 'volumes'], config.volumes);
+  doc.deleteIn(['services', appServiceName, 'depends_on']);
+  doc.setIn(
+    ['services', appServiceName, 'depends_on', dbServiceName, 'condition'],
+    'service_healthy',
+  );
+  if (hostName) {
+    /* let extras = [];
+    const p = platform();
+    if (p !== 'darwin' && p !== 'win32') {
+      // map host.docker.internal to docker0 bridge IP for linux
+      extras = ['--add-host=host.docker.internal:host-gateway'];
+    } */
+    doc.setIn(
+      ['services', appServiceName, 'labels'],
+      [
+        `traefik.http.routers.${appContainerName}.rule=Host(\`${hostName}\`)`,
+        `traefik.http.services.${appContainerName}.loadbalancer.server.port=80`,
+      ],
+    );
   }
   const appVolumes = volumes ?? [];
   if (appVolumes.length > 0) {
@@ -108,24 +104,21 @@ const runContainer = async function (config: FinalInstanceConfig): Promise<void>
   }
 
   // Write to new file
-  fs.writeFileSync(`${topdir}/docker/docker-compose.wp.yml`, doc.toString(), 'utf8');
+  fs.writeFileSync(config.instanceComposeFile, doc.toString(), 'utf8');
+
+  // docker image build args
+  const buildArgs = buildDockerBuildArgs(config);
+
   try {
-    /* execSync(
-      `docker buildx create --name container-network-builder --driver docker-container --driver-opt network=local-wp-net --use`,
-    );
     execSync(
-      `docker buildx build --network=local-wp-net -t ${envvarsMap.WORDPRESS_APP_IMAGE_NAME} -f ${topdir}/docker/Dockerfile.php${envvarsMap.PHP_VERSION} --load ${topdir}`,
-    ); */
-    execSync(
-      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml build app`,
+      `docker compose -p ${instanceName} -f ${config.instanceComposeFile} build ${buildArgs} ${appServiceName}`,
       {
         stdio: 'inherit',
       },
     );
-    execSync(
-      `docker compose -p ${instanceName} -f ${topdir}/docker/docker-compose.wp.yml up -d --remove-orphans app`,
-      { stdio: 'inherit' },
-    );
+    execSync(`docker compose -p ${instanceName} -f ${config.instanceComposeFile} up -d`, {
+      stdio: 'inherit',
+    });
   } catch (e) {
     console.log(e);
     logger.error('Something went wrong :(');

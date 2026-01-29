@@ -4,7 +4,14 @@ export interface InstanceConfig {
   hostName?: string;
   phpVersion?: string;
   wordpressVersion?: string;
-  locale?: string;
+  wordpress?: {
+    version?: string;
+    title?: string;
+    adminUser?: string;
+    adminPassword?: string;
+    adminEmail?: string;
+    locale?: string;
+  };
   image?: string;
   uploads?: string;
   uploadsUrl?: string;
@@ -26,6 +33,7 @@ export interface InstanceConfig {
   ssh?: PrivateRemoteFilesConfig[];
   workingdir: string;
   topdir: string;
+  phpIniSettings: { [key: string]: string | number | boolean };
 }
 
 export interface PrivateRemoteFilesConfig {
@@ -57,7 +65,7 @@ export interface EnvVarsMap {
   WORDPRESS_DB_HOST: string;
   DB_PREFIX: string;
   DOCKER_BRIDGE_IP: string;
-  DOCKER_CONTAINER_PORT: string;
+  APP_PORT: string;
   ALREADY_INSTALLED_PLUGINS: string;
   PLUGINS: string;
   THEMES?: string;
@@ -67,7 +75,41 @@ export interface EnvVarsMap {
   [key: string]: string | number | boolean;
 }
 
+type ConfigVariableApplicationType = 'env' | 'build';
+export interface ConfigVariable<T> {
+  applicationTypes: ConfigVariableApplicationType[];
+  value: T;
+}
+export interface ConfigVariables {
+  DOCKER_CONTAINER_CONFIG_FOLDER: ConfigVariable<string>;
+  DOCKER_CONTAINER_INSTANCE_CONFIG_FILEPATH: ConfigVariable<string>;
+  DOCKER_CONTAINER_SCRIPTS_DIR: ConfigVariable<string>;
+  DOCKER_CONTAINER_DB_DUMPFILE_PATH: ConfigVariable<string>;
+  DOCKER_DB_CONTAINER_STATUS: ConfigVariable<'fresh' | 'restart'>;
+  INSTANCE_CONFIG_FILENAME: ConfigVariable<string>;
+  HOST_INSTANCE_CONFIG_FILEPATH: ConfigVariable<string>;
+  WORDPRESS_APP_HOST_NAME: ConfigVariable<string | undefined>;
+  WORDPRESS_APP_SERVICE_NAME: ConfigVariable<string>;
+  WORDPRESS_APP_CONTAINER_NAME: ConfigVariable<string>;
+  WORDPRESS_DB_SERVICE_NAME: ConfigVariable<string>;
+  WORDPRESS_DB_CONTAINER_NAME: ConfigVariable<string>;
+  WORDPRESS_VERSION: ConfigVariable<string | undefined>;
+  WORDPRESS_TITLE: ConfigVariable<string>;
+  WORDPRESS_ADMIN_USER: ConfigVariable<string>;
+  WORDPRESS_ADMIN_PASSWORD: ConfigVariable<string>;
+  WORDPRESS_ADMIN_EMAIL: ConfigVariable<string>;
+  SITE_URL: ConfigVariable<string>;
+  APP_PORT?: ConfigVariable<number>;
+  DB_PORT: ConfigVariable<number>;
+}
 export interface FinalInstanceConfig extends InstanceConfig {
+  instanceDir: string;
+  instanceComposeFile: string;
+  instanceEnvFilePath: string;
+  instanceConfigFilePath: string;
+  instanceComposeFileTemplatePath: string;
+  commonDockerFilesDir: string;
+  commonServicesComposeFilePath: string;
   fullUrl: string;
   runningFromCache: boolean;
   snapshotImage: string;
@@ -81,4 +123,11 @@ export interface FinalInstanceConfig extends InstanceConfig {
   envvars?: string;
   ftp?: FtpConfig[];
   ssh?: SSHConfig[];
+  wordpress: {
+    title: string;
+    adminUser: string;
+    adminPassword: string;
+    adminEmail: string;
+  } & InstanceConfig['wordpress'];
+  configVariables: ConfigVariables;
 }

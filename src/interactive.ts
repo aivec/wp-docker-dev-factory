@@ -2,18 +2,22 @@ import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import prompts from 'prompts';
 import { cwd } from 'process';
-import { InstanceConfig, FinalInstanceConfig } from './types';
+import { type InstanceConfig, type FinalInstanceConfig } from './types';
 import { createNewDump, overwriteDumpfile, redumpWithSelectedDumpfile } from './actions/dumpfiles';
 import { isRunning } from './docker/container';
 import validateConfig from './validation/validateAll';
 import buildFinalConfig from './buildFinalConfig/buildAll';
 import runContainer from './actions/instance';
 import stopContainers from './actions/stop';
-import saveSnapshot from './actions/savesnapshot';
+import { down } from './docker/utils';
 import logContainer from './actions/logContainer';
 import runNgrok from './actions/ngrok';
 import logger from './logger';
-import { CommandArgs } from './cli';
+import { type CommandArgs } from './cli';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const environmentSelect = async function (
   config: InstanceConfig | InstanceConfig[],
@@ -47,7 +51,7 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
     };
   }[] = [
     {
-      title: 'Start WordPress',
+      title: 'Start Containers',
       value: {
         shouldBeRunning: false,
         requiresValidation: true,
@@ -55,18 +59,17 @@ const actionSelect = async function (config: InstanceConfig): Promise<prompts.An
       },
     },
     {
-      title: 'Stop WordPress',
+      title: 'Stop Containers',
       value: {
         requiresValidation: false,
         func: stopContainers,
       },
     },
     {
-      title: 'Save snapshot',
+      title: 'Stop & Remove Containers',
       value: {
-        shouldBeRunning: true,
         requiresValidation: false,
-        func: saveSnapshot,
+        func: down,
       },
     },
     {
@@ -155,7 +158,11 @@ export const showPrompts = async (argv: CommandArgs): Promise<void> => {
         process.exit(1);
       }
     }
-    const finalConfig: FinalInstanceConfig = buildFinalConfig(chosenConfig, workingdir, topdir);
+    const finalConfig: FinalInstanceConfig = await buildFinalConfig(
+      chosenConfig,
+      workingdir,
+      topdir,
+    );
 
     const running = isRunning(finalConfig.containerName);
     if (!running && shouldBeRunning === true) {

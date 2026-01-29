@@ -9,11 +9,11 @@
 # install can only be accessed via localhost:80. The following lines tell Apache to ALSO LISTEN ON THE HOST PORT for requests
 # sent from within the container.
 
-if [ -z "${DOCKER_CONTAINER_PORT}" ]; then
+if [ -z "${APP_PORT}" ]; then
     exit 0
 fi
 
 sudo sed -i '/^#container-port/,+1d' /etc/apache2/ports.conf
 sudo sh -c "echo \"#container-port:\" >> /etc/apache2/ports.conf"
-sudo sh -c "echo \"Listen ${DOCKER_CONTAINER_PORT}\" >> /etc/apache2/ports.conf"
-sudo sed -i "/VirtualHost \*:80/c\<VirtualHost \*:80 \*:${DOCKER_CONTAINER_PORT}>" /etc/apache2/sites-enabled/000-default.conf
+sudo sh -c "echo \"Listen ${APP_PORT}\" >> /etc/apache2/ports.conf"
+sudo sed -i "/VirtualHost \*:80/c\<VirtualHost \*:80 \*:${APP_PORT}>" /etc/apache2/sites-enabled/000-default.conf

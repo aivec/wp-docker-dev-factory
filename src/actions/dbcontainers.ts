@@ -3,30 +3,15 @@ import { FinalInstanceConfig } from '../types';
 
 const makeContainers = ({
   topdir,
-  networkname,
   phpVersion,
-  envvarsMap,
-  hostName,
+  commonDockerFilesDir,
 }: FinalInstanceConfig): void => {
   execSync(
-    `docker build -t wordpress_devenv_visiblevc:latest-${phpVersion} -f ${topdir}/docker/Dockerfile.php${phpVersion} ${topdir}`,
+    `docker build -t wordpress_devenv_visiblevc:latest-${phpVersion} -f ${commonDockerFilesDir}/Dockerfile.php${phpVersion} ${topdir}`,
     {
       stdio: 'inherit',
     },
   );
-  /* let services = ['db', 'phpmyadmin', 'mailhog'];
-  if (hostName) {
-    services = [...services, 'reverse-proxy'];
-  }
-  const setenv = `export WORDPRESS_DB_NAME=${envvarsMap.WORDPRESS_DB_NAME} &&`;
-  execSync(
-    `${setenv} docker compose -p ${networkname} -f ${topdir}/docker/docker-compose.wp.yml up -d ${services.join(
-      ' ',
-    )}`,
-    {
-      stdio: 'inherit',
-    },
-  ); */
 };
 
 export default makeContainers;

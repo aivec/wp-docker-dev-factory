@@ -1,8 +1,8 @@
 services:
   reverse-proxy:
-    # The official v2 Traefik docker image
-    image: traefik:v2.9
-    container_name: aivec_wp_reverse_proxy
+    # The official v3 Traefik docker image
+    image: traefik:v3.6
+    container_name: wp-docker-reverse-proxy
     networks:
       - local-wp-net
     # Enables the web UI and tells Traefik to listen to docker
@@ -17,13 +17,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
   mailhog:
     image: mailhog/mailhog
-    container_name: mailhog
+    container_name: wp-docker-mailhog
     networks:
       - local-wp-net
     ports:
       - 8025:8025
     labels:
-      - "traefik.http.routers.mailhog.rule=Host(`wp.email.localhost`)"
+      - "traefik.http.routers.mailhog.rule=Host(`wp-docker.email.localhost`)"
       - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
 networks:
   local-wp-net:

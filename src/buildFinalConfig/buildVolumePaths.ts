@@ -10,7 +10,7 @@ const buildVolumePaths = (
   workingdir: string,
   topdir: string,
 ): string[] => {
-  const volumes: string[] = [];
+  let volumes = [];
 
   const localPathKeys = [
     { key: 'localPlugins', wpfolder: 'plugins' },
@@ -21,15 +21,16 @@ const buildVolumePaths = (
       config[key].forEach((p) => {
         const abspath = resolvePathToAbsolute(workingdir, p);
         const folder = path.basename(abspath);
-        volumes.push(`${abspath}:/var/www/html/wp-content/${wpfolder}/${folder}`);
+        volumes = [...volumes, `${abspath}:/var/www/html/wp-content/${wpfolder}/${folder}`];
       });
     }
   });
 
   if (rawconfig.uploads) {
-    volumes.push(
+    volumes = [
+      ...volumes,
       `${resolvePathToAbsolute(workingdir, rawconfig.uploads)}:/var/www/html/wp-content/uploads`,
-    );
+    ];
   }
 
   if (rawconfig.customInitScripts) {
@@ -45,7 +46,7 @@ const buildVolumePaths = (
     if (mysqlDumpfile) {
       const abspath = resolvePathToAbsolute(workingdir, mysqlDumpfile);
       // visiblevc's run.sh script will import db.sql automatically on startup
-      volumes.push(`${abspath}:/data/db.sql`);
+      volumes = [...volumes, `${abspath}:/data/db.sql`];
     }
   }
 
@@ -66,7 +67,7 @@ const buildVolumePaths = (
     `-v ${path.resolve(topdir, `src/scripts/initwp.sh`)}:/docker-entrypoint-initwp.d/run.sh`,
   ]; */
 
-  volumes.push(`${path.resolve(workingdir, 'dumpfiles')}:${dockerDumpfilesDirpath}`);
+  volumes = [...volumes, `${path.resolve(workingdir, 'dumpfiles')}:${dockerDumpfilesDirpath}`];
 
   if (process.platform === 'win32' && process.env.DOCKER_TOOLBOX_INSTALL_PATH) {
     const normalizeHost = (binding: string): string => {
