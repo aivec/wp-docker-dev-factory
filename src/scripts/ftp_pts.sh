@@ -30,7 +30,7 @@ download_and_install_ftp_pts() {
                     fi
                     file="$path.zip"
                     echo Downloading $file |& logger
-                    lftp -c "open -u $user,$password $host; mget ${file};"
+                    lftp -c "open -u $user,$password $host;set ftp:ssl-allow no;set ftp:passive-mode true;set ssl:verify-certificate no; mget ${file};"
                     if [ $? -eq 0 ]; then
                         wp $wpcommand install $tempdir/*.zip |& logger
                         rm $tempdir/*.zip
